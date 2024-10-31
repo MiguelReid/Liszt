@@ -17,6 +17,7 @@ NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioP
     // editor's size to whatever you need it to be.
     setSize (700, 500);
     addAndMakeVisible(keyboardComponent);
+	addAndMakeVisible(waveScreen);
 }
 
 NewProjectAudioProcessorEditor::~NewProjectAudioProcessorEditor()
@@ -26,9 +27,13 @@ NewProjectAudioProcessorEditor::~NewProjectAudioProcessorEditor()
 //==============================================================================
 void NewProjectAudioProcessorEditor::paint (juce::Graphics& g)
 {
-    // background colour
-    g.fillAll(juce::Colour(0xFF0F3325));
+    g.fillAll(juce::Colour::fromRGB(109, 70, 44));  // Rich wood brown
 
+    // Add subtle shading for a 3D effect
+    juce::ColourGradient gradient(juce::Colour::fromRGB(60, 35, 20), 0, 0,
+        juce::Colour::fromRGB(150, 90, 55), getWidth(), getHeight(),false);
+    g.setGradientFill(gradient);
+    g.fillRect(getLocalBounds());
 
 }
 
@@ -37,7 +42,11 @@ void NewProjectAudioProcessorEditor::resized()
 {
     auto bounds = getLocalBounds();
 
-
 	// Keyboard Position
     keyboardComponent.setBounds(bounds.removeFromBottom(150));
+    auto screenHeight = 130;
+    auto screenWidth = 130;
+    auto screenX = (getWidth() - screenWidth) / 2;
+    auto screenY = keyboardComponent.getY() - screenHeight - 15; // Un poco por encima del teclado
+    waveScreen.setBounds(screenX, screenY, screenWidth, screenHeight);
 }

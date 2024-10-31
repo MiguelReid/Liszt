@@ -11,6 +11,8 @@
       <FILE id="usKd1l" name="PluginEditor.cpp" compile="1" resource="0"
             file="Source/PluginEditor.cpp"/>
       <FILE id="QvRDmp" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+      <FILE id="pkdE2C" name="WaveScreen.cpp" compile="1" resource="0" file="Source/WaveScreen.cpp"/>
+      <FILE id="Ld2ec1" name="WaveScreen.h" compile="0" resource="0" file="Source/WaveScreen.h"/>
     </GROUP>
   </MAINGROUP>
   <MODULES>

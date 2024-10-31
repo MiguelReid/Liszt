@@ -10,6 +10,7 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
+#include "WaveScreen.h"
 
 //==============================================================================
 /**
@@ -32,6 +33,7 @@ private:
     // Keyboard
     juce::MidiKeyboardState keyboardState;
     juce::MidiKeyboardComponent keyboardComponent;
+	WaveScreen waveScreen;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NewProjectAudioProcessorEditor)
 };
