@@ -15,9 +15,21 @@ NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioP
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    setSize (700, 500);
+    setSize (600, 500);
     addAndMakeVisible(keyboardComponent);
 	addAndMakeVisible(waveScreen);
+	addAndMakeVisible(arpegiattorButton);
+	addAndMakeVisible(pitchBendSlider);
+
+	arpegiattorButton.setButtonText("Arp");
+	//arpegiattorButton.setToggleState(false, juce::NotificationType::dontSendNotification);
+
+	pitchBendSlider.setSliderStyle(juce::Slider::SliderStyle::LinearBarVertical);
+
+    // 2 Octaves
+    int startNote = 60; // C4 (Middle C)
+    int endNote = startNote + 48;
+    keyboardComponent.setAvailableRange(startNote, endNote);
 }
 
 NewProjectAudioProcessorEditor::~NewProjectAudioProcessorEditor()
@@ -42,11 +54,21 @@ void NewProjectAudioProcessorEditor::resized()
 {
     auto bounds = getLocalBounds();
 
-	// Keyboard Position
-    keyboardComponent.setBounds(bounds.removeFromBottom(150));
+    // Reservar espacio a la izquierda para los botones
+    auto controlAreaWidth = 100;
+    auto controlArea = bounds.removeFromLeft(controlAreaWidth);
+
+    // Bottom elements height
+    arpegiattorButton.setBounds(controlArea.removeFromBottom(70));
+    pitchBendSlider.setBounds(controlArea.removeFromBottom(10));
+
+    // Keyboard Position
+    keyboardComponent.setBounds(bounds.removeFromBottom(130));
+
+    // WaveScreen Position
     auto screenHeight = 130;
     auto screenWidth = 130;
     auto screenX = (getWidth() - screenWidth) / 2;
-    auto screenY = keyboardComponent.getY() - screenHeight - 15; // Un poco por encima del teclado
+    auto screenY = keyboardComponent.getY() - screenHeight - 15;
     waveScreen.setBounds(screenX, screenY, screenWidth, screenHeight);
 }

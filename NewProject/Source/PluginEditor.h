@@ -34,6 +34,8 @@ private:
     juce::MidiKeyboardState keyboardState;
     juce::MidiKeyboardComponent keyboardComponent;
 	WaveScreen waveScreen;
+    juce::ToggleButton arpegiattorButton;
+    juce::Slider pitchBendSlider;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NewProjectAudioProcessorEditor)
 };
