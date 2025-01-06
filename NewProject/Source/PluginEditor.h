@@ -11,6 +11,7 @@
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 #include "WaveScreen.h"
+#include "LeftControls.h"
 
 //==============================================================================
 /**
@@ -36,6 +37,7 @@ private:
 	WaveScreen waveScreen;
     juce::ToggleButton arpegiattorButton;
     juce::Slider pitchBendSlider;
+    LeftControls leftControls;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NewProjectAudioProcessorEditor)
 };

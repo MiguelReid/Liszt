@@ -34,3 +34,6 @@
 # Juce 
 **/Builds
 **/JuceLibraryCode
+/.vs
+CppProperties.json
+/NewProject/Samples

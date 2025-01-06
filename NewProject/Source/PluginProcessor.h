@@ -7,8 +7,9 @@
 */
 
 #pragma once
-
 #include <JuceHeader.h>
+#include "Synth.h"
+
 
 //==============================================================================
 /**
@@ -55,5 +56,6 @@ public:
 
 private:
     //==============================================================================
+    Synth Synth;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NewProjectAudioProcessor)
 };

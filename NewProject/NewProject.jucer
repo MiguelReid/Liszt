@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="XnHqiS" name="Ruizt" projectType="audioplug" useAppConfig="0"
-              addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1">
-  <MAINGROUP id="h9bKiU" name="Ruizt">
+<JUCERPROJECT id="XnHqiS" name="Liszt" projectType="audioplug" useAppConfig="0"
+              addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn"
+              pluginFormats="buildVST3">
+  <MAINGROUP id="h9bKiU" name="Liszt">
     <GROUP id="{0DE48964-0C34-297E-506C-5D9552E4C577}" name="Source">
+      <FILE id="d4eQFA" name="LeftControls.cpp" compile="1" resource="0"
+            file="Source/LeftControls.cpp"/>
+      <FILE id="LKBzOc" name="LeftControls.h" compile="0" resource="0" file="Source/LeftControls.h"/>
       <FILE id="MhuN9m" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="JhAaad" name="PluginProcessor.h" compile="0" resource="0"
@@ -13,6 +17,8 @@
       <FILE id="QvRDmp" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
       <FILE id="pkdE2C" name="WaveScreen.cpp" compile="1" resource="0" file="Source/WaveScreen.cpp"/>
       <FILE id="Ld2ec1" name="WaveScreen.h" compile="0" resource="0" file="Source/WaveScreen.h"/>
+      <FILE id="MKnr7k" name="Synth.cpp" compile="1" resource="0" file="Source/Synth.cpp"/>
+      <FILE id="Bb3sc5" name="Synth.h" compile="0" resource="0" file="Source/Synth.h"/>
     </GROUP>
   </MAINGROUP>
   <MODULES>
@@ -36,8 +42,8 @@
   <EXPORTFORMATS>
     <VS2022 targetFolder="Builds/VisualStudio2022">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" targetName="NewProject"/>
-        <CONFIGURATION isDebug="0" name="Release" targetName="NewProject"/>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="Liszt"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="Liszt"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_animation" path="../../../../../../JUCE/modules"/>

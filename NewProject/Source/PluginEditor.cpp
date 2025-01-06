@@ -15,20 +15,14 @@ NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioP
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    setSize (600, 500);
+    setSize (677, 550);
     addAndMakeVisible(keyboardComponent);
 	addAndMakeVisible(waveScreen);
-	addAndMakeVisible(arpegiattorButton);
-	addAndMakeVisible(pitchBendSlider);
-
-	arpegiattorButton.setButtonText("Arp");
-	//arpegiattorButton.setToggleState(false, juce::NotificationType::dontSendNotification);
-
-	pitchBendSlider.setSliderStyle(juce::Slider::SliderStyle::LinearBarVertical);
+    addAndMakeVisible(leftControls);
 
     // 2 Octaves
-    int startNote = 60; // C4 (Middle C)
-    int endNote = startNote + 48;
+    int startNote = 36; // C4 (Middle C)
+    int endNote = startNote + 60;
     keyboardComponent.setAvailableRange(startNote, endNote);
 }
 
@@ -54,19 +48,17 @@ void NewProjectAudioProcessorEditor::resized()
 {
     auto bounds = getLocalBounds();
 
-    // Reservar espacio a la izquierda para los botones
+    // Space on the left for extra controls
     auto controlAreaWidth = 100;
-    auto controlArea = bounds.removeFromLeft(controlAreaWidth);
+    auto keyboardHeight = 130; // Altura fija para el teclado
 
-    // Bottom elements height
-    arpegiattorButton.setBounds(controlArea.removeFromBottom(70));
-    pitchBendSlider.setBounds(controlArea.removeFromBottom(10));
+    leftControls.setBounds(bounds.removeFromLeft(controlAreaWidth).withHeight(keyboardHeight).withY(bounds.getBottom() - keyboardHeight));
 
     // Keyboard Position
-    keyboardComponent.setBounds(bounds.removeFromBottom(130));
+    keyboardComponent.setBounds(bounds.removeFromBottom(keyboardHeight));
 
     // WaveScreen Position
-    auto screenHeight = 130;
+    auto screenHeight = 80;
     auto screenWidth = 130;
     auto screenX = (getWidth() - screenWidth) / 2;
     auto screenY = keyboardComponent.getY() - screenHeight - 15;
