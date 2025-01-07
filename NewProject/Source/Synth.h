@@ -12,18 +12,12 @@
 
 #include <JuceHeader.h>
 
-//==============================================================================
-/*
-*/
 class Synth : public juce::Synthesiser
 {
 public:
     Synth();
-
-    void loadSampleForNote(const juce::String& filePath, int midiNoteNumber);
-    void initializeFormatManager();
+    void loadSamples();
 
 private:
     juce::AudioFormatManager formatManager;
-
 };

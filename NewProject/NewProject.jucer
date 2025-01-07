@@ -2,8 +2,11 @@
 
 <JUCERPROJECT id="XnHqiS" name="Liszt" projectType="audioplug" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn"
-              pluginFormats="buildVST3">
+              pluginFormats="buildVST3" includeBinaryInJuceHeader="1" binaryDataNamespace="BinaryData">
   <MAINGROUP id="h9bKiU" name="Liszt">
+    <GROUP id="{C0AC9768-3D81-3C38-E340-32DBE9DBAA2C}" name="Resources">
+      <FILE id="JBPWM1" name="60.mp3" compile="0" resource="1" file="../../../../Downloads/60.mp3"/>
+    </GROUP>
     <GROUP id="{0DE48964-0C34-297E-506C-5D9552E4C577}" name="Source">
       <FILE id="d4eQFA" name="LeftControls.cpp" compile="1" resource="0"
             file="Source/LeftControls.cpp"/>

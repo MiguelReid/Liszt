@@ -6,8 +6,12 @@
   ==============================================================================
 */
 
+#pragma once
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "Synth.h"
+#include <unordered_map>
+
 
 //==============================================================================
 NewProjectAudioProcessor::NewProjectAudioProcessor()
@@ -19,34 +23,18 @@ NewProjectAudioProcessor::NewProjectAudioProcessor()
 #endif
         .withOutput("Output", juce::AudioChannelSet::stereo(), true)
 #endif
-    )
+    ),
+    synth()
 #endif
 {
-    Synth.initializeFormatManager();
-
-    auto currentWorkingDirectory = juce::File::getCurrentWorkingDirectory();
-
-
-    // Load samples for different notes
-    auto sampleFile = juce::File::getCurrentWorkingDirectory().getChildFile("../../../../../../../../Samples/limits.mp3");
-
-    Synth.loadSampleForNote(sampleFile.getFullPathName(), 60);  // Middle C
-
-    if (sampleFile.existsAsFile())
-    {
-        juce::Logger::getCurrentLogger()->writeToLog("Sample loaded successfully");
-    }
-    else
-    {
-        juce::Logger::getCurrentLogger()->writeToLog("Sample failed to load");
-
-    }
-
-    // Add voices to the synthesizer
+    // Add voices to the synthesiser
     for (int i = 0; i < 8; ++i)
     {
-        Synth.addVoice(new juce::SamplerVoice());
+        synth.addVoice(new juce::SamplerVoice());
     }
+
+    // Load samples
+    synth.loadSamples();
 }
 
 NewProjectAudioProcessor::~NewProjectAudioProcessor()
@@ -118,7 +106,7 @@ void NewProjectAudioProcessor::changeProgramName (int index, const juce::String&
 //==============================================================================
 void NewProjectAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    Synth.setCurrentPlaybackSampleRate(sampleRate);
+    synth.setCurrentPlaybackSampleRate(sampleRate);
 }
 
 void NewProjectAudioProcessor::releaseResources()
@@ -181,7 +169,7 @@ void NewProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
     }
 
     // Process audio
-    Synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
+    synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 }
 
 //==============================================================================

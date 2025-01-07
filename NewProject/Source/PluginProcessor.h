@@ -10,7 +10,6 @@
 #include <JuceHeader.h>
 #include "Synth.h"
 
-
 //==============================================================================
 /**
 */
@@ -56,6 +55,7 @@ public:
 
 private:
     //==============================================================================
-    Synth Synth;
+    Synth synth;
+    juce::AudioFormatManager formatManager;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NewProjectAudioProcessor)
 };
