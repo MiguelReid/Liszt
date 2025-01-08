@@ -21,7 +21,7 @@ NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioP
     addAndMakeVisible(leftControls);
 
     // 2 Octaves
-    int startNote = 36; // C4 (Middle C)
+    int startNote = 36; // 60 is middle C
     int endNote = startNote + 60;
     keyboardComponent.setAvailableRange(startNote, endNote);
     keyboardState.addListener(this);
@@ -42,7 +42,6 @@ void NewProjectAudioProcessorEditor::paint (juce::Graphics& g)
         juce::Colour::fromRGB(150, 90, 55), getWidth(), getHeight(),false);
     g.setGradientFill(gradient);
     g.fillRect(getLocalBounds());
-
 }
 
 // Positions of any subcomponents
@@ -60,9 +59,9 @@ void NewProjectAudioProcessorEditor::resized()
     keyboardComponent.setBounds(bounds.removeFromBottom(keyboardHeight));
 
     // WaveScreen Position
-    auto screenHeight = 80;
-    auto screenWidth = 130;
-    auto screenX = (getWidth() - screenWidth) / 2;
+    auto screenHeight = 125;
+    auto screenWidth = 200;
+    auto screenX = (getWidth() - screenWidth) - 25;
     auto screenY = keyboardComponent.getY() - screenHeight - 15;
     waveScreen.setBounds(screenX, screenY, screenWidth, screenHeight);
 }
