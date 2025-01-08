@@ -10,8 +10,6 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include "Synth.h"
-#include <unordered_map>
-
 
 //==============================================================================
 NewProjectAudioProcessor::NewProjectAudioProcessor()
@@ -149,27 +147,32 @@ void NewProjectAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, j
 
     // Clear any output channels that didn't contain input data
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-        buffer.clear(i, 0, buffer.getNumSamples());
-
-    // Process MIDI events
-    for (const auto metadata : midiMessages)
     {
-        auto message = metadata.getMessage();
-        if (message.isNoteOn())
+        if (i < buffer.getNumChannels() && buffer.getNumSamples() > 0)
         {
-            DBG("Note On: " << message.getNoteNumber()
-                << " Velocity: " << message.getVelocity());
-            juce::Logger::getCurrentLogger()->writeToLog("Note On: " + juce::String(message.getNoteNumber()));
+            buffer.clear(i, 0, buffer.getNumSamples());
         }
-        else if (message.isNoteOff())
-        {
-            DBG("Note Off: " << message.getNoteNumber());
-            juce::Logger::getCurrentLogger()->writeToLog("Note Off: " + juce::String(message.getNoteNumber()));
-        }
+    }
+
+    // Merge custom MIDI messages into incoming buffer
+    if (!midiBuffer.isEmpty())
+    {
+        const juce::ScopedLock lock(midiBufferLock);
+        midiMessages.addEvents(midiBuffer, 0, buffer.getNumSamples(), 0);
+        midiBuffer.clear(); // Clear the MIDI buffer after merging
     }
 
     // Process audio
     synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
+
+    // No MIDI output
+    midiMessages.clear();
+}
+
+void NewProjectAudioProcessor::addMidiMessage(const juce::MidiMessage& message)
+{
+    const juce::ScopedLock lock(midiBufferLock);
+    midiBuffer.addEvent(message, 0);
 }
 
 //==============================================================================

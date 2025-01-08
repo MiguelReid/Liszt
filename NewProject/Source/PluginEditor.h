@@ -16,7 +16,7 @@
 //==============================================================================
 /**
 */
-class NewProjectAudioProcessorEditor  : public juce::AudioProcessorEditor
+class NewProjectAudioProcessorEditor  : public juce::AudioProcessorEditor, private juce::MidiKeyboardStateListener
 {
 public:
     NewProjectAudioProcessorEditor (NewProjectAudioProcessor&);
@@ -27,13 +27,14 @@ public:
     void resized() override;
 
 private:
-    // This reference is provided as a quick way for your editor to
-    // access the processor object that created it.
     NewProjectAudioProcessor& audioProcessor;
 
     // Keyboard
     juce::MidiKeyboardState keyboardState;
     juce::MidiKeyboardComponent keyboardComponent;
+    void handleNoteOn(juce::MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity) override;
+    void handleNoteOff(juce::MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity) override;
+
 	WaveScreen waveScreen;
     juce::ToggleButton arpegiattorButton;
     juce::Slider pitchBendSlider;

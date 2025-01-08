@@ -53,9 +53,14 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
+	//==============================================================================
+    void addMidiMessage(const juce::MidiMessage& message);
+
 private:
     //==============================================================================
     Synth synth;
-    juce::AudioFormatManager formatManager;
+    juce::MidiBuffer midiBuffer;
+    juce::CriticalSection midiBufferLock;
+    //juce::AudioFormatManager formatManager;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NewProjectAudioProcessor)
 };

@@ -24,10 +24,12 @@ NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioP
     int startNote = 36; // C4 (Middle C)
     int endNote = startNote + 60;
     keyboardComponent.setAvailableRange(startNote, endNote);
+    keyboardState.addListener(this);
 }
 
 NewProjectAudioProcessorEditor::~NewProjectAudioProcessorEditor()
 {
+    keyboardState.removeListener(this);
 }
 
 //==============================================================================
@@ -63,4 +65,18 @@ void NewProjectAudioProcessorEditor::resized()
     auto screenX = (getWidth() - screenWidth) / 2;
     auto screenY = keyboardComponent.getY() - screenHeight - 15;
     waveScreen.setBounds(screenX, screenY, screenWidth, screenHeight);
+}
+
+void NewProjectAudioProcessorEditor::handleNoteOn(juce::MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity)
+{
+    // Send a note-on message to the processor
+    juce::MidiMessage message = juce::MidiMessage::noteOn(midiChannel, midiNoteNumber, velocity);
+    audioProcessor.addMidiMessage(message);
+}
+
+void NewProjectAudioProcessorEditor::handleNoteOff(juce::MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity)
+{
+    // Send a note-off message to the processor
+    juce::MidiMessage message = juce::MidiMessage::noteOff(midiChannel, midiNoteNumber);
+    audioProcessor.addMidiMessage(message);
 }

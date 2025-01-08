@@ -22,6 +22,7 @@ Synth::Synth()
 
 void Synth::loadSamples()
 {
+    clearSounds();
 
     // Print out all available resource names
     DBG("CHECK Available resources:");

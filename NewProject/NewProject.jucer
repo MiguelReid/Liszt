@@ -45,8 +45,8 @@
   <EXPORTFORMATS>
     <VS2022 targetFolder="Builds/VisualStudio2022">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" targetName="Liszt"/>
-        <CONFIGURATION isDebug="0" name="Release" targetName="Liszt"/>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="Liszt" winArchitecture="x64"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="Liszt" winArchitecture="x64"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_animation" path="../../../../../../JUCE/modules"/>
