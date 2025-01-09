@@ -4,6 +4,13 @@
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn"
               pluginFormats="buildVST3" includeBinaryInJuceHeader="1" binaryDataNamespace="BinaryData">
   <MAINGROUP id="h9bKiU" name="Liszt">
+    <GROUP id="{C5E3E42E-845E-92E2-8096-5396AAE29B3C}" name="Frontend">
+      <FILE id="yCkANW" name="Knob.cpp" compile="1" resource="0" file="Source/Knob.cpp"/>
+      <FILE id="qepLJZ" name="Knob.h" compile="0" resource="0" file="Source/Knob.h"/>
+      <FILE id="S8lNT8" name="ToggleButton.cpp" compile="1" resource="0"
+            file="Source/ToggleButton.cpp"/>
+      <FILE id="TEFUdo" name="ToggleButton.h" compile="0" resource="0" file="Source/ToggleButton.h"/>
+    </GROUP>
     <GROUP id="{C0AC9768-3D81-3C38-E340-32DBE9DBAA2C}" name="Resources">
       <FILE id="JBPWM1" name="60.mp3" compile="0" resource="1" file="../../../../Downloads/60.mp3"/>
     </GROUP>

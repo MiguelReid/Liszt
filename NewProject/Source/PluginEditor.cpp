@@ -25,11 +25,23 @@ NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioP
     int endNote = startNote + 60;
     keyboardComponent.setAvailableRange(startNote, endNote);
     keyboardState.addListener(this);
+
+    // Look and feel
+    /*
+    knobLookAndFeel = std::make_unique<Knob>();
+    toggleButtonLookAndFeel = std::make_unique<ToggleButton>();
+    component.setLookAndFeel(knobLookAndFeel.get());
+    */
 }
 
 NewProjectAudioProcessorEditor::~NewProjectAudioProcessorEditor()
 {
     keyboardState.removeListener(this);
+    /*
+    arpeggiatorButton.setLookAndFeel(nullptr);
+    setLookAndFeel(nullptr);
+    knobLookAndFeel.reset();
+    */
 }
 
 //==============================================================================

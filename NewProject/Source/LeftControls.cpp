@@ -8,7 +8,6 @@
   ==============================================================================
 */
 
-#include <JuceHeader.h>
 #include "LeftControls.h"
 
 //==============================================================================
@@ -18,12 +17,18 @@ LeftControls::LeftControls()
     addAndMakeVisible(pitchBendSlider);
 
     arpeggiatorButton.setButtonText("Arp");
+
+    toggleButtonLookAndFeel = std::make_unique<ToggleButton>();
+    arpeggiatorButton.setLookAndFeel(toggleButtonLookAndFeel.get());
     //arpegiattorButton.setToggleState(false, juce::NotificationType::dontSendNotification);
     pitchBendSlider.setSliderStyle(juce::Slider::SliderStyle::LinearBarVertical);
 }
 
 LeftControls::~LeftControls()
 {
+    arpeggiatorButton.setLookAndFeel(nullptr);
+    setLookAndFeel(nullptr);
+    knobLookAndFeel.reset();
 }
 
 void LeftControls::paint (juce::Graphics& g)

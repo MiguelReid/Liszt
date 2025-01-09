@@ -11,6 +11,8 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "Knob.h"
+#include "ToggleButton.h"
 
 //==============================================================================
 /*
@@ -27,4 +29,8 @@ public:
 private:
     juce::ToggleButton arpeggiatorButton;
     juce::Slider pitchBendSlider;
+
+    // Custom look and feel
+    std::unique_ptr<Knob> knobLookAndFeel;
+    std::unique_ptr<ToggleButton> toggleButtonLookAndFeel;
 };
