@@ -14,29 +14,44 @@
 void ToggleButton::drawToggleButton(juce::Graphics& g, juce::ToggleButton& button,
     bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown)
 {
-    // Get button bounds
-    auto bounds = button.getLocalBounds().reduced(4);
-    auto isToggled = button.getToggleState();
+    // Define the diameter of the circle
+    const float circleDiameter = 10.0f;  // Adjust as needed for size
 
-    // Draw background
-    g.setColour(juce::Colours::darkgrey);
-    g.fillRoundedRectangle(bounds.toFloat(), 4.0f);
+    // Get the bounds of the button
+    auto bounds = button.getLocalBounds().toFloat();
 
-    // Draw toggle switch base
-    auto switchWidth = bounds.getHeight() * 0.4f;
-    auto switchHeight = bounds.getHeight() * 0.6f;
+    // Calculate the center position for the circle
+    float centerX = bounds.getCentreX();
+    float centerY = bounds.getY() + circleDiameter / 2 + 5.0f;  // Adjust vertical position if needed
 
-    auto switchX = isToggled ? bounds.getRight() - switchWidth - 6
-        : bounds.getX() + 6;
+    // Define the circle area
+    juce::Rectangle<float> circleArea(centerX - circleDiameter / 2,
+        centerY - circleDiameter / 2,
+        circleDiameter,
+        circleDiameter);
 
-    auto switchY = bounds.getY() + (bounds.getHeight() - switchHeight) / 2;
+    // Determine the color based on the toggle state
+    juce::Colour circleColour = button.getToggleState() ? juce::Colours::red : juce::Colours::black;
 
-    g.setColour(isToggled ? juce::Colours::lightblue : juce::Colours::darkblue);
-    g.fillRect(switchX, switchY, switchWidth, switchHeight);
+    // Draw the circle
+    g.setColour(circleColour);
+    g.fillEllipse(circleArea);
 
-    // Draw "ON" and "OFF" text
-    g.setFont(12.0f);
+    // Optional: Draw a border around the circle
+    g.setColour(juce::Colours::grey);
+    g.drawEllipse(circleArea, 1.0f);
+
+    // Draw the button text below the circle
+    juce::Font font(12.0f);
+    g.setFont(font);
     g.setColour(juce::Colours::white);
-    g.drawText("ON", bounds.withWidth(bounds.getWidth() / 2), juce::Justification::centredRight);
-    g.drawText("OFF", bounds.withWidth(bounds.getWidth() / 2), juce::Justification::centredLeft);
+
+    float textWidth = bounds.getWidth();
+    float textHeight = 20.0f;  // Height of the text area
+    float textY = circleArea.getBottom() + 5.0f;  // Space between circle and text
+
+    juce::Rectangle<float> textArea(bounds.getX(), textY, textWidth, textHeight);
+
+    g.drawFittedText(button.getButtonText(), textArea.toNearestInt(), juce::Justification::centredTop, 1);
 }
+

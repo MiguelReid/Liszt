@@ -25,13 +25,6 @@ NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioP
     int endNote = startNote + 60;
     keyboardComponent.setAvailableRange(startNote, endNote);
     keyboardState.addListener(this);
-
-    // Look and feel
-    /*
-    knobLookAndFeel = std::make_unique<Knob>();
-    toggleButtonLookAndFeel = std::make_unique<ToggleButton>();
-    component.setLookAndFeel(knobLookAndFeel.get());
-    */
 }
 
 NewProjectAudioProcessorEditor::~NewProjectAudioProcessorEditor()
@@ -39,8 +32,6 @@ NewProjectAudioProcessorEditor::~NewProjectAudioProcessorEditor()
     keyboardState.removeListener(this);
     /*
     arpeggiatorButton.setLookAndFeel(nullptr);
-    setLookAndFeel(nullptr);
-    knobLookAndFeel.reset();
     */
 }
 
@@ -71,9 +62,9 @@ void NewProjectAudioProcessorEditor::resized()
     keyboardComponent.setBounds(bounds.removeFromBottom(keyboardHeight));
 
     // WaveScreen Position
-    auto screenHeight = 125;
-    auto screenWidth = 200;
-    auto screenX = (getWidth() - screenWidth) - 25;
+    auto screenHeight = 100;
+    auto screenWidth = 160;
+    auto screenX = (getWidth() - screenWidth) - 20;
     auto screenY = keyboardComponent.getY() - screenHeight - 15;
     waveScreen.setBounds(screenX, screenY, screenWidth, screenHeight);
 }

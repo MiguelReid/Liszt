@@ -69,6 +69,11 @@ void Synth::loadSamples()
                 DBG("Failed to create AudioFormatReader for " << fileName);
             }
         }
+        else
+        {
+            // Handle the case where the sample data could not be loaded
+            DBG("Failed to load sample data for " << fileName);
+        }
     }
 }
 

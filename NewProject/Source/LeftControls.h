@@ -29,8 +29,14 @@ public:
 private:
     juce::ToggleButton arpeggiatorButton;
     juce::Slider pitchBendSlider;
+    juce::Slider gainSlider;
 
-    // Custom look and feel
+    // Labels
+    juce::Label pitchBendLabel;
+    juce::Label gainLabel;
+
+    // Custom LookAndFeel
     std::unique_ptr<Knob> knobLookAndFeel;
     std::unique_ptr<ToggleButton> toggleButtonLookAndFeel;
+
 };

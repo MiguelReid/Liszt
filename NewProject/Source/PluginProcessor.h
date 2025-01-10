@@ -61,6 +61,5 @@ private:
     Synth synth;
     juce::MidiBuffer midiBuffer;
     juce::CriticalSection midiBufferLock;
-    //juce::AudioFormatManager formatManager;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NewProjectAudioProcessor)
 };

@@ -9,7 +9,6 @@
 */
 
 #pragma once
-
 #include <JuceHeader.h>
 
 class Knob : public juce::LookAndFeel_V4
