@@ -5,6 +5,8 @@
               pluginFormats="buildVST3" includeBinaryInJuceHeader="1" binaryDataNamespace="BinaryData">
   <MAINGROUP id="h9bKiU" name="Liszt">
     <GROUP id="{C5E3E42E-845E-92E2-8096-5396AAE29B3C}" name="Frontend">
+      <FILE id="pkdE2C" name="WaveScreen.cpp" compile="1" resource="0" file="Source/WaveScreen.cpp"/>
+      <FILE id="Ld2ec1" name="WaveScreen.h" compile="0" resource="0" file="Source/WaveScreen.h"/>
       <FILE id="yCkANW" name="Knob.cpp" compile="1" resource="0" file="Source/Knob.cpp"/>
       <FILE id="qepLJZ" name="Knob.h" compile="0" resource="0" file="Source/Knob.h"/>
       <FILE id="S8lNT8" name="ToggleButton.cpp" compile="1" resource="0"
@@ -25,8 +27,6 @@
       <FILE id="usKd1l" name="PluginEditor.cpp" compile="1" resource="0"
             file="Source/PluginEditor.cpp"/>
       <FILE id="QvRDmp" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
-      <FILE id="pkdE2C" name="WaveScreen.cpp" compile="1" resource="0" file="Source/WaveScreen.cpp"/>
-      <FILE id="Ld2ec1" name="WaveScreen.h" compile="0" resource="0" file="Source/WaveScreen.h"/>
       <FILE id="MKnr7k" name="Synth.cpp" compile="1" resource="0" file="Source/Synth.cpp"/>
       <FILE id="Bb3sc5" name="Synth.h" compile="0" resource="0" file="Source/Synth.h"/>
     </GROUP>

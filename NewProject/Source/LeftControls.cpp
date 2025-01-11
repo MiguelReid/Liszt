@@ -20,12 +20,8 @@ LeftControls::LeftControls()
     arpeggiatorButton.setLookAndFeel(toggleButtonLookAndFeel.get());
 	gainSlider.setLookAndFeel(knobLookAndFeel.get());
 
-    arpeggiatorButton.setSize(40, 60);  // Adjust size as needed
-	pitchBendSlider.setSize(20, 50);  // Adjust size as needed
-	gainSlider.setSize(20, 50);  // Adjust size as needed
-
     arpeggiatorButton.setButtonText("Arp");
-    pitchBendSlider.setName("Pitch Bend");
+    pitchBendSlider.setName("Pitch");
     gainSlider.setName("Gain");
 
 	arpeggiatorButton.setClickingTogglesState(true);
@@ -37,14 +33,12 @@ LeftControls::LeftControls()
     gainSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
 
     // Initialize and configure labels
-    pitchBendLabel.setText("Pitch Bend", juce::dontSendNotification);
+    pitchBendLabel.setText("Pitch", juce::dontSendNotification);
     pitchBendLabel.setJustificationType(juce::Justification::centredTop);
-    pitchBendLabel.setFont(12.0f);
     pitchBendLabel.setColour(juce::Label::textColourId, juce::Colours::white);
 
     gainLabel.setText("Gain", juce::dontSendNotification);
     gainLabel.setJustificationType(juce::Justification::centredTop);
-    gainLabel.setFont(12.0f);
     gainLabel.setColour(juce::Label::textColourId, juce::Colours::white);
 
     // --------------------------
@@ -79,40 +73,68 @@ void LeftControls::resized()
 {
     auto bounds = getLocalBounds();
 
-    // Top section height (e.g., 30% of the total height)
-    int topSectionHeight = bounds.proportionOfHeight(0.45f);
+    // Define dimensions for the arpeggiator button
+    const int buttonWidth = 33;
+    const int buttonHeight = 33;
+    const int buttonMarginTop = 2;
 
     // Position the arpeggiator button at the top center
-    arpeggiatorButton.setCentrePosition(bounds.getCentreX(), topSectionHeight / 2);
+    arpeggiatorButton.setBounds(
+        bounds.getCentreX() - buttonWidth / 2,
+        buttonMarginTop,
+        buttonWidth,
+        buttonHeight
+    );
 
-    // Bottom section bounds
-    auto bottomSectionBounds = bounds.withTop(topSectionHeight);
+    // Calculate the remaining space, ensuring room for labels at bottom
+    auto slidersArea = bounds;
+    slidersArea.removeFromTop(arpeggiatorButton.getBottom() + 5);
+    slidersArea.removeFromBottom(25); // Reserve space for labels at bottom
 
-    // Split bottom section into left and right halves
-    auto leftHalf = bottomSectionBounds.removeFromLeft(bottomSectionBounds.getWidth() / 2);
-    auto rightHalf = bottomSectionBounds;
+    // Adjust dimensions for sliders and labels
+    const int labelHeight = 15;
+    const int sliderHeight = slidersArea.getHeight() - 10; // Leave some margin
+    const int sliderWidth = 22;
+    const int labelWidth = 40;
 
-    // Adjust slider sizes if necessary
-    int sliderWidth = 20;
-    int sliderHeight = 60;
+    // Split the area into left and right halves
+    auto leftHalf = slidersArea.removeFromLeft(slidersArea.getWidth() / 2);
+    auto rightHalf = slidersArea;
+
+    // Set font size for labels
+    pitchBendLabel.setFont(juce::Font(13.0f, juce::Font::plain));
+    gainLabel.setFont(juce::Font(13.0f, juce::Font::plain));
 
     // Position pitch bend slider in the left half
-    pitchBendSlider.setBounds(leftHalf.getCentreX() - sliderWidth / 2,
-        leftHalf.getCentreY() - sliderHeight / 2 - 10,  // Adjust vertical position
-        sliderWidth, sliderHeight);
-
-    // Position pitch bend label below the slider
-    pitchBendLabel.setBounds(pitchBendSlider.getX() - 10,
-        pitchBendSlider.getBottom() + 5,
-        sliderWidth + 20, 20);
+    pitchBendSlider.setBounds(
+        leftHalf.getCentreX() - sliderWidth / 2,
+        leftHalf.getY(),
+        sliderWidth,
+        sliderHeight
+    );
 
     // Position gain slider in the right half
-    gainSlider.setBounds(rightHalf.getCentreX() - sliderWidth / 2,
-        rightHalf.getCentreY() - sliderHeight / 2 - 10,  // Adjust vertical position
-        sliderWidth, sliderHeight);
+    gainSlider.setBounds(
+        rightHalf.getCentreX() - sliderWidth / 2,
+        rightHalf.getY(),
+        sliderWidth,
+        sliderHeight
+    );
 
-    // Position gain label below the slider
-    gainLabel.setBounds(gainSlider.getX() - 10,
-        gainSlider.getBottom() + 5,
-        sliderWidth + 20, 20);
+    // Position labels at the bottom of the bounds
+    const int labelY = bounds.getBottom() - labelHeight - 5; // 5 pixels from bottom
+
+    pitchBendLabel.setBounds(
+        leftHalf.getCentreX() - labelWidth / 2,
+        labelY,
+        labelWidth,
+        labelHeight
+    );
+
+    gainLabel.setBounds(
+        rightHalf.getCentreX() - labelWidth / 2,
+        labelY,
+        labelWidth,
+        labelHeight
+    );
 }
