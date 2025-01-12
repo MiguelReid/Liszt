@@ -13,14 +13,13 @@
 NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioProcessor& p)
 	: AudioProcessorEditor(&p), audioProcessor(p), keyboardComponent(keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard)
 {
-    // Make sure that before the constructor has finished, you've set the
-    // editor's size to whatever you need it to be.
-    setSize (677, 550);
+    setSize (677, 350);
     addAndMakeVisible(keyboardComponent);
 	addAndMakeVisible(waveScreen);
     addAndMakeVisible(leftControls);
+    addAndMakeVisible(reverbControls);
 
-    // 2 Octaves
+    // Keyboard Settings
     int startNote = 36; // 60 is middle C
     int endNote = startNote + 60;
     keyboardComponent.setAvailableRange(startNote, endNote);
@@ -45,20 +44,32 @@ void NewProjectAudioProcessorEditor::paint (juce::Graphics& g)
         juce::Colour::fromRGB(150, 90, 55), getWidth(), getHeight(),false);
     g.setGradientFill(gradient);
     g.fillRect(getLocalBounds());
+
+    g.setColour(juce::Colours::black);
+    g.drawLine(reverbControls.getRight() + 40, 0, reverbControls.getRight() + 40, getHeight(), 2.0f);
 }
 
-// Positions of any subcomponents
 void NewProjectAudioProcessorEditor::resized()
 {
     auto bounds = getLocalBounds();
 
     // Space on the left for extra controls
-    auto controlAreaWidth = 100;
-    auto keyboardHeight = 130; // Altura fija para el teclado
+    auto controlAreaWidth = 120;
+    auto keyboardHeight = 130;       // Fixed height for the keyboard
+    auto reverbControlsHeight = 200; // Height for ReverbControls
 
-    leftControls.setBounds(bounds.removeFromLeft(controlAreaWidth).withHeight(keyboardHeight).withY(bounds.getBottom() - keyboardHeight));
+    // Position ReverbControls lower down and to the right
+    auto leftControlArea = bounds.removeFromLeft(controlAreaWidth);
+    auto reverbOffsetX = 23; // Horizontal offset from the left edge
+    auto reverbOffsetY = 30; // Vertical offset from the top
+    reverbControls.setBounds(leftControlArea
+        .removeFromTop(reverbControlsHeight)
+        .translated(reverbOffsetX, reverbOffsetY)); // Apply offset
 
-    // Keyboard Position
+    // Position LeftControls explicitly at the bottom left
+    leftControls.setBounds(leftControlArea.withY(getHeight() - keyboardHeight).withHeight(keyboardHeight));
+
+    // Position the keyboard at the bottom
     keyboardComponent.setBounds(bounds.removeFromBottom(keyboardHeight));
 
     // WaveScreen Position
@@ -68,6 +79,7 @@ void NewProjectAudioProcessorEditor::resized()
     auto screenY = keyboardComponent.getY() - screenHeight - 15;
     waveScreen.setBounds(screenX, screenY, screenWidth, screenHeight);
 }
+
 
 void NewProjectAudioProcessorEditor::handleNoteOn(juce::MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity)
 {

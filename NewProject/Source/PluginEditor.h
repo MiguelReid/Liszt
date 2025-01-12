@@ -12,8 +12,7 @@
 #include "PluginProcessor.h"
 #include "WaveScreen.h"
 #include "LeftControls.h"
-#include "Knob.h"
-#include "ToggleButton.h"
+#include "ReverbControls.h"
 
 //==============================================================================
 /**
@@ -41,10 +40,7 @@ private:
     juce::ToggleButton arpegiattorButton;
     juce::Slider pitchBendSlider;
     LeftControls leftControls;
-
-	// Custom LookAndFeel
-    std::unique_ptr<Knob> knobLookAndFeel;
-    std::unique_ptr<ToggleButton> toggleButtonLookAndFeel;
+    ReverbControls reverbControls;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NewProjectAudioProcessorEditor)
 };
