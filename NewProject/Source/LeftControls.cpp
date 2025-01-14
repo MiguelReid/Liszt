@@ -93,8 +93,8 @@ void LeftControls::resized()
 
     // Adjust dimensions for sliders and labels
     const int labelHeight = 15;
-    const int sliderHeight = slidersArea.getHeight() - 10; // Leave some margin
-    const int sliderWidth = 22;
+    const int sliderHeight = slidersArea.getHeight() + 5; // Leave some margin
+    const int sliderWidth = 30;
     const int labelWidth = 40;
 
     // Split the area into left and right halves
@@ -117,8 +117,8 @@ void LeftControls::resized()
     gainSlider.setBounds(
         rightHalf.getCentreX() - sliderWidth / 2,
         rightHalf.getY(),
-        sliderWidth,
-        sliderHeight
+        sliderWidth+15,
+        sliderHeight+15
     );
 
     // Position labels at the bottom of the bounds

@@ -13,11 +13,12 @@
 NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioProcessor& p)
 	: AudioProcessorEditor(&p), audioProcessor(p), keyboardComponent(keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard)
 {
-    setSize (677, 350);
+    setSize (680, 350);
     addAndMakeVisible(keyboardComponent);
 	addAndMakeVisible(waveScreen);
     addAndMakeVisible(leftControls);
     addAndMakeVisible(reverbControls);
+    addAndMakeVisible(oscillatorControls);
 
     // Keyboard Settings
     int startNote = 36; // 60 is middle C
@@ -46,7 +47,9 @@ void NewProjectAudioProcessorEditor::paint (juce::Graphics& g)
     g.fillRect(getLocalBounds());
 
     g.setColour(juce::Colours::black);
-    g.drawLine(reverbControls.getRight() + 40, 0, reverbControls.getRight() + 40, getHeight(), 2.0f);
+    g.drawLine(reverbControls.getRight() + 30, 0, reverbControls.getRight() + 30, getHeight(), 2.0f);
+    g.drawLine(oscillatorControls.getRight() + 20, 0, oscillatorControls.getRight() + 20, getHeight(), 2.0f);
+
 }
 
 void NewProjectAudioProcessorEditor::resized()
@@ -54,19 +57,22 @@ void NewProjectAudioProcessorEditor::resized()
     auto bounds = getLocalBounds();
 
     // Space on the left for extra controls
-    auto controlAreaWidth = 120;
-    auto keyboardHeight = 130;       // Fixed height for the keyboard
-    auto reverbControlsHeight = 200; // Height for ReverbControls
+    auto controlAreaWidth = 135;
+    auto keyboardHeight = 130;
+    auto reverbControlsHeight = 200;
+    int oscillatorControlsHeight = 200;
 
     // Position ReverbControls lower down and to the right
     auto leftControlArea = bounds.removeFromLeft(controlAreaWidth);
-    auto reverbOffsetX = 23; // Horizontal offset from the left edge
+    auto reverbOffsetX = 20; // Horizontal offset from the left edge
     auto reverbOffsetY = 30; // Vertical offset from the top
     reverbControls.setBounds(leftControlArea
         .removeFromTop(reverbControlsHeight)
-        .translated(reverbOffsetX, reverbOffsetY)); // Apply offset
+        .translated(reverbOffsetX, reverbOffsetY));
 
-    // Position LeftControls explicitly at the bottom left
+    // Position OscillatorControls to the right of ReverbControls
+    oscillatorControls.setBounds(reverbControls.getRight() + 50, reverbControls.getY(), 180, oscillatorControlsHeight);
+    // Position LeftControls at the bottom left
     leftControls.setBounds(leftControlArea.withY(getHeight() - keyboardHeight).withHeight(keyboardHeight));
 
     // Position the keyboard at the bottom

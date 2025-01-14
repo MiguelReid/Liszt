@@ -82,25 +82,25 @@ void ReverbControls::paint (juce::Graphics& g)
 void ReverbControls::resized()
 {
     auto bounds = getLocalBounds();
-    auto labelHeight = 30;
-    auto knobSize = 35;
-    auto margin = 40;
+    auto labelHeight = 20;
+    auto knobSize = 55;
+    auto margin = 27;
     auto labelSize = 50;
-    auto spaceForCenteredLabel = 3;
+    auto extraSpace = 8;
 
     // Position the label at the top
     reverbLabel.setBounds(bounds.removeFromTop(labelHeight));
 
     // Position the knobs in a 2x2 grid
-    predelayKnob.setBounds(bounds.getX() + spaceForCenteredLabel, bounds.getY(), knobSize, knobSize);
-    predelayLabel.setBounds(predelayKnob.getX() + spaceForCenteredLabel + (knobSize - labelSize) / 2, predelayKnob.getBottom() + 3, labelSize, 15);
+    predelayKnob.setBounds(bounds.getX(), bounds.getY() + extraSpace, knobSize, knobSize);
+    predelayLabel.setBounds(predelayKnob.getX() + (knobSize - labelSize) / 2, predelayKnob.getBottom(), labelSize, 15);
 
-    decayKnob.setBounds(bounds.getX() + knobSize + margin + spaceForCenteredLabel, bounds.getY(), knobSize, knobSize);
-    decayLabel.setBounds(decayKnob.getX() + spaceForCenteredLabel + (knobSize - labelSize) / 2, decayKnob.getBottom() + 3, labelSize, 15);
+    decayKnob.setBounds(bounds.getX() + knobSize + margin, bounds.getY() + extraSpace, knobSize, knobSize);
+    decayLabel.setBounds(decayKnob.getX() + (knobSize - labelSize) / 2, decayKnob.getBottom(), labelSize, 15);
 
-    dryWetKnob.setBounds(bounds.getX() + spaceForCenteredLabel, bounds.getY() + knobSize + margin, knobSize, knobSize);
-    dryWetLabel.setBounds(dryWetKnob.getX() + spaceForCenteredLabel + (knobSize - labelSize) / 2, dryWetKnob.getBottom() + 3, labelSize, 15);
+    dryWetKnob.setBounds(bounds.getX(), bounds.getY() + knobSize + margin + extraSpace, knobSize, knobSize);
+    dryWetLabel.setBounds(dryWetKnob.getX() + (knobSize - labelSize) / 2, dryWetKnob.getBottom(), labelSize, 15);
 
-    diffusionKnob.setBounds(bounds.getX() + spaceForCenteredLabel + knobSize + margin, bounds.getY() + knobSize + margin, knobSize, knobSize);
-    diffusionLabel.setBounds(diffusionKnob.getX() + spaceForCenteredLabel + (knobSize - labelSize) / 2, diffusionKnob.getBottom() + 3, labelSize, 15);
+    diffusionKnob.setBounds(bounds.getX() + knobSize + margin, bounds.getY() + knobSize + margin + extraSpace, knobSize, knobSize);
+    diffusionLabel.setBounds(diffusionKnob.getX() + (knobSize - labelSize) / 2, diffusionKnob.getBottom(), labelSize, 15);
 }

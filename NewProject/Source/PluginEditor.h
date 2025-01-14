@@ -13,6 +13,7 @@
 #include "WaveScreen.h"
 #include "LeftControls.h"
 #include "ReverbControls.h"
+#include "OscillatorControls.h"
 
 //==============================================================================
 /**
@@ -41,6 +42,7 @@ private:
     juce::Slider pitchBendSlider;
     LeftControls leftControls;
     ReverbControls reverbControls;
+    OscillatorControls oscillatorControls;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NewProjectAudioProcessorEditor)
 };
