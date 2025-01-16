@@ -62,8 +62,8 @@ void Knob::drawRotarySlider(juce::Graphics& g, int x, int y, int width, int heig
     {
         // Define angles for the top-right quadrant
         float startAngle = juce::MathConstants<float>::pi / 6.0f;
-        float middleAngle = juce::MathConstants<float>::pi * 2.0f / 6.0f; // 0 degrees (vertical)
-        float endAngle = juce::MathConstants<float>::pi * 4.0f / 6.0f;
+        float middleAngle = juce::MathConstants<float>::pi / 3.0f; // 60 degrees
+        float endAngle = juce::MathConstants<float>::pi / 2.0f; // 90 degrees
 
         std::vector<float> positions = { startAngle, middleAngle, endAngle };
         float shapeSize = 3.0f; // Adjusted size

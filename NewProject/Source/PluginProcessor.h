@@ -9,6 +9,7 @@
 #pragma once
 #include <JuceHeader.h>
 #include "Synth.h"
+#include "WaveScreen.h"
 
 //==============================================================================
 /**
@@ -61,5 +62,7 @@ private:
     Synth synth;
     juce::MidiBuffer midiBuffer;
     juce::CriticalSection midiBufferLock;
+    WaveScreen waveScreen;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NewProjectAudioProcessor)
 };

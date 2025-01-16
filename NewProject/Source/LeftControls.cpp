@@ -20,10 +20,6 @@ LeftControls::LeftControls()
     arpeggiatorButton.setLookAndFeel(toggleButtonLookAndFeel.get());
 	gainSlider.setLookAndFeel(knobLookAndFeel.get());
 
-    arpeggiatorButton.setButtonText("Arp");
-    pitchBendSlider.setName("Pitch");
-    gainSlider.setName("Gain");
-
 	arpeggiatorButton.setClickingTogglesState(true);
 
     pitchBendSlider.setSliderStyle(juce::Slider::SliderStyle::LinearBarVertical);
@@ -74,8 +70,8 @@ void LeftControls::resized()
     auto bounds = getLocalBounds();
 
     // Define dimensions for the arpeggiator button
-    const int buttonWidth = 33;
-    const int buttonHeight = 33;
+    const int buttonWidth = 35;
+    const int buttonHeight = 35;
     const int buttonMarginTop = 2;
 
     // Position the arpeggiator button at the top center

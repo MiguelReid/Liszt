@@ -43,7 +43,7 @@ OscillatorControls::OscillatorControls()
     shapeKnob1.setRange(0, 2, 1); // Only three positions: 0, 1, 2
     // Set rotary parameters to reduce angular range
     shapeKnob1.setRotaryParameters(juce::MathConstants<float>::pi / 6.0f,
-        (4.0f * juce::MathConstants<float>::pi) / 6.0f,
+        juce::MathConstants<float>::pi / 2.0f,
         true);
     addAndMakeVisible(shapeKnob1);
 
@@ -76,7 +76,7 @@ OscillatorControls::OscillatorControls()
     shapeKnob2.setRange(0, 2, 1); // Only three positions: 0, 1, 2
     // Set rotary parameters to reduce angular range
     shapeKnob2.setRotaryParameters(juce::MathConstants<float>::pi / 6.0f,
-        (4.0f * juce::MathConstants<float>::pi) / 6.0f,
+        juce::MathConstants<float>::pi / 2.0f,
         true);
     addAndMakeVisible(shapeKnob2);
 

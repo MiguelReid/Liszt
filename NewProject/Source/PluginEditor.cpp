@@ -49,6 +49,9 @@ void NewProjectAudioProcessorEditor::paint (juce::Graphics& g)
     g.setColour(juce::Colours::black);
     g.drawLine(reverbControls.getRight() + 30, 0, reverbControls.getRight() + 30, getHeight(), 2.0f);
     g.drawLine(oscillatorControls.getRight() + 20, 0, oscillatorControls.getRight() + 20, getHeight(), 2.0f);
+    
+    int lineY = waveScreen.getY() - 10;
+    g.drawLine(oscillatorControls.getRight() + 20, lineY, getWidth(), lineY, 2.0f);
 
 }
 
@@ -79,10 +82,10 @@ void NewProjectAudioProcessorEditor::resized()
     keyboardComponent.setBounds(bounds.removeFromBottom(keyboardHeight));
 
     // WaveScreen Position
-    auto screenHeight = 100;
-    auto screenWidth = 160;
-    auto screenX = (getWidth() - screenWidth) - 20;
-    auto screenY = keyboardComponent.getY() - screenHeight - 15;
+    auto screenHeight = 70;
+    auto screenWidth = 170;
+    auto screenX = getWidth() - screenWidth - 20;
+    auto screenY = keyboardComponent.getY() - screenHeight - 10;
     waveScreen.setBounds(screenX, screenY, screenWidth, screenHeight);
 }
 
