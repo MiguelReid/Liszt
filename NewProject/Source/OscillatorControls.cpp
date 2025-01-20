@@ -86,15 +86,22 @@ OscillatorControls::OscillatorControls()
     shapeLabel2.setColour(juce::Label::textColourId, juce::Colours::white);
     addAndMakeVisible(shapeLabel2);
 
+    addAndMakeVisible(osc1Button);
+    addAndMakeVisible(osc2Button);
+
     // ------------------- Look and feel --------------------------
 
+    toggleButtonLookAndFeel = std::make_unique<ToggleButton>();
     knobLookAndFeel = std::make_unique<Knob>();
+
 	shapeKnob1.setName("ShapeKnob");
 	shapeKnob2.setName("ShapeKnob");
     rangeKnob1.setLookAndFeel(knobLookAndFeel.get());
     rangeKnob2.setLookAndFeel(knobLookAndFeel.get());
     shapeKnob1.setLookAndFeel(knobLookAndFeel.get());
     shapeKnob2.setLookAndFeel(knobLookAndFeel.get());
+    osc1Button.setLookAndFeel(toggleButtonLookAndFeel.get());
+    osc2Button.setLookAndFeel(toggleButtonLookAndFeel.get());
 }
 
 OscillatorControls::~OscillatorControls()
@@ -103,26 +110,28 @@ OscillatorControls::~OscillatorControls()
     rangeKnob2.setLookAndFeel(nullptr);
     shapeKnob1.setLookAndFeel(nullptr);
     shapeKnob2.setLookAndFeel(nullptr);
+    osc1Button.setLookAndFeel(nullptr);
+    osc2Button.setLookAndFeel(nullptr);
 }
 
 void OscillatorControls::paint(juce::Graphics& g)
 {
-    // Optional: Add custom painting code here
 }
 
 void OscillatorControls::resized()
 {
     auto bounds = getLocalBounds();
     auto labelHeight = 20;
-    auto KnobWidth = 55;      
-    auto knobHeight = 55;   
-	// Knobs are -15 in reality but we add padding for the labels
+    auto knobWidth = 55;
+    auto knobHeight = 55;
     auto marginX = 10;
     auto marginY = 10;
     auto labelWidth = 50;
+    auto buttonWidth = 20;
+    auto buttonHeight = 20;
 
     // Calculate total width for the three columns
-    auto totalWidth = 3 * KnobWidth + 3 * marginX;
+    auto totalWidth = 3 * knobWidth + 2 * marginX + buttonWidth;
 
     // Position the label at the top, centered
     oscillatorLabel.setBounds((bounds.getWidth() - totalWidth) / 2, 0, totalWidth, labelHeight);
@@ -133,30 +142,37 @@ void OscillatorControls::resized()
     int startY = bounds.getY() + marginY;
 
     // rangeKnob1
-    rangeKnob1.setBounds(startX, startY, KnobWidth, knobHeight);
-    rangeLabel1.setBounds(rangeKnob1.getX(), rangeKnob1.getBottom(), KnobWidth, 15);
+    rangeKnob1.setBounds(startX, startY, knobWidth, knobHeight);
+    rangeLabel1.setBounds(rangeKnob1.getX(), rangeKnob1.getBottom(), knobWidth, 15);
 
     // oscLabel1
-    oscLabel1.setBounds(rangeKnob1.getRight() + marginX, startY + (KnobWidth / 2) - 10, KnobWidth, 20);
+    oscLabel1.setBounds(rangeKnob1.getRight() + marginX, startY + (knobWidth / 2) - 10, knobWidth, 20);
+
+    // osc1Button
+    osc1Button.setBounds(oscLabel1.getRight() - 5, startY + (knobWidth / 2) - 10, buttonWidth, buttonHeight);
 
     // shapeKnob1 with increased height
-    shapeKnob1.setBounds(oscLabel1.getRight() + marginX, startY, KnobWidth, knobHeight);
-    shapeLabel1.setBounds(shapeKnob1.getX(), shapeKnob1.getBottom(), KnobWidth, 15);
+    shapeKnob1.setBounds(osc1Button.getRight() + marginX, startY, knobWidth, knobHeight);
+    shapeLabel1.setBounds(shapeKnob1.getX(), shapeKnob1.getBottom(), knobWidth, 15);
 
     // Second Row
     startY = shapeLabel1.getBottom() + marginY;  // Adjust startY based on shapeKnob1's bottom
 
     // rangeKnob2
-    rangeKnob2.setBounds(startX, startY, KnobWidth, knobHeight);
-    rangeLabel2.setBounds(rangeKnob2.getX(), rangeKnob2.getBottom(), KnobWidth, 15);
+    rangeKnob2.setBounds(startX, startY, knobWidth, knobHeight);
+    rangeLabel2.setBounds(rangeKnob2.getX(), rangeKnob2.getBottom(), knobWidth, 15);
 
     // oscLabel2
-    oscLabel2.setBounds(rangeKnob2.getRight() + marginX, startY + (KnobWidth / 2) - 10, KnobWidth, 20);
+    oscLabel2.setBounds(rangeKnob2.getRight() + marginX, startY + (knobWidth / 2) - 10, knobWidth, 20);
+
+    // osc2Button
+    osc2Button.setBounds(oscLabel2.getRight() - 5, startY + (knobWidth / 2) - 10, buttonWidth, buttonHeight);
 
     // shapeKnob2 with increased height
-    shapeKnob2.setBounds(oscLabel2.getRight() + marginX, startY, KnobWidth, knobHeight);
-    shapeLabel2.setBounds(shapeKnob2.getX(), shapeKnob2.getBottom(), KnobWidth, 15);
+    shapeKnob2.setBounds(osc2Button.getRight() + marginX, startY, knobWidth, knobHeight);
+    shapeLabel2.setBounds(shapeKnob2.getX(), shapeKnob2.getBottom(), knobWidth, 15);
 }
+
 
 
 

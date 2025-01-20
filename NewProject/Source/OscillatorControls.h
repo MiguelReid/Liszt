@@ -12,6 +12,7 @@
 
 #include <JuceHeader.h>
 #include "Knob.h"
+#include "ToggleButton.h"
 
 //==============================================================================
 /*
@@ -32,6 +33,7 @@ private:
 	juce::Slider rangeKnob2;
 	juce::Slider shapeKnob1;
 	juce::Slider shapeKnob2;
+
 	juce::Label oscLabel1;
     juce::Label oscLabel2;
 	juce::Label rangeLabel1;
@@ -39,5 +41,9 @@ private:
 	juce::Label shapeLabel1;
 	juce::Label shapeLabel2;
 
+    juce::ToggleButton osc1Button;
+    juce::ToggleButton osc2Button;
+
     std::unique_ptr<Knob> knobLookAndFeel;
+	std::unique_ptr<ToggleButton> toggleButtonLookAndFeel;
 };

@@ -143,7 +143,7 @@ void FilterControls::resized()
 
     // Place High-Pass Label
     highPassLabel.setBounds(
-        highPassArea.getCentreX() - 40, // Center the label horizontally
+        highPassArea.getCentreX() - 53, // Center the label horizontally
         highPassArea.getY(),
         80,
         labelHeight
@@ -197,7 +197,7 @@ void FilterControls::resized()
 
     // Place Low-Pass Label
     lowPassLabel.setBounds(
-        lowPassArea.getCentreX() - 40,
+        lowPassArea.getCentreX() - 53,
         lowPassArea.getY(),
         80,
         labelHeight

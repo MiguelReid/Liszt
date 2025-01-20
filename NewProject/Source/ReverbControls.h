@@ -12,6 +12,7 @@
 
 #include <JuceHeader.h>
 #include "Knob.h"
+#include "ToggleButton.h"
 
 //==============================================================================
 /*
@@ -37,6 +38,10 @@ private:
     juce::Label dryWetLabel;
     juce::Label diffusionLabel;
 
+    juce::ToggleButton reverbButton;
+
+    std::unique_ptr<ToggleButton> toggleButtonLookAndFeel;
     std::unique_ptr<Knob> knobLookAndFeel;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ReverbControls)
 };

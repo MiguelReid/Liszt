@@ -57,13 +57,18 @@ ReverbControls::ReverbControls()
     diffusionLabel.setColour(juce::Label::textColourId, juce::Colours::white);
     addAndMakeVisible(diffusionLabel);
 
+	addAndMakeVisible(reverbButton);
+
     // ------------------- Look and feel --------------------------
 
     knobLookAndFeel = std::make_unique<Knob>();
+	toggleButtonLookAndFeel = std::make_unique<ToggleButton>();
+
     predelayKnob.setLookAndFeel(knobLookAndFeel.get());
     decayKnob.setLookAndFeel(knobLookAndFeel.get());
     dryWetKnob.setLookAndFeel(knobLookAndFeel.get());
     diffusionKnob.setLookAndFeel(knobLookAndFeel.get());
+	reverbButton.setLookAndFeel(toggleButtonLookAndFeel.get());
 }
 
 ReverbControls::~ReverbControls()
@@ -72,6 +77,7 @@ ReverbControls::~ReverbControls()
 	decayKnob.setLookAndFeel(nullptr);
 	dryWetKnob.setLookAndFeel(nullptr);
 	diffusionKnob.setLookAndFeel(nullptr);
+	reverbButton.setLookAndFeel(nullptr);
 }
 
 void ReverbControls::paint (juce::Graphics& g)
@@ -87,20 +93,30 @@ void ReverbControls::resized()
     auto margin = 27;
     auto labelSize = 50;
     auto extraSpace = 8;
+    auto buttonWidth = 20;
+    auto buttonHeight = 20;
+
+    // Calculate total width for the label and button
+    auto totalWidth = reverbLabel.getFont().getStringWidth(reverbLabel.getText()) + buttonWidth + margin;
+	auto reverbLabelWidth = reverbLabel.getFont().getStringWidth(reverbLabel.getText());
 
     // Position the label at the top
-    reverbLabel.setBounds(bounds.removeFromTop(labelHeight));
+    reverbLabel.setBounds((bounds.getWidth() - reverbLabelWidth - buttonWidth) / 2, 0, reverbLabelWidth, labelHeight);
+    reverbButton.setBounds(reverbLabel.getRight(), reverbLabel.getY() + (labelHeight - buttonHeight) / 2, buttonWidth, buttonHeight);
+
+    // Adjust bounds to leave space for the label and button
+    bounds.removeFromTop(labelHeight + extraSpace);
 
     // Position the knobs in a 2x2 grid
-    predelayKnob.setBounds(bounds.getX(), bounds.getY() + extraSpace, knobSize, knobSize);
+    predelayKnob.setBounds(bounds.getX(), bounds.getY(), knobSize, knobSize);
     predelayLabel.setBounds(predelayKnob.getX() + (knobSize - labelSize) / 2, predelayKnob.getBottom(), labelSize, 15);
 
-    decayKnob.setBounds(bounds.getX() + knobSize + margin, bounds.getY() + extraSpace, knobSize, knobSize);
+    decayKnob.setBounds(bounds.getX() + knobSize + margin, bounds.getY(), knobSize, knobSize);
     decayLabel.setBounds(decayKnob.getX() + (knobSize - labelSize) / 2, decayKnob.getBottom(), labelSize, 15);
 
-    dryWetKnob.setBounds(bounds.getX(), bounds.getY() + knobSize + margin + extraSpace, knobSize, knobSize);
+    dryWetKnob.setBounds(bounds.getX(), bounds.getY() + knobSize + margin, knobSize, knobSize);
     dryWetLabel.setBounds(dryWetKnob.getX() + (knobSize - labelSize) / 2, dryWetKnob.getBottom(), labelSize, 15);
 
-    diffusionKnob.setBounds(bounds.getX() + knobSize + margin, bounds.getY() + knobSize + margin + extraSpace, knobSize, knobSize);
+    diffusionKnob.setBounds(bounds.getX() + knobSize + margin, bounds.getY() + knobSize + margin, knobSize, knobSize);
     diffusionLabel.setBounds(diffusionKnob.getX() + (knobSize - labelSize) / 2, diffusionKnob.getBottom(), labelSize, 15);
 }
