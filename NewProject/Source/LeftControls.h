@@ -34,6 +34,7 @@ private:
     // Labels
     juce::Label pitchBendLabel;
     juce::Label gainLabel;
+    juce::Label arpeggiatorLabel;
 
     // Custom LookAndFeel
     std::unique_ptr<Knob> knobLookAndFeel;

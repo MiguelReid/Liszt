@@ -13,12 +13,13 @@
 NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioProcessor& p)
 	: AudioProcessorEditor(&p), audioProcessor(p), keyboardComponent(keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard)
 {
-    setSize (680, 350);
+    setSize (680, 380);
     addAndMakeVisible(keyboardComponent);
 	addAndMakeVisible(waveScreen);
     addAndMakeVisible(leftControls);
     addAndMakeVisible(reverbControls);
     addAndMakeVisible(oscillatorControls);
+	addAndMakeVisible(filterControls);
 
     // Keyboard Settings
     int startNote = 36; // 60 is middle C
@@ -30,9 +31,6 @@ NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioP
 NewProjectAudioProcessorEditor::~NewProjectAudioProcessorEditor()
 {
     keyboardState.removeListener(this);
-    /*
-    arpeggiatorButton.setLookAndFeel(nullptr);
-    */
 }
 
 //==============================================================================
@@ -50,8 +48,8 @@ void NewProjectAudioProcessorEditor::paint (juce::Graphics& g)
     g.drawLine(reverbControls.getRight() + 30, 0, reverbControls.getRight() + 30, getHeight(), 2.0f);
     g.drawLine(oscillatorControls.getRight() + 20, 0, oscillatorControls.getRight() + 20, getHeight(), 2.0f);
     
-    int lineY = waveScreen.getY() - 10;
-    g.drawLine(oscillatorControls.getRight() + 20, lineY, getWidth(), lineY, 2.0f);
+    //int lineY = waveScreen.getY() - 10;
+    //g.drawLine(oscillatorControls.getRight() + 20, lineY, getWidth(), lineY, 2.0f);
 
 }
 
@@ -75,6 +73,10 @@ void NewProjectAudioProcessorEditor::resized()
 
     // Position OscillatorControls to the right of ReverbControls
     oscillatorControls.setBounds(reverbControls.getRight() + 50, reverbControls.getY(), 180, oscillatorControlsHeight);
+
+	// Position FilterControls to the right of OscillatorControls
+	filterControls.setBounds(oscillatorControls.getRight() + 50, oscillatorControls.getY(), 180, oscillatorControlsHeight);
+
     // Position LeftControls at the bottom left
     leftControls.setBounds(leftControlArea.withY(getHeight() - keyboardHeight).withHeight(keyboardHeight));
 
@@ -86,7 +88,7 @@ void NewProjectAudioProcessorEditor::resized()
     auto screenWidth = 170;
     auto screenX = getWidth() - screenWidth - 20;
     auto screenY = keyboardComponent.getY() - screenHeight - 10;
-    waveScreen.setBounds(screenX, screenY, screenWidth, screenHeight);
+    //waveScreen.setBounds(screenX, screenY, screenWidth, screenHeight);
 }
 
 

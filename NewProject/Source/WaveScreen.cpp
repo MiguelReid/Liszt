@@ -52,13 +52,14 @@ void WaveScreen::resized()
     auto buttonWidth = 35; // Width of the button
     auto buttonHeight = 35; // Height of the button
 
-    // Position the button on the left side, centered vertically
-    auto buttonY = (area.getHeight() - buttonHeight) / 2;
-    screenButton.setBounds(0, buttonY, buttonWidth, buttonHeight);
-
     // Adjust the area for the audioVisualiser to make space for the button
-    auto visualiserArea = area.withTrimmedLeft(buttonWidth + 5); // 5 pixels padding
+    auto visualiserArea = area.withTrimmedRight(buttonWidth + 5); // 5 pixels padding
     audioVisualiser.setBounds(visualiserArea);
+
+    // Position the button on the left side, centered vertically
+	auto buttonY = (visualiserArea.getHeight() - buttonHeight) / 2 + 2; // 2 pixels offset
+    screenButton.setBounds(visualiserArea.getRight(), buttonY, buttonWidth, buttonHeight);
+
 }
 
 void WaveScreen::pushNextSampleIntoVisualiser(const float* samples, int numChannels)

@@ -37,10 +37,15 @@ LeftControls::LeftControls()
     gainLabel.setJustificationType(juce::Justification::centredTop);
     gainLabel.setColour(juce::Label::textColourId, juce::Colours::white);
 
+    arpeggiatorLabel.setText("Arp", juce::dontSendNotification);
+    arpeggiatorLabel.setJustificationType(juce::Justification::centredTop);
+    arpeggiatorLabel.setColour(juce::Label::textColourId, juce::Colours::white);
+
     // --------------------------
 
     addAndMakeVisible(pitchBendLabel);
     addAndMakeVisible(gainLabel);
+	addAndMakeVisible(arpeggiatorLabel);
 
     addAndMakeVisible(arpeggiatorButton);
     addAndMakeVisible(pitchBendSlider);
@@ -68,6 +73,7 @@ void LeftControls::paint (juce::Graphics& g)
 void LeftControls::resized()
 {
     auto bounds = getLocalBounds();
+    const int labelHeight = 15;
 
     // Define dimensions for the arpeggiator button
     const int buttonWidth = 35;
@@ -82,55 +88,47 @@ void LeftControls::resized()
         buttonHeight
     );
 
-    // Calculate the remaining space, ensuring room for labels at bottom
-    auto slidersArea = bounds;
-    slidersArea.removeFromTop(arpeggiatorButton.getBottom() + 5);
-    slidersArea.removeFromBottom(25); // Reserve space for labels at bottom
+    // Position the arpeggiator label beneath the button
+    arpeggiatorLabel.setBounds(
+        bounds.getCentreX() - buttonWidth / 2,
+        buttonHeight - 5,
+        buttonWidth,
+        labelHeight
+    );
 
     // Adjust dimensions for sliders and labels
-    const int labelHeight = 15;
-    const int sliderHeight = slidersArea.getHeight() + 5; // Leave some margin
-    const int sliderWidth = 30;
-    const int labelWidth = 40;
+    const int sliderHeight = 40;
+    const int sliderWidth = 40;
 
-    // Split the area into left and right halves
-    auto leftHalf = slidersArea.removeFromLeft(slidersArea.getWidth() / 2);
-    auto rightHalf = slidersArea;
-
-    // Set font size for labels
-    pitchBendLabel.setFont(juce::Font(13.0f, juce::Font::plain));
-    gainLabel.setFont(juce::Font(13.0f, juce::Font::plain));
-
-    // Position pitch bend slider in the left half
+    // Position pitch bend slider in the bottom left
     pitchBendSlider.setBounds(
-        leftHalf.getCentreX() - sliderWidth / 2,
-        leftHalf.getY(),
+        25,
+        bounds.getBottom() - sliderHeight - labelHeight - 20,
+        sliderWidth-20,
+        sliderHeight+5
+    );
+
+    // Position pitch bend label beneath the slider
+    pitchBendLabel.setBounds(
+        15,
+        bounds.getBottom() - labelHeight - 8,
+        sliderWidth,
+        labelHeight
+    );
+
+    // Position gain slider in the bottom right
+    gainSlider.setBounds(
+        bounds.getWidth() - sliderWidth - 15,
+        bounds.getBottom() - sliderHeight - labelHeight - 8,
         sliderWidth,
         sliderHeight
     );
 
-    // Position gain slider in the right half
-    gainSlider.setBounds(
-        rightHalf.getCentreX() - sliderWidth / 2,
-        rightHalf.getY(),
-        sliderWidth+15,
-        sliderHeight+15
-    );
-
-    // Position labels at the bottom of the bounds
-    const int labelY = bounds.getBottom() - labelHeight - 5; // 5 pixels from bottom
-
-    pitchBendLabel.setBounds(
-        leftHalf.getCentreX() - labelWidth / 2,
-        labelY,
-        labelWidth,
-        labelHeight
-    );
-
+    // Position gain label beneath the slider
     gainLabel.setBounds(
-        rightHalf.getCentreX() - labelWidth / 2,
-        labelY,
-        labelWidth,
+        bounds.getWidth() - sliderWidth - 15,
+        bounds.getBottom() - labelHeight - 8,
+        sliderWidth,
         labelHeight
     );
 }
