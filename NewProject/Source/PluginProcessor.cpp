@@ -105,6 +105,8 @@ void NewProjectAudioProcessor::changeProgramName(int index, const juce::String& 
 void NewProjectAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
 	synth.setCurrentPlaybackSampleRate(sampleRate);
+
+
 }
 
 void NewProjectAudioProcessor::releaseResources()
@@ -141,6 +143,7 @@ bool NewProjectAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts
 
 void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
+	// PIANO NOTE PLAYING ====================================
 	juce::ScopedNoDenormals noDenormals;
 	auto totalNumInputChannels = getTotalNumInputChannels();
 	auto totalNumOutputChannels = getTotalNumOutputChannels();
@@ -168,6 +171,9 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 
 	// No MIDI output
 	midiMessages.clear();
+	// ========================================================
+
+	// AUDIO VISUALISER =======================================
 }
 
 void NewProjectAudioProcessor::addMidiMessage(const juce::MidiMessage& message)

@@ -22,9 +22,9 @@ NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioP
 	addAndMakeVisible(filterControls);
 
     // Keyboard Settings
-    //int startNote = 36; // 60 is middle C
-    //int endNote = startNote + 60;
-    //keyboardComponent.setAvailableRange(startNote, endNote);
+    int startNote = 36; // 60 is middle C
+    int endNote = startNote + 78;
+    keyboardComponent.setAvailableRange(startNote, endNote);
     keyboardState.addListener(this);
 }
 
@@ -36,9 +36,7 @@ NewProjectAudioProcessorEditor::~NewProjectAudioProcessorEditor()
 //==============================================================================
 void NewProjectAudioProcessorEditor::paint (juce::Graphics& g)
 {
-    g.fillAll(juce::Colour::fromRGB(109, 70, 44));  // Rich wood brown
-
-    // Add subtle shading for a 3D effect
+    g.fillAll(juce::Colour::fromRGB(109, 70, 44));
     juce::ColourGradient gradient(juce::Colour::fromRGB(60, 35, 20), 0, 0,
         juce::Colour::fromRGB(150, 90, 55), getWidth(), getHeight(),false);
     g.setGradientFill(gradient);

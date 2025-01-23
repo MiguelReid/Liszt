@@ -29,9 +29,11 @@ public:
     void pushNextSampleIntoVisualiser(const float* samples, int numChannels);
 
 private:
+    void drawWaveform(juce::Graphics& g);
+
     juce::ToggleButton screenButton;
     std::unique_ptr<ToggleButton> toggleButtonLookAndFeel;
-    juce::AudioVisualiserComponent audioVisualiser{ 2 }; // Assuming stereo audio
+    juce::AudioVisualiserComponent audioVisualiser{ 1 }; // mono audio
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveScreen)
 };
