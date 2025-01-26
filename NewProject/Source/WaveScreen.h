@@ -12,7 +12,6 @@
 
 #include <JuceHeader.h>
 #include "ToggleButton.h"
-#include "CircularBuffer.cpp"
 
 //==============================================================================
 /*
@@ -27,14 +26,14 @@ public:
     void resized() override;
 
     // Method to feed audio samples to the visualiser
-    void pushNextSampleIntoVisualiser(const float* samples, int numChannels);
+    void pushBufferIntoVisualiser(const juce::AudioBuffer<float>& buffer);
     static bool getVisualiserStatus() { return isScreenEnabled; }
+
+    juce::AudioVisualiserComponent audioVisualiser{ 1 }; // mono audio
 
 private:
     juce::ToggleButton screenButton;
     std::unique_ptr<ToggleButton> toggleButtonLookAndFeel;
-    juce::AudioVisualiserComponent audioVisualiser{ 1 }; // mono audio
-    CircularBuffer<float, 128> circularBuffer;
 
 	static bool isScreenEnabled;
 

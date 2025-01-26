@@ -19,7 +19,7 @@
 //==============================================================================
 /**
 */
-class NewProjectAudioProcessorEditor  : public juce::AudioProcessorEditor, private juce::MidiKeyboardStateListener
+class NewProjectAudioProcessorEditor  : public juce::AudioProcessorEditor, private juce::MidiKeyboardStateListener, private juce::Timer
 {
 public:
     NewProjectAudioProcessorEditor (NewProjectAudioProcessor&);
@@ -28,6 +28,8 @@ public:
     //==============================================================================
     void paint (juce::Graphics&) override;
     void resized() override;
+
+    void timerCallback() override;
 
 private:
     NewProjectAudioProcessor& audioProcessor;

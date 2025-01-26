@@ -20,7 +20,9 @@ WaveScreen::WaveScreen()
     audioVisualiser.setRepaintRate(30); // 30 frames/s
     audioVisualiser.setBufferSize(128);
     audioVisualiser.setSamplesPerBlock(16);
+    audioVisualiser.setNumChannels(1);
     audioVisualiser.setColours(juce::Colours::black, juce::Colours::white);
+    audioVisualiser.setEnabled(true);
     addAndMakeVisible(audioVisualiser);
 
     // Button
@@ -32,7 +34,6 @@ WaveScreen::WaveScreen()
     screenButton.onClick = [this]()
         {
             isScreenEnabled = screenButton.getToggleState();
-            audioVisualiser.setEnabled(isScreenEnabled);
         };
 }
 
@@ -65,23 +66,10 @@ void WaveScreen::resized()
 
 }
 
-void WaveScreen::pushNextSampleIntoVisualiser(const float* samples, int numChannels)
+void WaveScreen::pushBufferIntoVisualiser(const juce::AudioBuffer<float>& buffer)
 {
     if (isScreenEnabled)
     {
-		DBG("Pushing samples to visualiser");
-        for (int i = 0; i < numChannels; ++i)
-        {
-			DBG("Pushing sample: " << samples[i]);
-            circularBuffer.push(samples[i]);
-        }
-
-        // Retrieve samples from the circular buffer and push them to the visualizer
-        float sample;
-        while (!circularBuffer.empty() && circularBuffer.pop(sample))
-        {
-			DBG("Popped sample: " << sample);
-            audioVisualiser.pushSample(&sample, 1);
-        } 
+        audioVisualiser.pushBuffer(buffer);
     }
 }

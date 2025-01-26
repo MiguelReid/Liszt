@@ -10,6 +10,7 @@
 #include <JuceHeader.h>
 #include "Synth.h"
 #include "WaveScreen.h"
+#include <juce_audio_basics/juce_audio_basics.h>
 
 //==============================================================================
 /**
@@ -17,6 +18,12 @@
 class NewProjectAudioProcessor  : public juce::AudioProcessor
 {
 public:
+
+    // FIFO
+    juce::AudioSampleBuffer fifoBuffer;
+    std::atomic<int> fifoIndex{ 0 };
+    static constexpr int fifoSize = 48000; // Adjust size as needed
+
     //==============================================================================
     NewProjectAudioProcessor();
     ~NewProjectAudioProcessor() override;
@@ -57,14 +64,11 @@ public:
 	//==============================================================================
     void addMidiMessage(const juce::MidiMessage& message);
 
-	//==============================================================================
-
 private:
     //==============================================================================
     Synth synth;
     juce::MidiBuffer midiBuffer;
     juce::CriticalSection midiBufferLock;
-    WaveScreen waveScreen;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NewProjectAudioProcessor)
 };

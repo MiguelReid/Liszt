@@ -4,10 +4,7 @@
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn"
               pluginFormats="buildVST3" includeBinaryInJuceHeader="1" binaryDataNamespace="BinaryData">
   <MAINGROUP id="h9bKiU" name="Liszt">
-    <GROUP id="{4892159E-314E-9763-9FC0-6423C7B6C34B}" name="DSP">
-      <FILE id="GQNuKK" name="CircularBuffer.cpp" compile="1" resource="0"
-            file="Source/CircularBuffer.cpp"/>
-    </GROUP>
+    <GROUP id="{4892159E-314E-9763-9FC0-6423C7B6C34B}" name="DSP"/>
     <GROUP id="{C5E3E42E-845E-92E2-8096-5396AAE29B3C}" name="Frontend">
       <FILE id="yCkANW" name="Knob.cpp" compile="1" resource="0" file="Source/Knob.cpp"/>
       <FILE id="qepLJZ" name="Knob.h" compile="0" resource="0" file="Source/Knob.h"/>
@@ -17,7 +14,6 @@
     </GROUP>
     <GROUP id="{C0AC9768-3D81-3C38-E340-32DBE9DBAA2C}" name="Resources">
       <FILE id="wqHv9X" name="60.wav" compile="0" resource="1" file="../../../../Downloads/60.wav"/>
-      <FILE id="JBPWM1" name="60.mp3" compile="0" resource="1" file="../../../../Downloads/60.mp3"/>
     </GROUP>
     <GROUP id="{0DE48964-0C34-297E-506C-5D9552E4C577}" name="Source">
       <FILE id="imz0Km" name="FilterControls.cpp" compile="1" resource="0"

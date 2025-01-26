@@ -14,6 +14,7 @@ NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioP
 	: AudioProcessorEditor(&p), audioProcessor(p), keyboardComponent(keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard)
 {
     setSize (880, 380);
+    startTimerHz(30); // Adjust refresh rate as needed
     addAndMakeVisible(keyboardComponent);
 	addAndMakeVisible(waveScreen);
     addAndMakeVisible(leftControls);
@@ -49,7 +50,6 @@ void NewProjectAudioProcessorEditor::paint (juce::Graphics& g)
 
     int lineY = waveScreen.getY() - 10;
     g.drawLine(filterControls.getRight() + 25, lineY, getWidth(), lineY, 2.0f);
-
 }
 
 void NewProjectAudioProcessorEditor::resized()
@@ -103,4 +103,31 @@ void NewProjectAudioProcessorEditor::handleNoteOff(juce::MidiKeyboardState*, int
     // Send a note-off message to the processor
     juce::MidiMessage message = juce::MidiMessage::noteOff(midiChannel, midiNoteNumber);
     audioProcessor.addMidiMessage(message);
+}
+
+void NewProjectAudioProcessorEditor::timerCallback()
+{
+    if (waveScreen.getVisualiserStatus()) {
+        int availableSamples = audioProcessor.fifoIndex.load();
+        if (availableSamples >= audioProcessor.fifoSize)
+        {
+            availableSamples = audioProcessor.fifoSize;
+        }
+
+        if (availableSamples > 0)
+        {
+            juce::AudioBuffer<float> tempBuffer(1, availableSamples);
+
+            for (int i = 0; i < availableSamples; ++i)
+            {
+                tempBuffer.setSample(0, i, audioProcessor.fifoBuffer.getSample(0, i));
+            }
+
+            // Push samples into the visualiser
+            waveScreen.audioVisualiser.pushBuffer(tempBuffer);
+
+            // Reset FIFO index
+            audioProcessor.fifoIndex.store(0);
+        }
+    }
 }

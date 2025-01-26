@@ -9,7 +9,6 @@
 #pragma once
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include "Synth.h"
 
 //==============================================================================
 NewProjectAudioProcessor::NewProjectAudioProcessor()
@@ -33,6 +32,8 @@ NewProjectAudioProcessor::NewProjectAudioProcessor()
 
 	// Load samples
 	synth.loadSamples();
+
+	fifoBuffer.setSize(1, fifoSize);
 }
 
 NewProjectAudioProcessor::~NewProjectAudioProcessor()
@@ -105,8 +106,6 @@ void NewProjectAudioProcessor::changeProgramName(int index, const juce::String& 
 void NewProjectAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
 	synth.setCurrentPlaybackSampleRate(sampleRate);
-
-
 }
 
 void NewProjectAudioProcessor::releaseResources()
@@ -167,11 +166,23 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 	// Process audio
 	synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 
-	// Access audioVisualiser from waveScreen and check if it is enabled
+	// Only send buffer if toggleButton is on
+	/*
 	if (waveScreen.getVisualiserStatus())
 	{
-		waveScreen.pushNextSampleIntoVisualiser(buffer.getReadPointer(0), buffer.getNumChannels());
+		waveScreen.pushBufferIntoVisualiser(buffer);
 	} 
+	*/
+
+	// Write to FIFO buffer
+	const int numSamples = buffer.getNumSamples();
+	const float* writePointer = buffer.getReadPointer(0);
+
+	for (int i = 0; i < numSamples; ++i)
+	{
+		fifoBuffer.setSample(0, fifoIndex % fifoSize, writePointer[i]);
+		fifoIndex++;
+	}
 
 	// No MIDI output
 	midiMessages.clear();
