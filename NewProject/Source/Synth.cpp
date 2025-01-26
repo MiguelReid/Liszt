@@ -10,12 +10,12 @@
 
 #include <JuceHeader.h>
 #include "Synth.h"
-#include "BinaryData.h" // Include the BinaryData header if using embedded resources
+#include "BinaryData.h"
 
 //==============================================================================
 Synth::Synth()
 {
-    formatManager.registerBasicFormats();
+	formatManager.registerFormat(new juce::WavAudioFormat(), true);
     for (int i = 0; i < 8; ++i)
         addVoice(new juce::SamplerVoice());
 }
@@ -33,7 +33,7 @@ void Synth::loadSamples()
 
     for (int midiNote = 21; midiNote <= 108; ++midiNote)
     {
-        juce::String fileName = "_" + juce::String(midiNote) + "_mp3";
+        juce::String fileName = "_" + juce::String(midiNote) + "_wav";
         int size = 0;
 
         // Load the sample data from BinaryData

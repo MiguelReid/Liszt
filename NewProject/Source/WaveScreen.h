@@ -12,6 +12,7 @@
 
 #include <JuceHeader.h>
 #include "ToggleButton.h"
+#include "CircularBuffer.cpp"
 
 //==============================================================================
 /*
@@ -27,13 +28,15 @@ public:
 
     // Method to feed audio samples to the visualiser
     void pushNextSampleIntoVisualiser(const float* samples, int numChannels);
+    static bool getVisualiserStatus() { return isScreenEnabled; }
 
 private:
-    void drawWaveform(juce::Graphics& g);
-
     juce::ToggleButton screenButton;
     std::unique_ptr<ToggleButton> toggleButtonLookAndFeel;
     juce::AudioVisualiserComponent audioVisualiser{ 1 }; // mono audio
+    CircularBuffer<float, 128> circularBuffer;
+
+	static bool isScreenEnabled;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (WaveScreen)
 };

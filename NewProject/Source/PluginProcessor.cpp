@@ -143,7 +143,6 @@ bool NewProjectAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts
 
 void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
-	// PIANO NOTE PLAYING ====================================
 	juce::ScopedNoDenormals noDenormals;
 	auto totalNumInputChannels = getTotalNumInputChannels();
 	auto totalNumOutputChannels = getTotalNumOutputChannels();
@@ -167,19 +166,24 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 
 	// Process audio
 	synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
-	waveScreen.pushNextSampleIntoVisualiser(buffer.getReadPointer(0), buffer.getNumChannels());
+
+	// Access audioVisualiser from waveScreen and check if it is enabled
+	if (waveScreen.getVisualiserStatus())
+	{
+		waveScreen.pushNextSampleIntoVisualiser(buffer.getReadPointer(0), buffer.getNumChannels());
+	} 
 
 	// No MIDI output
 	midiMessages.clear();
-	// ========================================================
-
-	// AUDIO VISUALISER =======================================
 }
+
+
 
 void NewProjectAudioProcessor::addMidiMessage(const juce::MidiMessage& message)
 {
 	const juce::ScopedLock lock(midiBufferLock);
 	midiBuffer.addEvent(message, 0);
+	// Debug the message
 }
 
 //==============================================================================
