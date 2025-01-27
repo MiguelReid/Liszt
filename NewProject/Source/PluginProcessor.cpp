@@ -20,8 +20,7 @@ NewProjectAudioProcessor::NewProjectAudioProcessor()
 #endif
 		.withOutput("Output", juce::AudioChannelSet::stereo(), true)
 #endif
-	),
-	synth()
+	)
 #endif
 {
 	// Add voices to the synthesiser
@@ -34,6 +33,9 @@ NewProjectAudioProcessor::NewProjectAudioProcessor()
 	synth.loadSamples();
 
 	fifoBuffer.setSize(1, fifoSize);
+
+	// Make sure they're the same size
+	midiBuffer.resize(midiFifo.getTotalSize());
 }
 
 NewProjectAudioProcessor::~NewProjectAudioProcessor()
@@ -142,11 +144,10 @@ bool NewProjectAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts
 
 void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
-	juce::ScopedNoDenormals noDenormals;
 	auto totalNumInputChannels = getTotalNumInputChannels();
 	auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-	// Clear any output channels that didn't contain input data
+	// Clear output channels with no input data
 	for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
 	{
 		if (i < buffer.getNumChannels() && buffer.getNumSamples() > 0)
@@ -155,24 +156,29 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 		}
 	}
 
-	// Merge custom MIDI messages into incoming buffer
-	if (!midiBuffer.isEmpty())
+	// Merge custom MIDI messages into the incoming MIDI buffer
+	int numToRead = midiFifo.getNumReady();
+	int start1, size1, start2, size2;
+	midiFifo.prepareToRead(numToRead, start1, size1, start2, size2);
+
+	if (size1 > 0)
 	{
-		const juce::ScopedLock lock(midiBufferLock);
-		midiMessages.addEvents(midiBuffer, 0, buffer.getNumSamples(), 0);
-		midiBuffer.clear(); // Clear the MIDI buffer after merging
+		for (int i = 0; i < size1; ++i)
+			midiMessages.addEvent(midiBuffer[start1 + i], midiBuffer[start1 + i].getTimeStamp());
+
+		midiFifo.finishedRead(size1);
+	}
+
+	if (size2 > 0)
+	{
+		for (int i = 0; i < size2; ++i)
+			midiMessages.addEvent(midiBuffer[start2 + i], midiBuffer[start2 + i].getTimeStamp());
+
+		midiFifo.finishedRead(size2);
 	}
 
 	// Process audio
 	synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
-
-	// Only send buffer if toggleButton is on
-	/*
-	if (waveScreen.getVisualiserStatus())
-	{
-		waveScreen.pushBufferIntoVisualiser(buffer);
-	} 
-	*/
 
 	// Write to FIFO buffer
 	const int numSamples = buffer.getNumSamples();
@@ -192,9 +198,30 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 
 void NewProjectAudioProcessor::addMidiMessage(const juce::MidiMessage& message)
 {
-	const juce::ScopedLock lock(midiBufferLock);
-	midiBuffer.addEvent(message, 0);
-	// Debug the message
+	int start1, size1, start2, size2;
+	midiFifo.prepareToWrite(1, start1, size1, start2, size2);
+
+	bool written = false;
+
+	if (size1 > 0)
+	{
+		midiBuffer[start1] = message;
+		midiFifo.finishedWrite(1);
+		written = true;
+	}
+	else if (size2 > 0)
+	{
+		midiBuffer[start2] = message;
+		midiFifo.finishedWrite(1);
+		written = true;
+	}
+
+	// Optionally handle the case where the FIFO is full
+	if (!written)
+	{
+		// Handle buffer overflow if necessary
+		// For example, you might log a warning or discard the message
+	}
 }
 
 //==============================================================================

@@ -67,8 +67,8 @@ public:
 private:
     //==============================================================================
     Synth synth;
-    juce::MidiBuffer midiBuffer;
-    juce::CriticalSection midiBufferLock;
+    juce::AbstractFifo midiFifo{ 1024 }; // Size the FIFO as needed
+    std::vector<juce::MidiMessage> midiBuffer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NewProjectAudioProcessor)
 };

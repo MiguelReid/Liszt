@@ -25,10 +25,9 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
 
-    // Method to feed audio samples to the visualiser
+    // Visualiser
     void pushBufferIntoVisualiser(const juce::AudioBuffer<float>& buffer);
     static bool getVisualiserStatus() { return isScreenEnabled; }
-
     juce::AudioVisualiserComponent audioVisualiser{ 1 }; // mono audio
 
 private:
