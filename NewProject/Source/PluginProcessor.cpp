@@ -161,6 +161,7 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 	int start1, size1, start2, size2;
 	midiFifo.prepareToRead(numToRead, start1, size1, start2, size2);
 
+	// First Block
 	if (size1 > 0)
 	{
 		for (int i = 0; i < size1; ++i)
@@ -169,6 +170,7 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 		midiFifo.finishedRead(size1);
 	}
 
+	// Second Block
 	if (size2 > 0)
 	{
 		for (int i = 0; i < size2; ++i)
