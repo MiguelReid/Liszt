@@ -25,13 +25,15 @@ void Synth::loadSamples()
     clearSounds();
 
     // Print out all available resource names
+    /*
     DBG("CHECK Available resources:");
     for (int i = 0; i < BinaryData::namedResourceListSize; ++i)
     {
         DBG(BinaryData::namedResourceList[i]);
     }
+    */
 
-    for (int midiNote = 21; midiNote <= 108; ++midiNote)
+    for (int midiNote = 24; midiNote <= 101; ++midiNote)
     {
         juce::String fileName = "_" + juce::String(midiNote) + "_wav";
         int size = 0;

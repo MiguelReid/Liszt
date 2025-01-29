@@ -22,10 +22,8 @@ NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioP
     addAndMakeVisible(oscillatorControls);
 	addAndMakeVisible(filterControls);
 
-    // Keyboard Settings
-    int startNote = 36; // 60 is middle C
-    int endNote = startNote + 78;
-    keyboardComponent.setAvailableRange(startNote, endNote);
+    // C0 to F6
+    keyboardComponent.setAvailableRange(24, 101);
     keyboardState.addListener(this);
 }
 
@@ -96,6 +94,7 @@ void NewProjectAudioProcessorEditor::handleNoteOn(juce::MidiKeyboardState*, int 
     // Send a note-on message to the processor
     juce::MidiMessage message = juce::MidiMessage::noteOn(midiChannel, midiNoteNumber, velocity);
     audioProcessor.addMidiMessage(message);
+	DBG("Note On: " << midiNoteNumber);
 }
 
 void NewProjectAudioProcessorEditor::handleNoteOff(juce::MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity)
