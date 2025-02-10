@@ -93,23 +93,27 @@
       <FILE id="JUHqxN" name="25.wav" compile="0" resource="1" file="../../../samples2/25.wav"/>
     </GROUP>
     <GROUP id="{0DE48964-0C34-297E-506C-5D9552E4C577}" name="Source">
-      <FILE id="imz0Km" name="FilterControls.cpp" compile="1" resource="0"
-            file="Source/FilterControls.cpp"/>
-      <FILE id="uFkwhk" name="FilterControls.h" compile="0" resource="0"
-            file="Source/FilterControls.h"/>
-      <FILE id="hOKQMs" name="OscillatorControls.cpp" compile="1" resource="0"
-            file="Source/OscillatorControls.cpp"/>
-      <FILE id="pkdE2C" name="WaveScreen.cpp" compile="1" resource="0" file="Source/WaveScreen.cpp"/>
-      <FILE id="Ld2ec1" name="WaveScreen.h" compile="0" resource="0" file="Source/WaveScreen.h"/>
-      <FILE id="CMVIBa" name="OscillatorControls.h" compile="0" resource="0"
-            file="Source/OscillatorControls.h"/>
-      <FILE id="sk1b9D" name="ReverbControls.cpp" compile="1" resource="0"
-            file="Source/ReverbControls.cpp"/>
-      <FILE id="qdmB2q" name="ReverbControls.h" compile="0" resource="0"
-            file="Source/ReverbControls.h"/>
-      <FILE id="d4eQFA" name="LeftControls.cpp" compile="1" resource="0"
-            file="Source/LeftControls.cpp"/>
-      <FILE id="LKBzOc" name="LeftControls.h" compile="0" resource="0" file="Source/LeftControls.h"/>
+      <FILE id="yQkZep" name="CustomSamplerVoice.h" compile="1" resource="0"
+            file="Source/CustomSamplerVoice.h"/>
+      <GROUP id="{5BB37783-4C61-8178-D376-DF60AAB92159}" name="Controls">
+        <FILE id="imz0Km" name="FilterControls.cpp" compile="1" resource="0"
+              file="Source/FilterControls.cpp"/>
+        <FILE id="uFkwhk" name="FilterControls.h" compile="0" resource="0"
+              file="Source/FilterControls.h"/>
+        <FILE id="hOKQMs" name="OscillatorControls.cpp" compile="1" resource="0"
+              file="Source/OscillatorControls.cpp"/>
+        <FILE id="pkdE2C" name="WaveScreen.cpp" compile="1" resource="0" file="Source/WaveScreen.cpp"/>
+        <FILE id="Ld2ec1" name="WaveScreen.h" compile="0" resource="0" file="Source/WaveScreen.h"/>
+        <FILE id="CMVIBa" name="OscillatorControls.h" compile="0" resource="0"
+              file="Source/OscillatorControls.h"/>
+        <FILE id="sk1b9D" name="ReverbControls.cpp" compile="1" resource="0"
+              file="Source/ReverbControls.cpp"/>
+        <FILE id="qdmB2q" name="ReverbControls.h" compile="0" resource="0"
+              file="Source/ReverbControls.h"/>
+        <FILE id="d4eQFA" name="LeftControls.cpp" compile="1" resource="0"
+              file="Source/LeftControls.cpp"/>
+        <FILE id="LKBzOc" name="LeftControls.h" compile="0" resource="0" file="Source/LeftControls.h"/>
+      </GROUP>
       <FILE id="MhuN9m" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="JhAaad" name="PluginProcessor.h" compile="0" resource="0"

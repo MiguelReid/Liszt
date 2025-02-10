@@ -11,6 +11,8 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "BinaryData.h"
+#include "CustomSamplerVoice.h"
 
 class Synth : public juce::Synthesiser
 {

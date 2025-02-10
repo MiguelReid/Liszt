@@ -8,30 +8,20 @@
   ==============================================================================
 */
 
-#include <JuceHeader.h>
 #include "Synth.h"
-#include "BinaryData.h"
 
 //==============================================================================
 Synth::Synth()
 {
 	formatManager.registerFormat(new juce::WavAudioFormat(), true);
-    for (int i = 0; i < 8; ++i)
-        addVoice(new juce::SamplerVoice());
+    for (int i = 0; i < 16; ++i) {
+        addVoice(new CustomSamplerVoice());
+    }
 }
 
 void Synth::loadSamples()
 {
     clearSounds();
-
-    // Print out all available resource names
-    /*
-    DBG("CHECK Available resources:");
-    for (int i = 0; i < BinaryData::namedResourceListSize; ++i)
-    {
-        DBG(BinaryData::namedResourceList[i]);
-    }
-    */
 
     for (int midiNote = 24; midiNote <= 101; ++midiNote)
     {
@@ -45,9 +35,8 @@ void Synth::loadSamples()
             auto inputStream = std::make_unique<juce::MemoryInputStream>(data, static_cast<size_t>(size), false);
 
             // Create an AudioFormatReader for the sample data
-            auto formatReader = std::unique_ptr<juce::AudioFormatReader>(formatManager.createReaderFor(std::move(inputStream)));
 
-            if (formatReader != nullptr)
+            if (auto* formatReader = formatManager.createReaderFor(std::move(inputStream)))
             {
                 // Create a BigInteger and set the bit for the current MIDI note
                 juce::BigInteger allNotes;
@@ -59,11 +48,11 @@ void Synth::loadSamples()
                     *formatReader,
                     allNotes,
                     midiNote,
-                    0.1,   // Attack time
-                    0.1,   // Release time
+                    0.0,   // Attack time
+                    0.0,   // Release time
                     10.0)); // Maximum sample length
-
-                // The formatReader will be automatically deleted when it goes out of scope
+                
+                delete formatReader;
             }
             else
             {
