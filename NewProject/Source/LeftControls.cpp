@@ -52,6 +52,9 @@ LeftControls::LeftControls(NewProjectAudioProcessor& proc) : processorRef(proc)
     addAndMakeVisible(gainSlider);
 
 	// ==========================
+
+	gainSlider.setSkewFactor(0.5f);
+
     gainSlider.onValueChange = [this]() {
 		processorRef.setGain(gainSlider.getValue());
     };
