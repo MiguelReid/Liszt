@@ -51,5 +51,6 @@ private:
     std::unique_ptr<Knob> knobLookAndFeel;
     std::unique_ptr<ToggleButton> toggleButtonLookAndFeel;
 
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FilterControls)
 };

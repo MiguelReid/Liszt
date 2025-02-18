@@ -11,7 +11,7 @@
 
 //==============================================================================
 NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioProcessor& p)
-	: AudioProcessorEditor(&p), audioProcessor(p), keyboardComponent(keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard)
+	: AudioProcessorEditor(&p), audioProcessor(p), keyboardComponent(keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard), leftControls(p), reverbControls(), oscillatorControls(), filterControls(), waveScreen()
 {
     setSize (880, 380);
     startTimerHz(30); // Adjust refresh rate as needed

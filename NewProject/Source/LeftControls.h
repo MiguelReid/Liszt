@@ -13,6 +13,7 @@
 #include <JuceHeader.h>
 #include "Knob.h"
 #include "ToggleButton.h"
+#include "PluginProcessor.h"
 
 //==============================================================================
 /*
@@ -20,7 +21,7 @@
 class LeftControls  : public juce::Component
 {
 public:
-    LeftControls();
+    LeftControls(NewProjectAudioProcessor& proc);
     ~LeftControls() override;
 
     void paint (juce::Graphics&) override;
@@ -40,4 +41,5 @@ private:
     std::unique_ptr<Knob> knobLookAndFeel;
     std::unique_ptr<ToggleButton> toggleButtonLookAndFeel;
 
+    NewProjectAudioProcessor& processorRef;
 };

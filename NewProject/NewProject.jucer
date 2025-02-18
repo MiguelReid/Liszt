@@ -4,14 +4,6 @@
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn"
               pluginFormats="buildVST3" includeBinaryInJuceHeader="1" binaryDataNamespace="BinaryData">
   <MAINGROUP id="h9bKiU" name="Liszt">
-    <GROUP id="{4892159E-314E-9763-9FC0-6423C7B6C34B}" name="DSP"/>
-    <GROUP id="{C5E3E42E-845E-92E2-8096-5396AAE29B3C}" name="Frontend">
-      <FILE id="yCkANW" name="Knob.cpp" compile="1" resource="0" file="Source/Knob.cpp"/>
-      <FILE id="qepLJZ" name="Knob.h" compile="0" resource="0" file="Source/Knob.h"/>
-      <FILE id="S8lNT8" name="ToggleButton.cpp" compile="1" resource="0"
-            file="Source/ToggleButton.cpp"/>
-      <FILE id="TEFUdo" name="ToggleButton.h" compile="0" resource="0" file="Source/ToggleButton.h"/>
-    </GROUP>
     <GROUP id="{C0AC9768-3D81-3C38-E340-32DBE9DBAA2C}" name="Resources">
       <FILE id="yRi24x" name="24.wav" compile="0" resource="1" file="../../../samples2/24.wav"/>
       <FILE id="MkKbDz" name="101.wav" compile="0" resource="1" file="../../../samples2/101.wav"/>
@@ -93,29 +85,40 @@
       <FILE id="JUHqxN" name="25.wav" compile="0" resource="1" file="../../../samples2/25.wav"/>
     </GROUP>
     <GROUP id="{0DE48964-0C34-297E-506C-5D9552E4C577}" name="Source">
+      <GROUP id="{C5E3E42E-845E-92E2-8096-5396AAE29B3C}" name="Frontend">
+        <GROUP id="{5BB37783-4C61-8178-D376-DF60AAB92159}" name="Controls">
+          <FILE id="imz0Km" name="FilterControls.cpp" compile="1" resource="0"
+                file="Source/FilterControls.cpp"/>
+          <FILE id="uFkwhk" name="FilterControls.h" compile="0" resource="0"
+                file="Source/FilterControls.h"/>
+          <FILE id="hOKQMs" name="OscillatorControls.cpp" compile="1" resource="0"
+                file="Source/OscillatorControls.cpp"/>
+          <FILE id="pkdE2C" name="WaveScreen.cpp" compile="1" resource="0" file="Source/WaveScreen.cpp"/>
+          <FILE id="Ld2ec1" name="WaveScreen.h" compile="0" resource="0" file="Source/WaveScreen.h"/>
+          <FILE id="CMVIBa" name="OscillatorControls.h" compile="0" resource="0"
+                file="Source/OscillatorControls.h"/>
+          <FILE id="sk1b9D" name="ReverbControls.cpp" compile="1" resource="0"
+                file="Source/ReverbControls.cpp"/>
+          <FILE id="qdmB2q" name="ReverbControls.h" compile="0" resource="0"
+                file="Source/ReverbControls.h"/>
+          <FILE id="d4eQFA" name="LeftControls.cpp" compile="1" resource="0"
+                file="Source/LeftControls.cpp"/>
+          <FILE id="LKBzOc" name="LeftControls.h" compile="0" resource="0" file="Source/LeftControls.h"/>
+        </GROUP>
+        <FILE id="yCkANW" name="Knob.cpp" compile="1" resource="0" file="Source/Knob.cpp"/>
+        <FILE id="qepLJZ" name="Knob.h" compile="0" resource="0" file="Source/Knob.h"/>
+        <FILE id="S8lNT8" name="ToggleButton.cpp" compile="1" resource="0"
+              file="Source/ToggleButton.cpp"/>
+        <FILE id="TEFUdo" name="ToggleButton.h" compile="0" resource="0" file="Source/ToggleButton.h"/>
+      </GROUP>
+      <GROUP id="{4892159E-314E-9763-9FC0-6423C7B6C34B}" name="DSP">
+        <FILE id="pZLWx2" name="FDNReverb.cpp" compile="1" resource="0" file="Source/FDNReverb.cpp"/>
+        <FILE id="n3CSLg" name="FDNReverb.h" compile="0" resource="0" file="Source/FDNReverb.h"/>
+      </GROUP>
       <FILE id="uSltEe" name="CustomSamplerVoice.cpp" compile="1" resource="0"
             file="Source/CustomSamplerVoice.cpp"/>
       <FILE id="yQkZep" name="CustomSamplerVoice.h" compile="1" resource="0"
             file="Source/CustomSamplerVoice.h"/>
-      <GROUP id="{5BB37783-4C61-8178-D376-DF60AAB92159}" name="Controls">
-        <FILE id="imz0Km" name="FilterControls.cpp" compile="1" resource="0"
-              file="Source/FilterControls.cpp"/>
-        <FILE id="uFkwhk" name="FilterControls.h" compile="0" resource="0"
-              file="Source/FilterControls.h"/>
-        <FILE id="hOKQMs" name="OscillatorControls.cpp" compile="1" resource="0"
-              file="Source/OscillatorControls.cpp"/>
-        <FILE id="pkdE2C" name="WaveScreen.cpp" compile="1" resource="0" file="Source/WaveScreen.cpp"/>
-        <FILE id="Ld2ec1" name="WaveScreen.h" compile="0" resource="0" file="Source/WaveScreen.h"/>
-        <FILE id="CMVIBa" name="OscillatorControls.h" compile="0" resource="0"
-              file="Source/OscillatorControls.h"/>
-        <FILE id="sk1b9D" name="ReverbControls.cpp" compile="1" resource="0"
-              file="Source/ReverbControls.cpp"/>
-        <FILE id="qdmB2q" name="ReverbControls.h" compile="0" resource="0"
-              file="Source/ReverbControls.h"/>
-        <FILE id="d4eQFA" name="LeftControls.cpp" compile="1" resource="0"
-              file="Source/LeftControls.cpp"/>
-        <FILE id="LKBzOc" name="LeftControls.h" compile="0" resource="0" file="Source/LeftControls.h"/>
-      </GROUP>
       <FILE id="MhuN9m" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="JhAaad" name="PluginProcessor.h" compile="0" resource="0"

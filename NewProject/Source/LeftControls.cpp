@@ -11,7 +11,7 @@
 #include "LeftControls.h"
 
 //==============================================================================
-LeftControls::LeftControls()
+LeftControls::LeftControls(NewProjectAudioProcessor& proc) : processorRef(proc)
 {
     // Initialize LookAndFeel
     toggleButtonLookAndFeel = std::make_unique<ToggleButton>();
@@ -41,7 +41,7 @@ LeftControls::LeftControls()
     arpeggiatorLabel.setJustificationType(juce::Justification::centredTop);
     arpeggiatorLabel.setColour(juce::Label::textColourId, juce::Colours::white);
 
-    // --------------------------
+	// ==========================
 
     addAndMakeVisible(pitchBendLabel);
     addAndMakeVisible(gainLabel);
@@ -50,6 +50,11 @@ LeftControls::LeftControls()
     addAndMakeVisible(arpeggiatorButton);
     addAndMakeVisible(pitchBendSlider);
     addAndMakeVisible(gainSlider);
+
+	// ==========================
+    gainSlider.onValueChange = [this]() {
+		processorRef.setGain(gainSlider.getValue());
+    };
 }
 
 LeftControls::~LeftControls()
@@ -60,10 +65,10 @@ LeftControls::~LeftControls()
 
 void LeftControls::paint (juce::Graphics& g)
 {
-    // Fondo negro
+    // Black Background
     g.fillAll(juce::Colours::black);
 
-    // Ar un gradiente para simular un acabado de madera
+	// Wood-like Gradient
     juce::ColourGradient gradient(juce::Colour::fromRGB(30, 30, 30), 0, 0,
         juce::Colour::fromRGB(60, 60, 60), getWidth(), getHeight(), false);
     g.setGradientFill(gradient);
