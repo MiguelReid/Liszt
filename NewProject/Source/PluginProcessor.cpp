@@ -195,6 +195,9 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 	// No MIDI output
 	midiMessages.clear();
 
+	// ================================================================
+
+	// Gain Control
 	auto localGain = getGain(); // convenience
 
 	for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
@@ -205,6 +208,10 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 	}
 
 	// Reverb
+	// DEbug the reverbStatus
+	if (reverbControls.getReverbStatus()) {
+		fdnReverb.reverb();
+	}
 }
 
 

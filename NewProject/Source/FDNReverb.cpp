@@ -9,3 +9,14 @@
 */
 
 #include "FDNReverb.h"
+
+FDNReverb::FDNReverb(){
+
+}
+
+FDNReverb::~FDNReverb() {
+}
+
+void FDNReverb::reverb() {
+
+}

@@ -26,6 +26,8 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
 
+    static bool getReverbStatus() { return isReverbEnabled; }
+
 private:
     juce::Label reverbLabel;
     juce::Slider predelayKnob;

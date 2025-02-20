@@ -11,6 +11,8 @@
 #include "Synth.h"
 #include "WaveScreen.h"
 #include <juce_audio_basics/juce_audio_basics.h>
+#include "ReverbControls.h"
+#include "FDNReverb.h"
 
 //==============================================================================
 /**
@@ -71,6 +73,8 @@ public:
 private:
     //==============================================================================
     Synth synth;
+    FDNReverb fdnReverb;
+	ReverbControls reverbControls;
     juce::AbstractFifo midiFifo{ 1024 }; // Size the FIFO as needed
     std::vector<juce::MidiMessage> midiBuffer;
     float gain = 1.0f;

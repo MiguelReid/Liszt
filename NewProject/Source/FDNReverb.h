@@ -9,3 +9,16 @@
 */
 
 #pragma once
+#include <JuceHeader.h>
+#include "ReverbControls.h"
+
+class FDNReverb
+{
+public:
+    FDNReverb();
+    ~FDNReverb();
+
+    void FDNReverb::reverb();
+
+private:
+};
