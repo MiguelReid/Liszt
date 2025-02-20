@@ -203,6 +203,8 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 		for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
 			channelData[sample] *= localGain;
 	}
+
+	// Reverb
 }
 
 

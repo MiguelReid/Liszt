@@ -43,5 +43,7 @@ private:
     std::unique_ptr<ToggleButton> toggleButtonLookAndFeel;
     std::unique_ptr<Knob> knobLookAndFeel;
 
+    static bool isReverbEnabled;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ReverbControls)
 };

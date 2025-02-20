@@ -10,6 +10,8 @@
 
 #include "ReverbControls.h"
 
+bool ReverbControls::isReverbEnabled = false;
+
 //==============================================================================
 ReverbControls::ReverbControls()
 {
@@ -69,6 +71,12 @@ ReverbControls::ReverbControls()
     dryWetKnob.setLookAndFeel(knobLookAndFeel.get());
     diffusionKnob.setLookAndFeel(knobLookAndFeel.get());
 	reverbButton.setLookAndFeel(toggleButtonLookAndFeel.get());
+
+    // Check Toggle State =========================================
+    reverbButton.onClick = [this]()
+        {
+            isReverbEnabled = reverbButton.getToggleState();
+        };
 }
 
 ReverbControls::~ReverbControls()
