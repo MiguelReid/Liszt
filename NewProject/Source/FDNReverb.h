@@ -18,7 +18,7 @@ public:
     FDNReverb();
     ~FDNReverb();
 
-    void FDNReverb::reverb();
+    void FDNReverb::reverb(double predelay, double decay, double diffusion, double dryWet);
 
 private:
 };

@@ -17,6 +17,6 @@ FDNReverb::FDNReverb(){
 FDNReverb::~FDNReverb() {
 }
 
-void FDNReverb::reverb() {
-
+void FDNReverb::reverb(double predelay, double decay, double diffusion, double dryWet) {
+	DBG("Values: " << predelay << " " << decay << " " << diffusion << " " << dryWet);
 }

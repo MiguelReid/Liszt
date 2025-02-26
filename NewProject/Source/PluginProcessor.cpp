@@ -210,7 +210,17 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 	// Reverb
 	// DEbug the reverbStatus
 	if (reverbControls.getReverbStatus()) {
-		fdnReverb.reverb();
+		// Get reverb values
+		auto predelay = reverbControls.getPredelayValue();
+		auto decay = reverbControls.getDecayValue();
+		auto dryWet = reverbControls.getDryWetValue();	
+		auto diffusion = reverbControls.getDiffusionValue();
+
+		// Print values
+		DBG("Predelay: " << predelay);
+		DBG("Decay: " << decay);
+		DBG("Dry/Wet: " << dryWet);
+		DBG("Diffusion: " << diffusion);
 	}
 }
 

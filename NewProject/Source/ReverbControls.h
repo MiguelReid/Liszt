@@ -17,7 +17,7 @@
 //==============================================================================
 /*
 */
-class ReverbControls  : public juce::Component
+class ReverbControls : public juce::Component, public juce::Slider::Listener
 {
 public:
     ReverbControls();
@@ -27,6 +27,15 @@ public:
     void resized() override;
 
     static bool getReverbStatus() { return isReverbEnabled; }
+
+    // Methods to get knob values
+    float getPredelayValue() const { return predelayKnob.getValue(); }
+    float getDecayValue() const { return decayKnob.getValue(); }
+    float getDryWetValue() const { return dryWetKnob.getValue(); }
+    float getDiffusionValue() const { return diffusionKnob.getValue(); }
+
+    // Slider listener
+    void sliderValueChanged(juce::Slider* slider) override;
 
 private:
     juce::Label reverbLabel;
