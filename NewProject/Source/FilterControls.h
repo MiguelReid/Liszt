@@ -20,13 +20,24 @@
 class FilterControls  : public juce::Component
 {
 public:
-    FilterControls();
+    FilterControls(juce::AudioProcessorValueTreeState& apvts);
     ~FilterControls() override;
 
     void paint (juce::Graphics&) override;
     void resized() override;
 
 private:
+    // APVTS Attachments
+    std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> highCutoffAttachment;
+    std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> highSlopeAttachment;
+    std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> highEmphasisAttachment;
+    std::unique_ptr <juce::AudioProcessorValueTreeState::ButtonAttachment> highToggleAttachment;
+
+    std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> lowCutoffAttachment;
+    std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> lowSlopeAttachment;
+    std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> lowEmphasisAttachment;
+    std::unique_ptr <juce::AudioProcessorValueTreeState::ButtonAttachment> lowToggleAttachment;
+
     // High-Pass Elements
     juce::Label highPassLabel;
     juce::ToggleButton highToggle;
@@ -51,6 +62,7 @@ private:
     std::unique_ptr<Knob> knobLookAndFeel;
     std::unique_ptr<ToggleButton> toggleButtonLookAndFeel;
 
+    juce::AudioProcessorValueTreeState& apvts;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FilterControls)
 };

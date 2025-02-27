@@ -10,11 +10,8 @@
 
 #include "ReverbControls.h"
 
-bool ReverbControls::isReverbEnabled = false;
-
 //==============================================================================
-ReverbControls::ReverbControls()
-{
+ReverbControls::ReverbControls(juce::AudioProcessorValueTreeState& apvts): apvts(apvts) {
     // Initialize and configure the label
     reverbLabel.setText("Reverb", juce::dontSendNotification);
     reverbLabel.setJustificationType(juce::Justification::centred);
@@ -72,62 +69,20 @@ ReverbControls::ReverbControls()
     diffusionKnob.setLookAndFeel(knobLookAndFeel.get());
 	reverbButton.setLookAndFeel(toggleButtonLookAndFeel.get());
 
-    // Check Toggle State =========================================
+	// AudioProcessorValueTreeState ===============================
+	predelayAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(apvts, "PREDELAY", predelayKnob);
 
-    reverbButton.onClick = [this]()
-        {
-            isReverbEnabled = reverbButton.getToggleState();
-        };
+    decayAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+        apvts, "DECAY", decayKnob);
 
-	// Default Values =============================================
+    dryWetAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+        apvts, "DRYWET", dryWetKnob);
 
-    predelayKnob.setRange(0.0, 0.1, 0.001);
-    predelayKnob.setValue(0.0); // Start with no predelay
+    diffusionAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+        apvts, "DIFFUSION", diffusionKnob);
 
-    // Decay Time in seconds: 0.5 to 10.0
-    decayKnob.setRange(0.5, 10.0, 0.1);
-    decayKnob.setValue(0.5); // Minimum decay (reverb off or minimal)
-
-    // Dry/Wet mix: 0.0 (dry) to 1.0 (wet)
-    dryWetKnob.setRange(0.0, 1.0, 0.01);
-    dryWetKnob.setValue(0.0); // Initially dry
-
-    // Diffusion: 0.0 (minimal) to 1.0 (maximal)
-    diffusionKnob.setRange(0.0, 1.0, 0.01);
-    diffusionKnob.setValue(0.0); // Initially minimal diffusion
-
-	// Add listeners =============================================
-	predelayKnob.addListener(this);
-	decayKnob.addListener(this);
-	dryWetKnob.addListener(this);
-	diffusionKnob.addListener(this);
-}
-
-void ReverbControls::sliderValueChanged(juce::Slider* slider)
-{
-    if (slider == &predelayKnob)
-    {
-		// Set te value of the predelay
-		predelayKnob.setValue(slider->getValue());
-
-
-        //processorRef.setPredelay(slider->getValue());
-    }
-    else if (slider == &decayKnob)
-    {
-		decayKnob.setValue(slider->getValue());
-        //processorRef.setDecay(slider->getValue());
-    }
-    else if (slider == &dryWetKnob)
-    {
-		dryWetKnob.setValue(slider->getValue());
-        //processorRef.setDryWet(slider->getValue());
-    }
-    else if (slider == &diffusionKnob)
-    {
-		diffusionKnob.setValue(slider->getValue());
-        //processorRef.setDiffusion(slider->getValue());
-    }
+    reverbEnabledAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(
+        apvts, "REVERB_ENABLED", reverbButton);
 }
 
 

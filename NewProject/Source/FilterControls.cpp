@@ -12,8 +12,7 @@
 #include "FilterControls.h"
 
 //==============================================================================
-FilterControls::FilterControls()
-{
+FilterControls::FilterControls(juce::AudioProcessorValueTreeState& apvts) : apvts(apvts) {
 	// Custom LookAndFeel
     toggleButtonLookAndFeel = std::make_unique<ToggleButton>();
     knobLookAndFeel = std::make_unique<Knob>();
@@ -60,7 +59,7 @@ FilterControls::FilterControls()
     highEmphasisLabel.setColour(juce::Label::textColourId, juce::Colours::white);
     addAndMakeVisible(highEmphasisLabel);
 
-    // LOW PASS -----------------------------------------------------------------
+    // LOW PASS =================================================================
 
     // Low-Pass Label
     lowPassLabel.setText("Low-Pass", juce::dontSendNotification);
@@ -103,6 +102,24 @@ FilterControls::FilterControls()
     lowEmphasisLabel.setFont(12.0f);
     lowEmphasisLabel.setColour(juce::Label::textColourId, juce::Colours::white);
     addAndMakeVisible(lowEmphasisLabel);
+
+	// AudioProcessorValueTreeState ===============================
+	highCutoffAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+		apvts, "HIGH_CUTOFF", highCutoffKnob);
+	highSlopeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+		apvts, "HIGH_SLOPE", highSlopeKnob);
+	highEmphasisAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+		apvts, "HIGH_EMPHASIS", highEmphasisKnob);
+	lowCutoffAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+		apvts, "LOW_CUTOFF", lowCutoffKnob);
+	lowSlopeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+		apvts, "LOW_SLOPE", lowSlopeKnob);
+	lowEmphasisAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+		apvts, "LOW_EMPHASIS", lowEmphasisKnob);
+	highToggleAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(
+		apvts, "HIGH_ENABLED", highToggle);
+	lowToggleAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(
+		apvts, "LOW_ENABLED", lowToggle);
 }
 
 FilterControls::~FilterControls()

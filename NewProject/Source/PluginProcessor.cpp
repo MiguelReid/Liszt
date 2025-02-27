@@ -20,7 +20,8 @@ NewProjectAudioProcessor::NewProjectAudioProcessor()
 #endif
 		.withOutput("Output", juce::AudioChannelSet::stereo(), true)
 #endif
-	)
+	),
+	apvts(*this, nullptr, "Parameters", createParameters())
 #endif
 {
 	// Add voices to the synthesiser
@@ -144,6 +145,7 @@ bool NewProjectAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts
 
 void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
+	// NO CONSOLE OUT IN PROCESS BLOCK
 	auto totalNumInputChannels = getTotalNumInputChannels();
 	auto totalNumOutputChannels = getTotalNumOutputChannels();
 
@@ -198,7 +200,7 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 	// ================================================================
 
 	// Gain Control
-	auto localGain = getGain(); // convenience
+	auto localGain = apvts.getRawParameterValue("GAIN")->load();
 
 	for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
 	{
@@ -207,20 +209,23 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 			channelData[sample] *= localGain;
 	}
 
-	// Reverb
-	// DEbug the reverbStatus
-	if (reverbControls.getReverbStatus()) {
-		// Get reverb values
-		auto predelay = reverbControls.getPredelayValue();
-		auto decay = reverbControls.getDecayValue();
-		auto dryWet = reverbControls.getDryWetValue();	
-		auto diffusion = reverbControls.getDiffusionValue();
-
-		// Print values
-		DBG("Predelay: " << predelay);
-		DBG("Decay: " << decay);
-		DBG("Dry/Wet: " << dryWet);
-		DBG("Diffusion: " << diffusion);
+	if (auto* reverbEnabled = apvts.getRawParameterValue("REVERB_ENABLED"))
+	{
+		if (reverbEnabled->load()) // Check if it's actually enabled
+		{
+			// Get all reverb parameters
+			auto* predelay = apvts.getRawParameterValue("PREDELAY");
+			auto* decay = apvts.getRawParameterValue("DECAY");
+			auto* drywet = apvts.getRawParameterValue("DRYWET");
+			auto* diffusion = apvts.getRawParameterValue("DIFFUSION");
+			/*
+			DBG("Reverb Parameters:");
+			DBG("Predelay: " << predelay->load());
+			DBG("Decay: " << decay->load());
+			DBG("Dry/Wet: " << drywet->load());
+			DBG("Diffusion: " << diffusion->load());
+			*/
+		}
 	}
 }
 
@@ -253,6 +258,68 @@ void NewProjectAudioProcessor::addMidiMessage(const juce::MidiMessage& message)
 		// For example, you might log a warning or discard the message
 	}
 }
+
+juce::AudioProcessorValueTreeState::ParameterLayout NewProjectAudioProcessor::createParameters()
+{
+	juce::AudioProcessorValueTreeState::ParameterLayout layout;
+	std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
+
+	// Left Controls Parameters
+	params.push_back(std::make_unique<juce::AudioParameterFloat>(
+		"GAIN", "Gain", 0.0f, 1.0f, 0.5f));
+	params.push_back(std::make_unique<juce::AudioParameterFloat>(
+		"PITCH_BEND", "Pitch Bend", -2.0f, 2.0f, 0.0f));
+	params.push_back(std::make_unique<juce::AudioParameterBool>(
+		"ARPEGGIATOR", "Arpeggiator", false));
+
+	// Reverb Parameters
+	params.push_back(std::make_unique<juce::AudioParameterFloat>(
+		"PREDELAY", "Predelay", 0.0f, 0.1f, 0.0f));
+	params.push_back(std::make_unique<juce::AudioParameterFloat>(
+		"DECAY", "Decay", 0.5f, 10.0f, 0.5f));
+	params.push_back(std::make_unique<juce::AudioParameterFloat>(
+		"DRYWET", "Dry/Wet", 0.0f, 1.0f, 0.0f));
+	params.push_back(std::make_unique<juce::AudioParameterFloat>(
+		"DIFFUSION", "Diffusion", 0.0f, 1.0f, 0.0f));
+	params.push_back(std::make_unique<juce::AudioParameterBool>(
+		"REVERB_ENABLED", "Reverb Enabled", false));
+
+	// Oscillator Parameters
+	params.push_back(std::make_unique<juce::AudioParameterFloat>(
+		"OSC1_RANGE", "Osc 1 Range", 0.0f, 1.0f, 0.5f));
+	params.push_back(std::make_unique<juce::AudioParameterFloat>(
+		"OSC1_SHAPE", "Osc 1 Shape", 0.0f, 2.0f, 0.0f));
+	params.push_back(std::make_unique<juce::AudioParameterFloat>(
+		"OSC2_RANGE", "Osc 2 Range", 0.0f, 1.0f, 0.5f));
+	params.push_back(std::make_unique<juce::AudioParameterFloat>(
+		"OSC2_SHAPE", "Osc 2 Shape", 0.0f, 2.0f, 0.0f));
+	params.push_back(std::make_unique<juce::AudioParameterBool>(
+		"OSC1_ENABLED", "Osc 1 Enabled", false));
+	params.push_back(std::make_unique<juce::AudioParameterBool>(
+		"OSC2_ENABLED", "Osc 2 Enabled", false));
+
+	// Filter Parameters
+	params.push_back(std::make_unique<juce::AudioParameterFloat>(
+		"HIGH_CUTOFF", "High Cutoff", 20.0f, 20000.0f, 20000.0f));
+	params.push_back(std::make_unique<juce::AudioParameterFloat>(
+		"HIGH_SLOPE", "High Slope", 0.0f, 1.0f, 0.5f));
+	params.push_back(std::make_unique<juce::AudioParameterFloat>(
+		"HIGH_EMPHASIS", "High Emphasis", 0.0f, 1.0f, 0.0f));
+	params.push_back(std::make_unique<juce::AudioParameterFloat>(
+		"LOW_CUTOFF", "Low Cutoff", 20.0f, 20000.0f, 20.0f));
+	params.push_back(std::make_unique<juce::AudioParameterFloat>(
+		"LOW_SLOPE", "Low Slope", 0.0f, 1.0f, 0.5f));
+	params.push_back(std::make_unique<juce::AudioParameterFloat>(
+		"LOW_EMPHASIS", "Low Emphasis", 0.0f, 1.0f, 0.0f));
+	params.push_back(std::make_unique<juce::AudioParameterBool>(
+		"HIGH_ENABLED", "High Pass Enabled", false));
+	params.push_back(std::make_unique<juce::AudioParameterBool>(
+		"LOW_ENABLED", "Low Pass Enabled", false));
+
+	return { params.begin(), params.end() };
+}
+
+
 
 //==============================================================================
 bool NewProjectAudioProcessor::hasEditor() const

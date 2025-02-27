@@ -70,17 +70,21 @@ public:
     void setGain(float newGain) { gain = newGain; }
     float getGain() const { return gain; }
 
+	//==============================================================================
+    juce::AudioProcessorValueTreeState apvts;
+
 
 private:
     //==============================================================================
     Synth synth;
     FDNReverb fdnReverb;
-	ReverbControls reverbControls;
 
     juce::AbstractFifo midiFifo{ 1024 }; // Size the FIFO as needed
     std::vector<juce::MidiMessage> midiBuffer;
 
     float gain = 1.0f;
+
+	juce::AudioProcessorValueTreeState::ParameterLayout createParameters();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NewProjectAudioProcessor)
 };
