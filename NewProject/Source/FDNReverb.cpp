@@ -17,6 +17,19 @@ FDNReverb::FDNReverb(){
 FDNReverb::~FDNReverb() {
 }
 
-void FDNReverb::reverb(double predelay, double decay, double diffusion, double dryWet) {
+void FDNReverb::process(juce::AudioBuffer<float>& buffer, double predelay, double decay, double diffusion, double dryWet) {
 	DBG("Values: " << predelay << " " << decay << " " << diffusion << " " << dryWet);
+
+        for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
+    {
+        float* channelData = buffer.getWritePointer(channel);
+        
+        for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+        {
+            // Apply your reverb processing here
+            // This is just a placeholder - implement your actual reverb algorithm
+            channelData[sample] = channelData[sample] * (1.0f - dryWet) + 
+                                 (channelData[sample] * decay * diffusion) * dryWet;
+        }
+    }
 }

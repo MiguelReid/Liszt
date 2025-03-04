@@ -211,25 +211,19 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 
 	if (auto* reverbEnabled = apvts.getRawParameterValue("REVERB_ENABLED"))
 	{
-		if (reverbEnabled->load()) // Check if it's actually enabled
+		if (reverbEnabled->load())
 		{
 			// Get all reverb parameters
-			auto* predelay = apvts.getRawParameterValue("PREDELAY");
-			auto* decay = apvts.getRawParameterValue("DECAY");
-			auto* drywet = apvts.getRawParameterValue("DRYWET");
-			auto* diffusion = apvts.getRawParameterValue("DIFFUSION");
-			/*
-			DBG("Reverb Parameters:");
-			DBG("Predelay: " << predelay->load());
-			DBG("Decay: " << decay->load());
-			DBG("Dry/Wet: " << drywet->load());
-			DBG("Diffusion: " << diffusion->load());
-			*/
+			auto predelay = apvts.getRawParameterValue("PREDELAY")->load();
+			auto decay = apvts.getRawParameterValue("DECAY")->load();
+			auto dryWet = apvts.getRawParameterValue("DRYWET")->load();
+			auto diffusion = apvts.getRawParameterValue("DIFFUSION")->load();
+
+			// Process audio with reverb
+			fdnReverb.process(buffer, predelay, decay, diffusion, dryWet);
 		}
 	}
 }
-
-
 
 void NewProjectAudioProcessor::addMidiMessage(const juce::MidiMessage& message)
 {

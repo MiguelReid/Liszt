@@ -17,7 +17,7 @@ public:
     FDNReverb();
     ~FDNReverb();
 
-    void FDNReverb::reverb(double predelay, double decay, double diffusion, double dryWet);
+    void FDNReverb::process(juce::AudioBuffer<float>& buffer, double predelay, double decay, double diffusion, double dryWet);
 
 private:
 };
