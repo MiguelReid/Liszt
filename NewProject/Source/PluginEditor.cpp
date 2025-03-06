@@ -94,7 +94,6 @@ void NewProjectAudioProcessorEditor::handleNoteOn(juce::MidiKeyboardState*, int 
     // Send a note-on message to the processor
     juce::MidiMessage message = juce::MidiMessage::noteOn(midiChannel, midiNoteNumber, velocity);
     audioProcessor.addMidiMessage(message);
-	DBG("Note On: " << midiNoteNumber);
 }
 
 void NewProjectAudioProcessorEditor::handleNoteOff(juce::MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity)
