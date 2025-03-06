@@ -14,6 +14,7 @@
 #include <memory>
 #include <random>
 #include <iostream>
+#include <array>
 
 class CustomDelayLine {
 public:
@@ -43,6 +44,15 @@ public:
     std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buffer, double predelay, double decay, double diffusion, double dryWet);
 
 private:
-    int numDelayLines;
     std::vector<std::unique_ptr<CustomDelayLine>> delayLines;
+	std::vector<std::vector<float>> FDNReverb::hadamard(const std::vector<std::vector<float>>& delayOutputs);
+    static constexpr int numDelayLines = 4;
+
+    // Normalised hadamard matrix
+    const std::array<std::array<float, numDelayLines>, numDelayLines> hadamardMatrix = { {
+        {  0.5f,  0.5f,  0.5f,  0.5f },
+        {  0.5f, -0.5f,  0.5f, -0.5f },
+        {  0.5f,  0.5f, -0.5f, -0.5f },
+        {  0.5f, -0.5f, -0.5f,  0.5f }
+    } };
 };
