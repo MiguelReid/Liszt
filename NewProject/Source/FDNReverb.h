@@ -9,8 +9,6 @@
 */
 
 #pragma once
-<<<<<<< Updated upstream
-=======
 #include <JuceHeader.h>
 #include <vector>
 #include <memory>
@@ -103,4 +101,3 @@ private:
 
     std::vector<SimpleLPF> lpfFilters;
 };
->>>>>>> Stashed changes

@@ -13,7 +13,6 @@
 #include <JuceHeader.h>
 #include "Knob.h"
 #include "ToggleButton.h"
-#include "PluginProcessor.h"
 
 //==============================================================================
 /*
@@ -21,13 +20,18 @@
 class LeftControls  : public juce::Component
 {
 public:
-    LeftControls(NewProjectAudioProcessor& proc);
+    LeftControls(juce::AudioProcessorValueTreeState& apvts);
     ~LeftControls() override;
 
     void paint (juce::Graphics&) override;
     void resized() override;
 
 private:
+    // APVTS Attachments
+    std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> pitchBendAttachment;
+    std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> gainAttachment;
+    std::unique_ptr <juce::AudioProcessorValueTreeState::ButtonAttachment> arpeggiatorAttachment;
+
     juce::ToggleButton arpeggiatorButton;
     juce::Slider pitchBendSlider;
     juce::Slider gainSlider;
@@ -41,5 +45,5 @@ private:
     std::unique_ptr<Knob> knobLookAndFeel;
     std::unique_ptr<ToggleButton> toggleButtonLookAndFeel;
 
-    NewProjectAudioProcessor& processorRef;
+    juce::AudioProcessorValueTreeState& apvts;
 };

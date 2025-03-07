@@ -20,14 +20,22 @@
 class OscillatorControls  : public juce::Component
 {
 public:
-    OscillatorControls();
+    OscillatorControls(juce::AudioProcessorValueTreeState& apvts);
     ~OscillatorControls() override;
 
     void paint (juce::Graphics&) override;
     void resized() override;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OscillatorControls)
+	// APVTS Attachments
+	std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> rangeAttachment1;
+	std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> rangeAttachment2;
+	std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> shapeAttachment1;
+	std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> shapeAttachment2;
+	std::unique_ptr <juce::AudioProcessorValueTreeState::ButtonAttachment> oscAttachment1;
+	std::unique_ptr <juce::AudioProcessorValueTreeState::ButtonAttachment> oscAttachment2;
+
+	// Elements
     juce::Label oscillatorLabel;
     juce::Slider rangeKnob1;
 	juce::Slider rangeKnob2;
@@ -44,6 +52,12 @@ private:
     juce::ToggleButton osc1Button;
     juce::ToggleButton osc2Button;
 
+	// Custom LookAndFeel
     std::unique_ptr<Knob> knobLookAndFeel;
 	std::unique_ptr<ToggleButton> toggleButtonLookAndFeel;
+
+	// APVTS
+    juce::AudioProcessorValueTreeState& apvts;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OscillatorControls)
 };

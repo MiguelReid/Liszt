@@ -11,8 +11,8 @@
 #include "OscillatorControls.h"
 
 //==============================================================================
-OscillatorControls::OscillatorControls()
-{
+OscillatorControls::OscillatorControls(juce::AudioProcessorValueTreeState& apvts) : apvts(apvts) {
+
     // Initialize and configure the label
     oscillatorLabel.setText("Oscillators", juce::dontSendNotification);
     oscillatorLabel.setJustificationType(juce::Justification::centred);
@@ -89,7 +89,7 @@ OscillatorControls::OscillatorControls()
     addAndMakeVisible(osc1Button);
     addAndMakeVisible(osc2Button);
 
-    // ------------------- Look and feel --------------------------
+    // =================== Look and feel ========================
 
     toggleButtonLookAndFeel = std::make_unique<ToggleButton>();
     knobLookAndFeel = std::make_unique<Knob>();
@@ -102,6 +102,21 @@ OscillatorControls::OscillatorControls()
     shapeKnob2.setLookAndFeel(knobLookAndFeel.get());
     osc1Button.setLookAndFeel(toggleButtonLookAndFeel.get());
     osc2Button.setLookAndFeel(toggleButtonLookAndFeel.get());
+
+	// AudioProcessorValueTreeState ===============================
+	rangeAttachment1 = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+		apvts, "OSC1_RANGE", rangeKnob1);
+	shapeAttachment1 = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+		apvts, "OSC1_SHAPE", shapeKnob1);
+	rangeAttachment2 = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+		apvts, "OSC2_RANGE", rangeKnob2);
+	shapeAttachment2 = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+		apvts, "OSC2_SHAPE", shapeKnob2);
+	oscAttachment1 = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(
+		apvts, "OSC1_ENABLED", osc1Button);
+	oscAttachment2 = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(
+		apvts, "OSC2_ENABLED", osc2Button);
+
 }
 
 OscillatorControls::~OscillatorControls()

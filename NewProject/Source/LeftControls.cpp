@@ -11,8 +11,7 @@
 #include "LeftControls.h"
 
 //==============================================================================
-LeftControls::LeftControls(NewProjectAudioProcessor& proc) : processorRef(proc)
-{
+LeftControls::LeftControls(juce::AudioProcessorValueTreeState& apvts) : apvts(apvts) {
     // Initialize LookAndFeel
     toggleButtonLookAndFeel = std::make_unique<ToggleButton>();
     knobLookAndFeel = std::make_unique<Knob>();
@@ -55,9 +54,12 @@ LeftControls::LeftControls(NewProjectAudioProcessor& proc) : processorRef(proc)
 
 	gainSlider.setSkewFactor(0.5f);
 
-    gainSlider.onValueChange = [this]() {
-		processorRef.setGain(gainSlider.getValue());
-    };
+	// AudioProcessorValueTreeState ===============================
+	pitchBendAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+		apvts, "PITCH_BEND", pitchBendSlider);
+	gainAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+		apvts, "GAIN", gainSlider);
+	arpeggiatorAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(apvts, "ARPEGGIATOR", arpeggiatorButton);
 }
 
 LeftControls::~LeftControls()

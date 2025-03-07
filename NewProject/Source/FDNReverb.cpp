@@ -1,4 +1,4 @@
-/*
+﻿/*
   ==============================================================================
 
     FDNReverb.cpp
@@ -9,8 +9,6 @@
 */
 
 #include "FDNReverb.h"
-<<<<<<< Updated upstream
-=======
 
 // AudioPluginHost set at 512 numSamples
 
@@ -20,7 +18,6 @@ FDNReverb::FDNReverb() {
         delayLines.push_back(std::make_unique<CustomDelayLine>(primeDelays[i]));
         diffusionFilters.push_back(AllPassFilter());
         lpfFilters.push_back(SimpleLPF());
-    }
 }
 
 FDNReverb::~FDNReverb() {
@@ -33,7 +30,6 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
     // Convert parameters to usable values - be more conservative with values
     float decayGain = juce::jlimit(0.0f, 0.95f, static_cast<float>(decay));
     float diffusionCoeff = juce::jlimit(0.0f, 0.5f, static_cast<float>(diffusion));
-    float lpfCutoff = 0.2f;
 
     // Create outputs for each delay line
     std::vector<std::vector<float>> outputs(numDelayLines, std::vector<float>(numSamples, 0.0f));
@@ -64,7 +60,6 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
                 // Mix input with feedback for each delay line
                 float delayInput = inputSample + decayGain *
                     lpfFilters[delayIndex].process(feedbackSample, lpfCutoff);
-
                 // Safety limiter again
                 delayInput = juce::jlimit(-1.0f, 1.0f, delayInput);
 
@@ -96,8 +91,10 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
             }
         }
     }
+
     return channelOutputs;
 }
+
 
 // Applies a 4x4 Hadamard mixing matrix to the delay outputs.
 // 'delayOutputs' is assumed to have 4 channels (delay lines),
@@ -138,4 +135,3 @@ std::vector<std::vector<float>> FDNReverb::hadamard(const std::vector<std::vecto
     }
     return mixedOutputs;
 }
->>>>>>> Stashed changes

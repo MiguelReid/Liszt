@@ -13,20 +13,28 @@
 #include <JuceHeader.h>
 #include "Knob.h"
 #include "ToggleButton.h"
+#include "PluginProcessor.h"
 
 //==============================================================================
 /*
 */
-class ReverbControls  : public juce::Component
+class ReverbControls : public juce::Component
 {
 public:
-    ReverbControls();
+    ReverbControls(juce::AudioProcessorValueTreeState& apvts);
     ~ReverbControls() override;
 
-    void paint (juce::Graphics&) override;
+    void paint(juce::Graphics&) override;
     void resized() override;
 
 private:
+    // APVTS Attachments
+    std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> predelayAttachment;
+    std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> decayAttachment;
+    std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> dryWetAttachment;
+    std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> diffusionAttachment;
+    std::unique_ptr <juce::AudioProcessorValueTreeState::ButtonAttachment> reverbEnabledAttachment;
+
     juce::Label reverbLabel;
     juce::Slider predelayKnob;
     juce::Slider decayKnob;
@@ -43,5 +51,7 @@ private:
     std::unique_ptr<ToggleButton> toggleButtonLookAndFeel;
     std::unique_ptr<Knob> knobLookAndFeel;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ReverbControls)
+    juce::AudioProcessorValueTreeState& apvts;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ReverbControls)
 };

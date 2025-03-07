@@ -11,8 +11,7 @@
 #include "ReverbControls.h"
 
 //==============================================================================
-ReverbControls::ReverbControls()
-{
+ReverbControls::ReverbControls(juce::AudioProcessorValueTreeState& apvts): apvts(apvts) {
     // Initialize and configure the label
     reverbLabel.setText("Reverb", juce::dontSendNotification);
     reverbLabel.setJustificationType(juce::Justification::centred);
@@ -59,7 +58,7 @@ ReverbControls::ReverbControls()
 
 	addAndMakeVisible(reverbButton);
 
-    // ------------------- Look and feel --------------------------
+    // =================== Look and feel ==========================
 
     knobLookAndFeel = std::make_unique<Knob>();
 	toggleButtonLookAndFeel = std::make_unique<ToggleButton>();
@@ -69,7 +68,23 @@ ReverbControls::ReverbControls()
     dryWetKnob.setLookAndFeel(knobLookAndFeel.get());
     diffusionKnob.setLookAndFeel(knobLookAndFeel.get());
 	reverbButton.setLookAndFeel(toggleButtonLookAndFeel.get());
+
+	// AudioProcessorValueTreeState ===============================
+	predelayAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(apvts, "PREDELAY", predelayKnob);
+
+    decayAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+        apvts, "DECAY", decayKnob);
+
+    dryWetAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+        apvts, "DRYWET", dryWetKnob);
+
+    diffusionAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+        apvts, "DIFFUSION", diffusionKnob);
+
+    reverbEnabledAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(
+        apvts, "REVERB_ENABLED", reverbButton);
 }
+
 
 ReverbControls::~ReverbControls()
 {
