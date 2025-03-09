@@ -14,7 +14,7 @@
 Synth::Synth()
 {
 	formatManager.registerFormat(new juce::WavAudioFormat(), true);
-    for (int i = 0; i < 16; ++i) {
+    for (int i = 0; i < 24; ++i) {
         addVoice(new CustomSamplerVoice());
     }
 }

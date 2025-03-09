@@ -35,20 +35,46 @@ private:
     int writeIndex = 0;
 };
 
+// Add this to your FDNReverb class
+class PredelayLine {
+public:
+    PredelayLine(int maxDelay) {
+        buffer.resize(maxDelay, 0.0f);
+    }
+    
+    float process(float input, int delaySamples) {
+        delaySamples = juce::jlimit(0, static_cast<int>(buffer.size() - 1), delaySamples);
+        
+        float output = buffer[readIndex];
+        buffer[writeIndex] = input;
+        
+        writeIndex = (writeIndex + 1) % buffer.size();
+        readIndex = (writeIndex - delaySamples + buffer.size()) % buffer.size();
+        
+        return output;
+    }
+    
+private:
+    std::vector<float> buffer;
+    int writeIndex = 0, readIndex = 0;
+};
+
+
 class FDNReverb
 {
 public:
     FDNReverb();
     ~FDNReverb();
 
-    std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buffer, double predelay, double decay, double diffusion, double dryWet);
+    std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buffer, double predelay, double decay, double diffusion);
+    void prepare(double newSampleRate);
 
 private:
     std::vector<std::unique_ptr<CustomDelayLine>> delayLines;
-	std::vector<std::vector<float>> FDNReverb::hadamard(const std::vector<std::vector<float>>& delayOutputs);
     static constexpr int numDelayLines = 4;
 
     // Normalised hadamard matrix
+    std::vector<std::vector<float>> FDNReverb::hadamard(const std::vector<std::vector<float>>& delayOutputs);
     const std::array<std::array<float, numDelayLines>, numDelayLines> hadamardMatrix = { {
         {  0.5f,  0.5f,  0.5f,  0.5f },
         {  0.5f, -0.5f,  0.5f, -0.5f },
@@ -85,19 +111,44 @@ private:
 
     std::vector<AllPassFilter> diffusionFilters;
 
-    struct SimpleLPF
-    {
-        float z1 = 0.0f; // One-pole memory
+    struct BiquadFilter {
+        float b0 = 1.0f, b1 = 0.0f, b2 = 0.0f;
+        float a1 = 0.0f, a2 = 0.0f;
+        float z1 = 0.0f, z2 = 0.0f;
 
-        float process(float input, float cutoff)
-        {
-            // Simple one-pole filter y[n] = (1-a)*x[n] + a*y[n-1]
-            // cutoff in range (0.0 .. 1.0)
-            float output = z1 + cutoff * (input - z1);
-            z1 = output;
-            return output;
+        void setLowpass(float frequency, float Q, float sampleRate) {
+            float omega = 2.0f * juce::MathConstants<float>::pi * frequency / sampleRate;
+            float alpha = std::sin(omega) / (2.0f * Q);
+
+            float cosw = std::cos(omega);
+            float scale = 1.0f / (1.0f + alpha);
+
+            b0 = (1.0f - cosw) * 0.5f * scale;
+            b1 = (1.0f - cosw) * scale;
+            b2 = (1.0f - cosw) * 0.5f * scale;
+            a1 = -2.0f * cosw * scale;
+            a2 = (1.0f - alpha) * scale;
+        }
+
+        float process(float in, float cutoff) {
+            // Simple one-pole lowpass for now, using the cutoff parameter
+            z1 = z1 + cutoff * (in - z1);
+            return z1;
         }
     };
 
-    std::vector<SimpleLPF> lpfFilters;
+    std::vector<BiquadFilter> lpfFilters;
+
+    struct LFO {
+        float phase = 0.0f;
+
+        float process(float frequency, float sampleRate) {
+            phase += frequency / sampleRate;
+            if (phase > 1.0f) phase -= 1.0f;
+            return 0.5f * (1.0f + std::sin(2.0f * juce::MathConstants<float>::pi * phase));
+        }
+    };
+
+    std::vector<LFO> lfos;
+    double sampleRate = 44100.0;
 };

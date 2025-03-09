@@ -226,26 +226,25 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 			}
 
 			// Process audio with reverb
-			auto outputs = fdnReverb.process(buffer, predelay, decay, diffusion, dryWet);
+			auto outputs = fdnReverb.process(buffer, predelay, decay, diffusion);
 
 			// Clear the buffer as we'll fill it with the processed signal
 			buffer.clear();
 
 			// Mix the output of all delay lines back into the buffer
-			for (int channel = 0; channel < buffer.getNumChannels(); ++channel) {
-				for (int sample = 0; sample < buffer.getNumSamples(); ++sample) {
+			for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
+			{
+				for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+				{
 					float mixedSample = 0.0f;
 
-					// Sum all delay line outputs
-					for (int i = 0; i < outputs.size(); ++i) {
+					for (int i = 0; i < outputs.size(); ++i)
 						mixedSample += outputs[i][sample];
-					}
 
-					// Average the outputs and apply gain scaling if needed
 					mixedSample /= outputs.size();
 
-					// Mix dry/wet
-					if (dryWet < 1.0f) {
+					if (dryWet < 1.0f)
+					{
 						float drySample = dryBuffer.getSample(channel, sample);
 						mixedSample = drySample * (1.0f - dryWet) + mixedSample * dryWet;
 					}
