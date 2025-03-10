@@ -242,12 +242,8 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
         {
             for (int i = 0; i < numDelayLines; ++i)
             {
-                // Calculate the scaled feedback signal
-                float outputSignal = feedbackSignals[(i + ch) % numDelayLines][sample] / (numDelayLines * 0.8f);
-
                 // Apply soft limiting and add to output
-                float limitedSignal = softLimit(outputSignal);
-                channelOutputs[ch][sample] += limitedSignal;
+                channelOutputs[ch][sample] += softLimit(feedbackSignals[(i + ch) % numDelayLines][sample] / (numDelayLines * 0.8f));
             }
         }
     }
