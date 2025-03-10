@@ -20,6 +20,24 @@ FDNReverb::FDNReverb() {
         lpfFilters.push_back(BiquadFilter());
         lfos.push_back(LFO()); // Initialize LFOs
     }
+
+    // Early reflection for a realistic room sound
+    earlyReflections = {
+        { 450,  0.50f },  // Reduced gain
+        { 850,  0.40f },
+        { 1250, 0.30f },
+        { 1800, 0.25f },
+        { 2500, 0.20f },
+        { 3200, 0.15f }
+    };
+
+    // Initialize ER buffer (enough for longest reflection)
+    erBufferSize = 4000;  // ~90ms at 44.1kHz
+    erBuffer.resize(erBufferSize, 0.0f);
+
+    // Additional diffusers for the early reflections
+    erDiffusion1 = AllPassFilter();
+    erDiffusion2 = AllPassFilter();
 }
 
 FDNReverb::~FDNReverb() {
@@ -31,7 +49,7 @@ void FDNReverb::prepare(double newSampleRate) {
 
     // Scale delay lengths based on the new sample rate
     // This maintains consistent reverb time across different sample rates
-    double sampleRateRatio = sampleRate / 44100.0; // Assuming original design was for 44.1kHz
+    double sampleRateRatio = sampleRate / 44100.0;
 
     // Only recreate delay lines if sample rate has changed significantly
     if (std::abs(sampleRateRatio - 1.0) > 0.01) {
@@ -65,6 +83,16 @@ void FDNReverb::prepare(double newSampleRate) {
         filter.buffer2[0] = 0.0f;
         filter.buffer2[1] = 0.0f;
     }
+
+    // Scale early reflection times for sample rate
+    for (auto& er : earlyReflections) {
+        er.delaySamples = static_cast<int>(er.delaySamples * sampleRateRatio);
+    }
+
+    // Resize and clear ER buffer
+    erBufferSize = static_cast<int>(4000 * sampleRateRatio);
+    erBuffer.resize(erBufferSize, 0.0f);
+    erWriteIndex = 0;
 }
 
 std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buffer,
@@ -82,6 +110,43 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
     std::vector<std::vector<float>> outputs(numDelayLines, std::vector<float>(numSamples, 0.0f));
     std::vector<std::vector<float>> feedbackSignals(numDelayLines, std::vector<float>(numSamples, 0.0f));
     std::vector<std::vector<float>> channelOutputs(numChannels, std::vector<float>(numSamples, 0.0f));
+
+    // Process early reflections first
+    for (int sample = 0; sample < numSamples; ++sample) {
+        // Mix down input to mono for early reflections
+        float monoInput = 0.0f;
+        for (int ch = 0; ch < numChannels; ++ch) {
+            monoInput += buffer.getSample(ch, sample);
+        }
+        monoInput /= numChannels;
+
+        // Write to circular buffer
+        erBuffer[erWriteIndex] = monoInput;
+
+        // Generate early reflection output for this sample
+        float erOutput = 0.0f;
+
+        for (const auto& er : earlyReflections) {
+            // Calculate read position with wraparound
+            int readPos = erWriteIndex - er.delaySamples;
+            if (readPos < 0) readPos += erBufferSize;
+
+            // Add this reflection
+            erOutput += erBuffer[readPos] * er.gain;
+
+            // Apply diffusion to early reflections
+            erOutput = erDiffusion1.process(erOutput, 0.25f);
+            erOutput = erDiffusion2.process(erOutput, 0.15f);
+        }
+
+        // Advance write position
+        erWriteIndex = (erWriteIndex + 1) % erBufferSize;
+
+        // Add early reflections to output channels
+        for (int ch = 0; ch < numChannels; ++ch) {
+            channelOutputs[ch][sample] += erOutput;
+        }
+    }
 
     for (int sample = 0; sample < numSamples; ++sample)
     {
@@ -168,9 +233,8 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
         {
             for (int i = 0; i < numDelayLines; ++i)
             {
-                // Increase reverb contribution to outputs
                 channelOutputs[ch][sample] += feedbackSignals[(i + ch) % numDelayLines][sample]
-                    / (numDelayLines * 0.7f);
+                    / (numDelayLines * 0.4f);
             }
         }
     }

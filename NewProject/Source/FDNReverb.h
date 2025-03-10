@@ -151,4 +151,18 @@ private:
 
     std::vector<LFO> lfos;
     double sampleRate = 44100.0;
+
+    // Early reflections implementation
+    struct EarlyReflection {
+        int delaySamples;
+        float gain;
+    };
+
+    std::vector<EarlyReflection> earlyReflections;
+    std::vector<float> erBuffer;
+    int erBufferSize = 0;
+    int erWriteIndex = 0;
+
+    AllPassFilter erDiffusion1;
+    AllPassFilter erDiffusion2;
 };
