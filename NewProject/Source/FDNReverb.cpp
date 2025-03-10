@@ -13,7 +13,7 @@
 // AudioPluginHost set at 512 numSamples
 
 FDNReverb::FDNReverb() {
-    const int primeDelays[4] = { 1031, 1327, 1523, 1871 };
+    const int primeDelays[8] = { 1031, 1327, 1523, 1871, 2053, 2311, 2539, 2803 };
     for (int i = 0; i < numDelayLines; ++i) {
         delayLines.push_back(std::make_unique<CustomDelayLine>(primeDelays[i]));
         diffusionFilters.push_back(AllPassFilter());
@@ -54,7 +54,7 @@ void FDNReverb::prepare(double newSampleRate) {
     // Only recreate delay lines if sample rate has changed significantly
     if (std::abs(sampleRateRatio - 1.0) > 0.01) {
         // Calculate scaled delay lengths
-        const int primeDelays[4] = { 1031, 1327, 1523, 1871 };
+        const int primeDelays[8] = { 1031, 1327, 1523, 1871, 2053, 2311, 2539, 2803 };
 
         // Recreate delay lines with scaled lengths
         delayLines.clear();
@@ -105,8 +105,7 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
 
     // Smoother gain decay
     float decayGain = juce::jlimit(0.0f, 0.992f, static_cast<float>(decay));
-    float decayVariations[numDelayLines] = { 1.0f, 0.99f, 0.995f, 0.985f };
-
+    float decayVariations[numDelayLines] = { 1.0f, 0.99f, 0.995f, 0.985f, 0.992f, 0.988f, 0.997f, 0.982f };
     float diffusionCoeff = juce::jlimit(0.0f, 0.7f, static_cast<float>(diffusion));
 
     float lpfCutoff = 0.1f;
@@ -195,7 +194,7 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
             sampleVec[i] = outputs[i][sample];
 
         // 2) Apply Hadamard matrix:
-        std::array<float, numDelayLines> matrixedSample{ 0.0f, 0.0f, 0.0f, 0.0f };
+        std::array<float, numDelayLines> matrixedSample{ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
         for (int row = 0; row < numDelayLines; ++row)
         {
             for (int col = 0; col < numDelayLines; ++col)
@@ -209,20 +208,20 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
         {
             // Apply diffusion
             float diffused = diffusionFilters[i].process(matrixedSample[i], diffusionCoeff);
-            matrixedSample[i] = diffused; // Store back for Velvet mixing
+            matrixedSample[i] = diffused; // Store back for feedback matrix
         }
         
         // Apply Hadamard feedback matrix (cross-channel feedback mixing)
-        std::array<float, numDelayLines> hadamardMixed = { 0.0f, 0.0f, 0.0f, 0.0f };
+        std::array<float, numDelayLines> householderMixed = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
         for (int i = 0; i < numDelayLines; ++i) {
             for (int j = 0; j < numDelayLines; ++j) {
-                hadamardMixed[i] += hadamardMatrix[i][j] * matrixedSample[j];
+                householderMixed[i] += householderMatrix[i][j] * matrixedSample[j];
             }
         }
 
         // Apply LPF and decay gain
         for (int i = 0; i < numDelayLines; ++i) {
-            float filtered = lpfFilters[i].process(hadamardMixed[i], lpfCutoff);
+            float filtered = lpfFilters[i].process(householderMixed[i], lpfCutoff);
 
             // Apply slightly different decay for each line
             float lineDecay = decayGain * decayVariations[i];
@@ -235,7 +234,6 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
             }
 
             float feedbackOut = juce::jlimit(-1.0f, 1.0f, filtered * lineDecay);
-
             feedbackSignals[i][sample] = feedbackOut;
         }
 
@@ -245,50 +243,10 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
             for (int i = 0; i < numDelayLines; ++i)
             {
                 channelOutputs[ch][sample] += feedbackSignals[(i + ch) % numDelayLines][sample]
-                    / (numDelayLines * 0.4f);
+                    / (numDelayLines * 0.8f);
             }
         }
     }
 
     return channelOutputs;
-}
-
-// Applies a 4x4 Hadamard mixing matrix to the delay outputs.
-// 'delayOutputs' is assumed to have 4 channels (delay lines),
-// and each channel has the same number of samples.
-std::vector<std::vector<float>> FDNReverb::hadamard(const std::vector<std::vector<float>>& delayOutputs)
-{
-    int numSamples = delayOutputs[0].size();
-
-    // Prepare the output container: one vector per channel.
-    std::vector<std::vector<float>> mixedOutputs(numDelayLines, std::vector<float>(numSamples, 0.0f));
-
-    // Process each sample index
-    for (int sample = 0; sample < numSamples; ++sample)
-    {
-        // Form a temporary vector containing the sample from each delay line
-        std::array<float, numDelayLines> sampleVec;
-        for (int ch = 0; ch < numDelayLines; ++ch)
-        {
-            sampleVec[ch] = delayOutputs[ch][sample];
-        }
-
-        // Multiply the sample vector by the Hadamard matrix:
-        // For each output channel, compute the dot product of the corresponding row of the matrix with sampleVec.
-        std::array<float, numDelayLines> mixedSample = { 0.0f, 0.0f, 0.0f, 0.0f };
-        for (int row = 0; row < numDelayLines; ++row)
-        {
-            for (int col = 0; col < numDelayLines; ++col)
-            {
-                mixedSample[row] += hadamardMatrix[row][col] * sampleVec[col];
-            }
-        }
-
-        // Store the mixed sample back to each channel
-        for (int row = 0; row < numDelayLines; ++row)
-        {
-            mixedOutputs[row][sample] = mixedSample[row];
-        }
-    }
-    return mixedOutputs;
 }
