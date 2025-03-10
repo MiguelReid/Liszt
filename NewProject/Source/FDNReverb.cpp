@@ -147,7 +147,7 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
 
         // Add early reflections to output channels
         for (int ch = 0; ch < numChannels; ++ch) {
-            channelOutputs[ch][sample] += erOutput;
+            channelOutputs[ch][sample] += softLimit(erOutput);
         }
     }
 
@@ -181,7 +181,7 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
 
                 // Store delayed output:
                 outputs[i][sample] = delayLines[i]->processSample(
-                    juce::jlimit(-1.0f, 1.0f, delayInput));
+                    softLimit(delayInput));
             }
         }
 
@@ -233,7 +233,7 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
                 filtered *= (0.5f + (absLevel - 0.5f) * 0.8f) / absLevel;
             }
 
-            float feedbackOut = juce::jlimit(-1.0f, 1.0f, filtered * lineDecay);
+            float feedbackOut = softLimit(filtered * lineDecay);
             feedbackSignals[i][sample] = feedbackOut;
         }
 
@@ -242,11 +242,14 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
         {
             for (int i = 0; i < numDelayLines; ++i)
             {
-                channelOutputs[ch][sample] += feedbackSignals[(i + ch) % numDelayLines][sample]
-                    / (numDelayLines * 0.8f);
+                // Calculate the scaled feedback signal
+                float outputSignal = feedbackSignals[(i + ch) % numDelayLines][sample] / (numDelayLines * 0.8f);
+
+                // Apply soft limiting and add to output
+                float limitedSignal = softLimit(outputSignal);
+                channelOutputs[ch][sample] += limitedSignal;
             }
         }
     }
-
     return channelOutputs;
 }

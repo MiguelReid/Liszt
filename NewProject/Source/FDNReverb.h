@@ -127,31 +127,37 @@ private:
 
     std::vector<AllPassFilter> diffusionFilters;
 
+    // Update your BiquadFilter implementation in FDNReverb.h:
     struct BiquadFilter {
         float b0 = 1.0f, b1 = 0.0f, b2 = 0.0f;
         float a1 = 0.0f, a2 = 0.0f;
         float z1 = 0.0f, z2 = 0.0f;
+        float lastInput = 0.0f;
 
-        void setLowpass(float frequency, float Q, float sampleRate) {
-            float omega = 2.0f * juce::MathConstants<float>::pi * frequency / sampleRate;
-            float alpha = std::sin(omega) / (2.0f * Q);
-
-            float cosw = std::cos(omega);
-            float scale = 1.0f / (1.0f + alpha);
-
-            b0 = (1.0f - cosw) * 0.5f * scale;
-            b1 = (1.0f - cosw) * scale;
-            b2 = (1.0f - cosw) * 0.5f * scale;
-            a1 = -2.0f * cosw * scale;
-            a2 = (1.0f - alpha) * scale;
+        // Process with true biquad implementation
+        float processBiquad(float in) {
+            float out = in * b0 + z1;
+            z1 = in * b1 + z2 - a1 * out;
+            z2 = in * b2 - a2 * out;
+            return out;
         }
 
+        // Simple one-pole filter with slew limiting to prevent clicks
         float process(float in, float cutoff) {
-            // Simple one-pole lowpass for now, using the cutoff parameter
+            // Apply slew limiting to prevent discontinuities
+            const float maxChange = 0.01f;
+            float change = in - lastInput;
+            if (std::abs(change) > maxChange) {
+                in = lastInput + maxChange * (change > 0 ? 1.0f : -1.0f);
+            }
+            lastInput = in;
+
+            // Apply simple low-pass
             z1 = z1 + cutoff * (in - z1);
             return z1;
         }
     };
+
 
     std::vector<BiquadFilter> lpfFilters;
 
@@ -181,4 +187,19 @@ private:
 
     AllPassFilter erDiffusion1;
     AllPassFilter erDiffusion2;
+
+    // Soft Limiter
+    float softLimit(float input) {
+        // Cubic soft clipper for smooth limiting
+        if (input > 1.0f)
+            return 1.0f - (1.0f / (input + 1.0f)); // Asymptotic approach to 1.0
+        else if (input < -1.0f)
+            return -1.0f + (1.0f / (-input + 1.0f)); // Asymptotic approach to -1.0
+        else if (input > 0.4f)
+            return 0.4f + (0.6f * (input - 0.4f) / (0.6f + (input - 0.4f)));
+        else if (input < -0.4f)
+            return -0.4f + (0.6f * (input + 0.4f) / (0.6f - (input + 0.4f)));
+        else
+            return input; // Pass through unaffected
+    }
 };
