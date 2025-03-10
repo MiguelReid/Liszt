@@ -131,14 +131,16 @@ private:
 
     std::vector<AllPassFilter> diffusionFilters;
 
-    // Update your BiquadFilter implementation in FDNReverb.h:
+	// Biquad filter
     struct BiquadFilter {
         float b0 = 1.0f, b1 = 0.0f, b2 = 0.0f;
         float a1 = 0.0f, a2 = 0.0f;
         float z1 = 0.0f, z2 = 0.0f;
         float lastInput = 0.0f;
+        float cutoffFreq = 5000.0f;  // Store current cutoff frequency
+        float q = 0.7071f;          // Default Q factor (Butterworth)
 
-        // Process with true biquad implementation
+        // Process using proper biquad implementation
         float processBiquad(float in) {
             float out = in * b0 + z1;
             z1 = in * b1 + z2 - a1 * out;
@@ -146,9 +148,28 @@ private:
             return out;
         }
 
-        // Simple one-pole filter with slew limiting to prevent clicks
+        // Set coefficients for low-pass filter
+        void setLowpass(float frequency, float q, float sampleRate) {
+            // Store current settings
+            cutoffFreq = frequency;
+            this->q = q;
+
+            // Avoid recalculating if the parameters haven't changed significantly
+            float omega = 2.0f * juce::MathConstants<float>::pi * frequency / sampleRate;
+            float alpha = std::sin(omega) / (2.0f * q);
+            float cosw = std::cos(omega);
+
+            float norm = 1.0f / (1.0f + alpha);
+
+            b0 = ((1.0f - cosw) * 0.5f) * norm;
+            b1 = (1.0f - cosw) * norm;
+            b2 = ((1.0f - cosw) * 0.5f) * norm;
+            a1 = (-2.0f * cosw) * norm;
+            a2 = (1.0f - alpha) * norm;
+        }
+
+        // Legacy one-pole filter with slew limiting
         float process(float in, float cutoff) {
-            // Apply slew limiting to prevent discontinuities
             const float maxChange = 0.01f;
             float change = in - lastInput;
             if (std::abs(change) > maxChange) {
@@ -205,5 +226,25 @@ private:
             return -0.4f + (0.6f * (input + 0.4f) / (0.6f - (input + 0.4f)));
         else
             return input; // Pass through unaffected
+    }
+
+	// Avoid static noise buildup with DC blocking
+    struct DCBlocker {
+        float x1 = 0.0f, y1 = 0.0f;
+
+        float process(float input) {
+            float output = input - x1 + 0.995f * y1;
+            x1 = input;
+            y1 = output;
+            return output;
+        }
+    };
+
+    std::vector<DCBlocker> dcBlockers;
+
+    // Denormal Prevention
+    inline float denormalPrevention(float sample) const {
+        static constexpr float antiDenormal = 1.0e-9f;
+        return sample + antiDenormal;
     }
 };

@@ -18,6 +18,7 @@ FDNReverb::FDNReverb() {
         diffusionFilters.push_back(AllPassFilter());
         lpfFilters.push_back(BiquadFilter());
         lfos.push_back(LFO());
+        dcBlockers.push_back(DCBlocker());
     }
 
     // Early reflection for a realistic room sound
@@ -69,6 +70,7 @@ void FDNReverb::prepare(double newSampleRate) {
 
     // Reset filter states to prevent artifacts
     for (auto& filter : lpfFilters) {
+        filter.setLowpass(5000.0f, 0.7071f, static_cast<float>(sampleRate));
         filter.z1 = 0.0f;
         filter.z2 = 0.0f;
     }
@@ -221,9 +223,19 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
             }
         }
 
-        // Apply LPF and decay gain
+        // Apply LPF + DC Blocking + decay gain
         for (int i = 0; i < numDelayLines; ++i) {
-            float filtered = lpfFilters[i].process(householderMixed[i], lpfCutoff);
+            // Filter cutoff based on decay value for frequency-dependent decay
+            float cutoff = 3000.0f + (1.0f - decayGain) * 5000.0f;
+
+            // Update biquad coefficients
+            lpfFilters[i].setLowpass(cutoff, 0.7071f, static_cast<float>(sampleRate));
+
+            // Process audio through the biquad filter
+            float filtered = lpfFilters[i].processBiquad(denormalPrevention(householderMixed[i]));
+
+            // Apply DC blocker to prevent static buildup
+            filtered = dcBlockers[i].process(filtered);
 
             // Apply slightly different decay for each line
             float lineDecay = decayGain * decayVariations[i];
