@@ -13,17 +13,16 @@
 // AudioPluginHost set at 512 numSamples
 
 FDNReverb::FDNReverb() {
-    const int primeDelays[8] = { 1031, 1327, 1523, 1871, 2053, 2311, 2539, 2803 };
     for (int i = 0; i < numDelayLines; ++i) {
         delayLines.push_back(std::make_unique<CustomDelayLine>(primeDelays[i]));
         diffusionFilters.push_back(AllPassFilter());
         lpfFilters.push_back(BiquadFilter());
-        lfos.push_back(LFO()); // Initialize LFOs
+        lfos.push_back(LFO());
     }
 
     // Early reflection for a realistic room sound
     earlyReflections = {
-        { 450,  0.50f },  // Reduced gain
+        { 450,  0.50f },
         { 850,  0.40f },
         { 1250, 0.30f },
         { 1800, 0.25f },
@@ -38,23 +37,21 @@ FDNReverb::FDNReverb() {
     // Additional diffusers for the early reflections
     erDiffusion1 = AllPassFilter();
     erDiffusion2 = AllPassFilter();
+
+    predelayBuffer = PredelayLine(96000);  // Maximum 2 seconds at 48kHz
 }
 
 FDNReverb::~FDNReverb() {
 }
 
 void FDNReverb::prepare(double newSampleRate) {
-    // Store the new sample rate
     sampleRate = newSampleRate;
 
-    // Scale delay lengths based on the new sample rate
-    // This maintains consistent reverb time across different sample rates
+    // Maintain consistent reverb time across different sample rates
     double sampleRateRatio = sampleRate / 44100.0;
 
     // Only recreate delay lines if sample rate has changed significantly
     if (std::abs(sampleRateRatio - 1.0) > 0.01) {
-        // Calculate scaled delay lengths
-        const int primeDelays[8] = { 1031, 1327, 1523, 1871, 2053, 2311, 2539, 2803 };
 
         // Recreate delay lines with scaled lengths
         delayLines.clear();
@@ -108,7 +105,9 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
     float decayVariations[numDelayLines] = { 1.0f, 0.99f, 0.995f, 0.985f, 0.992f, 0.988f, 0.997f, 0.982f };
     float diffusionCoeff = juce::jlimit(0.0f, 0.7f, static_cast<float>(diffusion));
 
-    float lpfCutoff = 0.1f;
+    int predelaySamples = static_cast<int>(predelay * sampleRate / 1000.0);
+
+    float lpfCutoff = 0.2f;
 
     std::vector<std::vector<float>> outputs(numDelayLines, std::vector<float>(numSamples, 0.0f));
     std::vector<std::vector<float>> feedbackSignals(numDelayLines, std::vector<float>(numSamples, 0.0f));
@@ -161,10 +160,13 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
             lfoValues[i] = lfos[i].process(lfoFreq, sampleRate);
         }
 
-        // 1) Delay lines:
+        // 1) Delay lines
         for (int ch = 0; ch < numChannels; ++ch)
         {
             float inputSample = juce::jlimit(-1.0f, 1.0f, buffer.getSample(ch, sample));
+
+            // Apply predelay to the input signal
+            float delayedInput = predelayBuffer.process(inputSample, predelaySamples);
 
             for (int i = 0; i < numDelayLines; ++i)
             {
@@ -172,11 +174,10 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
                     ? feedbackSignals[i][sample - 1]
                     : 0.0f;
 
-                // Sum input + previous feedback (no decay or filter at this stage):
-                float delayInput = inputSample + prevFeedback;
+                // Sum predelayed input + previous feedback
+                float delayInput = delayedInput + prevFeedback;
 
                 // Apply very subtle modulation to the feedback signal
-                // This will create a more natural sound without changing the basic algorithm
                 delayInput *= (1.0f + (lfoValues[i] - 0.5f) * 0.01f); // Very subtle ±0.5% modulation
 
                 // Store delayed output:
@@ -184,6 +185,7 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
                     softLimit(delayInput));
             }
         }
+
 
         // Rest of the processing remains the same
         // ...

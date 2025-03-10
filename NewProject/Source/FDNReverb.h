@@ -35,7 +35,6 @@ private:
     int writeIndex = 0;
 };
 
-// Add this to your FDNReverb class
 class PredelayLine {
 public:
     PredelayLine(int maxDelay) {
@@ -70,8 +69,13 @@ public:
     void prepare(double newSampleRate);
 
 private:
+    // DelayLines
     std::vector<std::unique_ptr<CustomDelayLine>> delayLines;
     static constexpr int numDelayLines = 8;
+    const int primeDelays[numDelayLines] = { 1031, 1327, 1523, 1871, 2053, 2311, 2539, 2803 };
+
+    // Predelay Lines
+    PredelayLine predelayBuffer{ 96000 }; // Maximum 2 seconds at 48kHz
 
     // Normalised hadamard matrix
     std::vector<std::vector<float>> FDNReverb::hadamard(const std::vector<std::vector<float>>& delayOutputs);

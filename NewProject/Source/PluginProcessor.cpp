@@ -291,53 +291,61 @@ juce::AudioProcessorValueTreeState::ParameterLayout NewProjectAudioProcessor::cr
 
 	// Left Controls Parameters
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
-		"GAIN", "Gain", 0.0f, 1.0f, 0.5f));
+		"GAIN", "Gain", juce::NormalisableRange<float>(0.0f, 1.0f), 0.5f));
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
-		"PITCH_BEND", "Pitch Bend", -2.0f, 2.0f, 0.0f));
+		"PITCH_BEND", "Pitch Bend", juce::NormalisableRange<float>(-2.0f, 2.0f), 0.0f));
 	params.push_back(std::make_unique<juce::AudioParameterBool>(
 		"ARPEGGIATOR", "Arpeggiator", false));
 
 	// Reverb Parameters
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
-		"PREDELAY", "Predelay", 0.0f, 0.1f, 0.0f));
+		"PREDELAY", "Predelay", juce::NormalisableRange<float>(0.0f, 100.0f, 0.01f), 0.0f));
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
-		"DECAY", "Decay", 0.5f, 10.0f, 0.5f));
+		"DECAY", "Decay", juce::NormalisableRange<float>(0.1f, 10.0f, 0.1f), 0.5f));
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
-		"DRYWET", "Dry/Wet", 0.0f, 1.0f, 0.0f));
+		"DRYWET", "Dry/Wet", juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.5f));
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
-		"DIFFUSION", "Diffusion", 0.0f, 1.0f, 0.0f));
+		"DIFFUSION", "Diffusion", juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.5f));
 	params.push_back(std::make_unique<juce::AudioParameterBool>(
 		"REVERB_ENABLED", "Reverb Enabled", false));
 
-	// Oscillator Parameters
+
+	// Oscillator 1 Parameters
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
-		"OSC1_RANGE", "Osc 1 Range", 0.0f, 1.0f, 0.5f));
+		"OSC1_RANGE", "Osc 1 Range", juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.5f));
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
-		"OSC1_SHAPE", "Osc 1 Shape", 0.0f, 2.0f, 0.0f));
+		"OSC1_SHAPE", "Osc 1 Shape", juce::NormalisableRange<float>(0.0f, 2.0f, 0.01f), 0.0f));
+
+	// Oscillator 2 Parameters
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
-		"OSC2_RANGE", "Osc 2 Range", 0.0f, 1.0f, 0.5f));
+		"OSC2_RANGE", "Osc 2 Range", juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.5f));
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
-		"OSC2_SHAPE", "Osc 2 Shape", 0.0f, 2.0f, 0.0f));
+		"OSC2_SHAPE", "Osc 2 Shape", juce::NormalisableRange<float>(0.0f, 2.0f, 0.01f), 0.0f));
+
+	// Oscillator Enable Parameters
 	params.push_back(std::make_unique<juce::AudioParameterBool>(
 		"OSC1_ENABLED", "Osc 1 Enabled", false));
 	params.push_back(std::make_unique<juce::AudioParameterBool>(
 		"OSC2_ENABLED", "Osc 2 Enabled", false));
 
-	// Filter Parameters
+
+	// High-Pass Filter Parameters
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
-		"HIGH_CUTOFF", "High Cutoff", 20.0f, 20000.0f, 20000.0f));
+		"HIGH_CUTOFF", "High Cutoff", juce::NormalisableRange<float>(20.0f, 20000.0f, 1.0f), 20000.0f));
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
-		"HIGH_SLOPE", "High Slope", 0.0f, 1.0f, 0.5f));
+		"HIGH_SLOPE", "High Slope", juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.5f));
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
-		"HIGH_EMPHASIS", "High Emphasis", 0.0f, 1.0f, 0.0f));
-	params.push_back(std::make_unique<juce::AudioParameterFloat>(
-		"LOW_CUTOFF", "Low Cutoff", 20.0f, 20000.0f, 20.0f));
-	params.push_back(std::make_unique<juce::AudioParameterFloat>(
-		"LOW_SLOPE", "Low Slope", 0.0f, 1.0f, 0.5f));
-	params.push_back(std::make_unique<juce::AudioParameterFloat>(
-		"LOW_EMPHASIS", "Low Emphasis", 0.0f, 1.0f, 0.0f));
+		"HIGH_EMPHASIS", "High Emphasis", juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.0f));
 	params.push_back(std::make_unique<juce::AudioParameterBool>(
 		"HIGH_ENABLED", "High Pass Enabled", false));
+
+	// Low-Pass Filter Parameters
+	params.push_back(std::make_unique<juce::AudioParameterFloat>(
+		"LOW_CUTOFF", "Low Cutoff", juce::NormalisableRange<float>(20.0f, 20000.0f, 1.0f), 20.0f));
+	params.push_back(std::make_unique<juce::AudioParameterFloat>(
+		"LOW_SLOPE", "Low Slope", juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.5f));
+	params.push_back(std::make_unique<juce::AudioParameterFloat>(
+		"LOW_EMPHASIS", "Low Emphasis", juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.0f));
 	params.push_back(std::make_unique<juce::AudioParameterBool>(
 		"LOW_ENABLED", "Low Pass Enabled", false));
 

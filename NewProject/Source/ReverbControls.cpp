@@ -70,7 +70,8 @@ ReverbControls::ReverbControls(juce::AudioProcessorValueTreeState& apvts): apvts
 	reverbButton.setLookAndFeel(toggleButtonLookAndFeel.get());
 
 	// AudioProcessorValueTreeState ===============================
-	predelayAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(apvts, "PREDELAY", predelayKnob);
+	predelayAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+        apvts, "PREDELAY", predelayKnob);
 
     decayAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
         apvts, "DECAY", decayKnob);
