@@ -103,8 +103,12 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
     const int numChannels = buffer.getNumChannels();
     const int numSamples = buffer.getNumSamples();
 
-    float decayGain = juce::jlimit(0.0f, 0.98f, static_cast<float>(decay));
+    // Smoother gain decay
+    float decayGain = juce::jlimit(0.0f, 0.992f, static_cast<float>(decay));
+    float decayVariations[numDelayLines] = { 1.0f, 0.99f, 0.995f, 0.985f };
+
     float diffusionCoeff = juce::jlimit(0.0f, 0.7f, static_cast<float>(diffusion));
+
     float lpfCutoff = 0.1f;
 
     std::vector<std::vector<float>> outputs(numDelayLines, std::vector<float>(numSamples, 0.0f));
@@ -218,13 +222,20 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
 
         // Apply LPF and decay gain
         for (int i = 0; i < numDelayLines; ++i) {
-            // Now using the fixed process method
             float filtered = lpfFilters[i].process(hadamardMixed[i], lpfCutoff);
 
-            // Apply decay and safety limit:
-            float feedbackOut = juce::jlimit(-1.0f, 1.0f, filtered * decayGain);
+            // Apply slightly different decay for each line
+            float lineDecay = decayGain * decayVariations[i];
 
-            // Store for next iteration's feedback:
+            // Apply a soft-knee compression to the decay to preserve quieter reverb tails
+            float absLevel = std::abs(filtered);
+            if (absLevel > 0.5f) {
+                // Compress louder parts slightly more
+                filtered *= (0.5f + (absLevel - 0.5f) * 0.8f) / absLevel;
+            }
+
+            float feedbackOut = juce::jlimit(-1.0f, 1.0f, filtered * lineDecay);
+
             feedbackSignals[i][sample] = feedbackOut;
         }
 
