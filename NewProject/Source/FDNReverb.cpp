@@ -62,7 +62,7 @@ void FDNReverb::prepare(double newSampleRate) {
         }
     }
 
-    // Reset filter states to prevent artifacts
+    // Reset Biquad Filters
     for (auto& filter : lpfFilters) {
         filter.setLowpass(5000.0f, 0.7071f, static_cast<float>(sampleRate));
         filter.z1 = 0.0f;
