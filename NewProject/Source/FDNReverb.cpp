@@ -17,7 +17,6 @@ FDNReverb::FDNReverb() {
         delayLines.push_back(std::make_unique<CustomDelayLine>(primeDelays[i]));
         diffusionFilters.push_back(AllPassFilter(allPassValues[i]));
         lpfFilters.push_back(BiquadFilter());
-        lfos.push_back(LFO());
         dcBlockers.push_back(DCBlocker());
     }
 
@@ -61,11 +60,6 @@ void FDNReverb::prepare(double newSampleRate) {
             if (scaledDelay < 1) scaledDelay = 1; // Ensure minimum delay
             delayLines.push_back(std::make_unique<CustomDelayLine>(scaledDelay));
         }
-    }
-
-    // Reset LFO phases to avoid clicks when changing sample rate
-    for (auto& lfo : lfos) {
-        lfo.phase = 0.0f;
     }
 
     // Reset filter states to prevent artifacts
@@ -151,12 +145,6 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
 
     for (int sample = 0; sample < numSamples; ++sample)
     {
-        // Generate LFO values
-        float lfoValues[numDelayLines];
-        for (int i = 0; i < numDelayLines; ++i) {
-            float lfoFreq = 0.1f + i * 0.03f;
-            lfoValues[i] = lfos[i].process(lfoFreq, sampleRate);
-        }
 
         // 1a) First prepare input signals from all channels using Hadamard matrix
         std::array<float, numDelayLines> inputSignals = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
@@ -182,9 +170,6 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
 
             // Sum mixed input + feedback
             float delayInput = mixedInputs[i] + prevFeedback;
-
-            // Apply subtle modulation
-            delayInput *= (1.0f + (lfoValues[i] - 0.5f) * 0.005f);
 
             // Store delayed output
             outputs[i][sample] = delayLines[i]->processSample(softLimit(delayInput));

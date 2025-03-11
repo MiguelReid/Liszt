@@ -167,36 +167,11 @@ private:
             a1 = (-2.0f * cosw) * norm;
             a2 = (1.0f - alpha) * norm;
         }
-
-        // Legacy one-pole filter with slew limiting
-        float process(float in, float cutoff) {
-            const float maxChange = 0.01f;
-            float change = in - lastInput;
-            if (std::abs(change) > maxChange) {
-                in = lastInput + maxChange * (change > 0 ? 1.0f : -1.0f);
-            }
-            lastInput = in;
-
-            // Apply simple low-pass
-            z1 = z1 + cutoff * (in - z1);
-            return z1;
-        }
     };
 
 
     std::vector<BiquadFilter> lpfFilters;
 
-    struct LFO {
-        float phase = 0.0f;
-
-        float process(float frequency, float sampleRate) {
-            phase += frequency / sampleRate;
-            if (phase > 1.0f) phase -= 1.0f;
-            return 0.5f * (1.0f + std::sin(2.0f * juce::MathConstants<float>::pi * phase));
-        }
-    };
-
-    std::vector<LFO> lfos;
     double sampleRate = 44100.0;
 
     // Early reflections implementation
