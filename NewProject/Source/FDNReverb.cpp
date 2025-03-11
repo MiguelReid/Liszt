@@ -103,13 +103,10 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
 
     // Smoother gain decay
     float decayGain = juce::jlimit(0.0f, 0.992f, static_cast<float>(decay));
-
     float decayVariations[numDelayLines] = { 1.0f, 0.99f, 0.995f, 0.985f, 0.992f, 0.988f, 0.997f, 0.982f };
     float diffusionCoeff = juce::jlimit(0.0f, 0.7f, static_cast<float>(diffusion));
 
     int predelaySamples = static_cast<int>(predelay * sampleRate / 1000.0);
-
-    float lpfCutoff = 0.2f;
 
     std::vector<std::vector<float>> outputs(numDelayLines, std::vector<float>(numSamples, 0.0f));
     std::vector<std::vector<float>> feedbackSignals(numDelayLines, std::vector<float>(numSamples, 0.0f));
@@ -154,115 +151,94 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
 
     for (int sample = 0; sample < numSamples; ++sample)
     {
-        // Generate LFO values for this sample
+        // Generate LFO values
         float lfoValues[numDelayLines];
         for (int i = 0; i < numDelayLines; ++i) {
-            // Different rates for each delay line
-            float lfoFreq = 0.1f + i * 0.03f; // 0.1 Hz to 0.19 Hz
+            float lfoFreq = 0.1f + i * 0.03f;
             lfoValues[i] = lfos[i].process(lfoFreq, sampleRate);
         }
 
-        // 1) Delay lines
-        for (int ch = 0; ch < numChannels; ++ch)
-        {
+        // 1a) First prepare input signals from all channels using Hadamard matrix
+        std::array<float, numDelayLines> inputSignals = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+
+        // Get channel inputs with predelay
+        for (int ch = 0; ch < std::min(numChannels, numDelayLines); ++ch) {
             float inputSample = juce::jlimit(-1.0f, 1.0f, buffer.getSample(ch, sample));
-
-            // Apply predelay to the input signal
-            float delayedInput = predelayBuffer.process(inputSample, predelaySamples);
-
-            for (int i = 0; i < numDelayLines; ++i)
-            {
-                float prevFeedback = (sample > 0)
-                    ? feedbackSignals[i][sample - 1]
-                    : 0.0f;
-
-                // Sum predelayed input + previous feedback
-                float delayInput = delayedInput + prevFeedback;
-
-                // Apply very subtle modulation to the feedback signal
-                delayInput *= (1.0f + (lfoValues[i] - 0.5f) * 0.01f); // Very subtle ±0.5% modulation
-
-                // Store delayed output:
-                outputs[i][sample] = delayLines[i]->processSample(
-                    softLimit(delayInput));
-            }
+            inputSignals[ch] = predelayBuffer.process(inputSample, predelaySamples);
         }
 
-
-        // Rest of the processing remains the same
-        // ...
-
-        // Gather delay output into an array:
-        std::array<float, numDelayLines> sampleVec;
-        for (int i = 0; i < numDelayLines; ++i)
-            sampleVec[i] = outputs[i][sample];
-
-        // 2) Apply Hadamard matrix:
-        std::array<float, numDelayLines> matrixedSample{ 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
-        for (int row = 0; row < numDelayLines; ++row)
-        {
-            for (int col = 0; col < numDelayLines; ++col)
-            {
-                matrixedSample[row] += hadamardMatrix[row][col] * sampleVec[col];
-            }
-        }
-
-        // 3) Apply cascaded diffusion
+        // Mixing matrix -> HADAMARD
+        std::array<float, numDelayLines> mixedInputs = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
         for (int i = 0; i < numDelayLines; ++i) {
-            float diffused = matrixedSample[i];
-            // More diffusion for higher diffusionCoeff values
-            int stages = 1 + static_cast<int>(diffusionCoeff * 6.0f); // 1-5 stages
-            for (int s = 0; s < stages; s++) {
-                diffused = diffusionFilters[i].process(diffused, 0.5f + (diffusionCoeff * 0.4f));
+            for (int j = 0; j < numDelayLines; ++j) {
+                mixedInputs[i] += hadamardMatrix[i][j] * inputSignals[j];
             }
-            matrixedSample[i] = diffused;
         }
-        
-        // Apply Hadamard feedback matrix (cross-channel feedback mixing)
+
+        // 1b) Delay lines with feedback
+        for (int i = 0; i < numDelayLines; ++i)
+        {
+            float prevFeedback = (sample > 0) ? feedbackSignals[i][sample - 1] : 0.0f;
+
+            // Sum mixed input + feedback
+            float delayInput = mixedInputs[i] + prevFeedback;
+
+            // Apply subtle modulation
+            delayInput *= (1.0f + (lfoValues[i] - 0.5f) * 0.005f);
+
+            // Store delayed output
+            outputs[i][sample] = delayLines[i]->processSample(softLimit(delayInput));
+        }
+
+        // 2) Get delay line outputs
+        std::array<float, numDelayLines> delayOutputs;
+        for (int i = 0; i < numDelayLines; ++i) {
+            delayOutputs[i] = outputs[i][sample];
+        }
+
+        // 3) Process feedback using Householder matrix
         std::array<float, numDelayLines> householderMixed = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
         for (int i = 0; i < numDelayLines; ++i) {
             for (int j = 0; j < numDelayLines; ++j) {
-                householderMixed[i] += householderMatrix[i][j] * matrixedSample[j];
+                householderMixed[i] += householderMatrix[i][j] * delayOutputs[j];
             }
         }
 
-        // Apply LPF + DC Blocking + decay gain
+        // 4) Process each delay line with proper signal flow
         for (int i = 0; i < numDelayLines; ++i) {
-            // Filter cutoff based on decay value for frequency-dependent decay
-            float cutoff = 3000.0f + (1.0f - decayGain) * 5000.0f;
+            // Apply DC blocking to prevent static buildup
+            float signal = dcBlockers[i].process(denormalPrevention(householderMixed[i]));
 
-            // Update biquad coefficients
-            lpfFilters[i].setLowpass(cutoff, 0.7071f, static_cast<float>(sampleRate));
-
-            // Process audio through the biquad filter
-            float filtered = lpfFilters[i].processBiquad(denormalPrevention(householderMixed[i]));
-
-            // Apply DC blocker to prevent static buildup
-            filtered = dcBlockers[i].process(filtered);
-
-            // Apply slightly different decay for each line
-            float lineDecay = decayGain * decayVariations[i];
-
-            // Apply a soft-knee compression to the decay to preserve quieter reverb tails
-            float absLevel = std::abs(filtered);
-            if (absLevel > 0.5f) {
-                // Compress louder parts slightly more
-                filtered *= (0.5f + (absLevel - 0.5f) * 0.8f) / absLevel;
+            // Apply diffusion for density
+            int stages = 1 + static_cast<int>(diffusionCoeff * 3.0f); // 3 MAX Stages
+            for (int s = 0; s < stages; s++) {
+                signal = diffusionFilters[i].process(signal, 0.4f + (diffusionCoeff * 0.3f));
             }
 
-            float feedbackOut = softLimit(filtered * lineDecay);
-            feedbackSignals[i][sample] = feedbackOut;
+            // Apply frequency-dependent filtering
+            float cutoff = 3000.0f + (1.0f - decayGain) * 5000.0f;
+            lpfFilters[i].setLowpass(cutoff, 0.7071f, static_cast<float>(sampleRate));
+            signal = lpfFilters[i].processBiquad(signal);
+
+            // Apply decay and compression
+            float lineDecay = decayGain * decayVariations[i];
+            float absLevel = std::abs(signal);
+            if (absLevel > 0.4f) {
+                signal *= (0.4f + (absLevel - 0.4f) * 0.8f) / absLevel;
+            }
+
+            feedbackSignals[i][sample] = softLimit(signal * lineDecay);
         }
 
-        // Send to channel outputs
-        for (int ch = 0; ch < numChannels; ++ch)
-        {
-            for (int i = 0; i < numDelayLines; ++i)
-            {
-                // Apply soft limiting and add to output
-                channelOutputs[ch][sample] += softLimit(feedbackSignals[(i + ch) % numDelayLines][sample] / (numDelayLines * 0.8f));
+        // 5) Mix to output channels
+        for (int ch = 0; ch < numChannels; ++ch) {
+            for (int i = 0; i < numDelayLines; ++i) {
+                float outputGain = 1.5f / numDelayLines;
+                channelOutputs[ch][sample] += softLimit(
+                    feedbackSignals[(i + ch) % numDelayLines][sample] * outputGain);
             }
         }
     }
+
     return channelOutputs;
 }
