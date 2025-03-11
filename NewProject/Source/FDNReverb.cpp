@@ -15,7 +15,7 @@
 FDNReverb::FDNReverb() {
     for (int i = 0; i < numDelayLines; ++i) {
         delayLines.push_back(std::make_unique<CustomDelayLine>(primeDelays[i]));
-        diffusionFilters.push_back(AllPassFilter());
+        diffusionFilters.push_back(AllPassFilter(allPassValues[i]));
         lpfFilters.push_back(BiquadFilter());
         lfos.push_back(LFO());
         dcBlockers.push_back(DCBlocker());
@@ -77,10 +77,9 @@ void FDNReverb::prepare(double newSampleRate) {
 
     // Reset diffusion filters
     for (auto& filter : diffusionFilters) {
-        filter.buffer1[0] = 0.0f;
-        filter.buffer1[1] = 0.0f;
-        filter.buffer2[0] = 0.0f;
-        filter.buffer2[1] = 0.0f;
+        // Clear all buffer content
+        std::fill(filter.buffer.begin(), filter.buffer.end(), 0.0f);
+        filter.writeIndex = 0;
     }
 
     // Scale early reflection times for sample rate
@@ -104,6 +103,7 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
 
     // Smoother gain decay
     float decayGain = juce::jlimit(0.0f, 0.992f, static_cast<float>(decay));
+
     float decayVariations[numDelayLines] = { 1.0f, 0.99f, 0.995f, 0.985f, 0.992f, 0.988f, 0.997f, 0.982f };
     float diffusionCoeff = juce::jlimit(0.0f, 0.7f, static_cast<float>(diffusion));
 
@@ -207,12 +207,15 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
             }
         }
 
-        // 3) Apply diffusion, then hadamard matrix, then LPF in the feedback loop
-        for (int i = 0; i < numDelayLines; ++i)
-        {
-            // Apply diffusion
-            float diffused = diffusionFilters[i].process(matrixedSample[i], diffusionCoeff);
-            matrixedSample[i] = diffused; // Store back for feedback matrix
+        // 3) Apply cascaded diffusion
+        for (int i = 0; i < numDelayLines; ++i) {
+            float diffused = matrixedSample[i];
+            // More diffusion for higher diffusionCoeff values
+            int stages = 1 + static_cast<int>(diffusionCoeff * 6.0f); // 1-5 stages
+            for (int s = 0; s < stages; s++) {
+                diffused = diffusionFilters[i].process(diffused, 0.5f + (diffusionCoeff * 0.4f));
+            }
+            matrixedSample[i] = diffused;
         }
         
         // Apply Hadamard feedback matrix (cross-channel feedback mixing)

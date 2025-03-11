@@ -104,30 +104,30 @@ private:
 
     // First, define the AllPassFilter properly in your header file
     struct AllPassFilter {
-        float buffer1[2] = { 0.0f, 0.0f };
-        float buffer2[2] = { 0.0f, 0.0f };
+        std::vector<float> buffer;
+        int bufferSize = 0;
+        int writeIndex = 0;
 
-        // Process with stability safeguards
+        AllPassFilter(int size = 277) { // Use a prime number for buffer size
+            buffer.resize(size, 0.0f);
+            bufferSize = size;
+        }
+
         float process(float input, float coeff) {
-            // Ensure coefficient is in stable range
             coeff = juce::jlimit(-0.9f, 0.9f, coeff);
 
-            // First all-pass stage with DC blocking
-            float temp = input + (-coeff * buffer1[0]);
-            float output1 = buffer1[0] + (coeff * temp);
-            buffer1[0] = buffer1[1];
-            buffer1[1] = temp;
+            int readIndex = (writeIndex - bufferSize + buffer.size()) % buffer.size();
+            float delayedSample = buffer[readIndex];
 
-            // Second all-pass stage 
-            temp = output1 + (-coeff * buffer2[0]);
-            float output2 = buffer2[0] + (coeff * temp);
-            buffer2[0] = buffer2[1];
-            buffer2[1] = temp;
+            float temp = input + (coeff * delayedSample);
+            buffer[writeIndex] = temp;
+            writeIndex = (writeIndex + 1) % buffer.size();
 
-            // Apply safety limiter to prevent instability
-            return juce::jlimit(-1.0f, 1.0f, output2);
+            return delayedSample - (coeff * temp);
         }
     };
+
+    const int allPassValues[8] = { 277, 379, 419, 479, 547, 607, 661, 739 };
 
     std::vector<AllPassFilter> diffusionFilters;
 
