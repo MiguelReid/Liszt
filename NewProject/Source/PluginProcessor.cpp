@@ -301,7 +301,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout NewProjectAudioProcessor::cr
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
 		"PREDELAY", "Predelay", juce::NormalisableRange<float>(0.0f, 100.0f, 0.01f), 0.0f));
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
-		"DECAY", "Decay", juce::NormalisableRange<float>(0.1f, 10.0f, 0.1f), 0.5f));
+		"DECAY", "Decay", juce::NormalisableRange<float>(0.8f, 5.0f, 0.1f), 0.8f));
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
 		"DRYWET", "Dry/Wet", juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.5f));
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
