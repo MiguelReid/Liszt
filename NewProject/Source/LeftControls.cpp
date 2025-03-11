@@ -50,10 +50,6 @@ LeftControls::LeftControls(juce::AudioProcessorValueTreeState& apvts) : apvts(ap
     addAndMakeVisible(pitchBendSlider);
     addAndMakeVisible(gainSlider);
 
-	// ==========================
-
-	gainSlider.setSkewFactor(0.5f);
-
 	// AudioProcessorValueTreeState ===============================
 	pitchBendAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
 		apvts, "PITCH_BEND", pitchBendSlider);
