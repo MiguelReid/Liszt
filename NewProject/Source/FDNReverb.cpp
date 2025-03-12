@@ -166,7 +166,7 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
             for (int j = 0; j < numDelayLines; ++j) {
                 mixedInputs[i] += hadamardMatrix[i][j] * inputSignals[j];
             }
-        }
+        }   
 
         // 1c) Delay lines with feedback
         for (int i = 0; i < numDelayLines; ++i)
@@ -186,7 +186,7 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
             outputs[i][sample] = delayLines[i]->processSample(softLimit(delayInput));
         }
 
-        // 2) Apply Householder matrix immediately
+        // 2) Feedback Matrix -> Householder
         std::array<float, numDelayLines> householderMixed = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
         for (int i = 0; i < numDelayLines; ++i) {
             for (int j = 0; j < numDelayLines; ++j) {

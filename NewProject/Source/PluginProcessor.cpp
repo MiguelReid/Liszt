@@ -254,6 +254,21 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 			}
 		}
 	}
+
+	if (buffer.getNumChannels() > 0)
+	{
+		float visualizationGain = 2.0f;
+		const float* readPtr = buffer.getReadPointer(0);
+
+		for (int i = 0; i < numSamples; ++i)
+		{
+			// Scale the sample just for visualization purposes
+			float scaledSample = readPtr[i] * visualizationGain;
+
+			fifoBuffer.setSample(0, fifoIndex % fifoSize, scaledSample);
+			fifoIndex++;
+		}
+	}
 }
 
 void NewProjectAudioProcessor::addMidiMessage(const juce::MidiMessage& message)

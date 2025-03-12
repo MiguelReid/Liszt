@@ -17,9 +17,9 @@ bool WaveScreen::isScreenEnabled = false;
 WaveScreen::WaveScreen()
 {
     // AudioVisualizer
-    audioVisualiser.setRepaintRate(30); // 30 frames/s
-    audioVisualiser.setBufferSize(128);
-    audioVisualiser.setSamplesPerBlock(16);
+    audioVisualiser.setRepaintRate(30);
+    audioVisualiser.setBufferSize(1024);
+    audioVisualiser.setSamplesPerBlock(32);
     audioVisualiser.setNumChannels(1);
     audioVisualiser.setColours(juce::Colours::black, juce::Colours::white);
     audioVisualiser.setEnabled(true);
