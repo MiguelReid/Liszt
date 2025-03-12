@@ -95,8 +95,8 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
     const int numChannels = buffer.getNumChannels();
     const int numSamples = buffer.getNumSamples();
 
-    // Smoother gain decay
-    float decayGain = juce::jlimit(0.0f, 0.992f, static_cast<float>(decay));
+    // Increase the decay gain scaling slightly
+    float decayGain = juce::jlimit(0.0f, 0.995f, static_cast<float>(decay));
     float decayVariations[numDelayLines] = { 1.0f, 0.99f, 0.995f, 0.985f, 0.992f, 0.988f, 0.997f, 0.982f };
     float diffusionCoeff = juce::jlimit(0.0f, 0.7f, static_cast<float>(diffusion));
 
@@ -139,23 +139,28 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
 
         // Add early reflections to output channels
         for (int ch = 0; ch < numChannels; ++ch) {
-            channelOutputs[ch][sample] += softLimit(erOutput);
+            // * 0.8 for more prominent late reverb
+            channelOutputs[ch][sample] += softLimit(erOutput * 0.8f);
         }
     }
 
     for (int sample = 0; sample < numSamples; ++sample)
     {
-
-        // 1a) First prepare input signals from all channels using Hadamard matrix
+        // 1a) First prepare input signals
         std::array<float, numDelayLines> inputSignals = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 
-        // Get channel inputs with predelay
         for (int ch = 0; ch < std::min(numChannels, numDelayLines); ++ch) {
-            float inputSample = juce::jlimit(-1.0f, 1.0f, buffer.getSample(ch, sample));
+            // Less conservative input limiting to allow more signal through
+            float inputSample = juce::jlimit(-0.85f, 0.85f, buffer.getSample(ch, sample));
+
+            // DC Block to reduce low frequency buildup
+            inputSample = dcBlockers[ch].process(inputSample);
+
+            // Predelay
             inputSignals[ch] = predelayBuffer.process(inputSample, predelaySamples);
         }
 
-        // Mixing matrix -> HADAMARD
+        // 1b) Mixing matrix -> HADAMARD
         std::array<float, numDelayLines> mixedInputs = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
         for (int i = 0; i < numDelayLines; ++i) {
             for (int j = 0; j < numDelayLines; ++j) {
@@ -163,59 +168,54 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
             }
         }
 
-        // 1b) Delay lines with feedback
+        // 1c) Delay lines with feedback
         for (int i = 0; i < numDelayLines; ++i)
         {
-            float prevFeedback = (sample > 0) ? feedbackSignals[i][sample - 1] : 0.0f;
+            // Increase feedback to 98% for more sustain
+            float prevFeedback = (sample > 0) ? feedbackSignals[i][sample - 1] * 0.98f : 0.0f;
 
             // Sum mixed input + feedback
             float delayInput = mixedInputs[i] + prevFeedback;
 
-            // Store delayed output
+            // Use slightly higher cutoff for more reverb presence
+            float inputCutoff = 2000.0f + (1.0f - decayGain) * 2500.0f;
+            lpfFilters[i].setLowpass(inputCutoff, 0.5f, static_cast<float>(sampleRate));
+            delayInput = lpfFilters[i].processBiquad(delayInput);
+
+            // Store delayed output with limiting
             outputs[i][sample] = delayLines[i]->processSample(softLimit(delayInput));
         }
 
-        // 2) Get delay line outputs
-        std::array<float, numDelayLines> delayOutputs;
-        for (int i = 0; i < numDelayLines; ++i) {
-            delayOutputs[i] = outputs[i][sample];
-        }
-
-        // 3) Process feedback using Householder matrix
+        // 2) Apply Householder matrix immediately
         std::array<float, numDelayLines> householderMixed = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
         for (int i = 0; i < numDelayLines; ++i) {
             for (int j = 0; j < numDelayLines; ++j) {
-                householderMixed[i] += householderMatrix[i][j] * delayOutputs[j];
+                householderMixed[i] += householderMatrix[i][j] * outputs[j][sample];
             }
         }
 
-        // 4) Process each delay line with proper signal flow
+        // 3) Post-processing with slightly more diffusion
         for (int i = 0; i < numDelayLines; ++i) {
-            // Apply DC blocking to prevent static buildup
+            // Apply DC blocking after the Householder matrix
             float signal = dcBlockers[i].process(denormalPrevention(householderMixed[i]));
 
-            // Apply diffusion for density
-            int stages = 1 + static_cast<int>(diffusionCoeff * 3.0f); // 3 MAX Stages
+            // Diffusion -> increased perceived density
+            int stages = 1 + static_cast<int>(diffusionCoeff * 2.0f); // 2 Stages
             for (int s = 0; s < stages; s++) {
-                signal = diffusionFilters[i].process(signal, 0.4f + (diffusionCoeff * 0.3f));
+                signal = diffusionFilters[i].process(signal, 0.35f + (diffusionCoeff * 0.2f));
             }
-
-            // Apply frequency-dependent filtering
-            float cutoff = 3000.0f + (1.0f - decayGain) * 5000.0f;
-            lpfFilters[i].setLowpass(cutoff, 0.7071f, static_cast<float>(sampleRate));
-            signal = lpfFilters[i].processBiquad(signal);
 
             // Apply decay and compression
             float lineDecay = decayGain * decayVariations[i];
             float absLevel = std::abs(signal);
-            if (absLevel > 0.4f) {
-                signal *= (0.4f + (absLevel - 0.4f) * 0.8f) / absLevel;
+            if (absLevel > 0.3f) {
+                signal *= (0.3f + (absLevel - 0.3f) * 0.7f) / absLevel;
             }
 
             feedbackSignals[i][sample] = softLimit(signal * lineDecay);
         }
 
-        // 5) Mix to output channels
+        // 4) Mix to output channels
         for (int ch = 0; ch < numChannels; ++ch) {
             for (int i = 0; i < numDelayLines; ++i) {
                 float outputGain = 1.5f / numDelayLines;

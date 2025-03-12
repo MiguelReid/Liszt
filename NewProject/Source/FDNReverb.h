@@ -131,7 +131,7 @@ private:
 
     std::vector<AllPassFilter> diffusionFilters;
 
-	// Biquad filter
+	// Biquad filter: 2 poles and 2 zeros
     struct BiquadFilter {
         float b0 = 1.0f, b1 = 0.0f, b2 = 0.0f;
         float a1 = 0.0f, a2 = 0.0f;
@@ -208,7 +208,7 @@ private:
         float x1 = 0.0f, y1 = 0.0f;
 
         float process(float input) {
-            float output = input - x1 + 0.995f * y1;
+            float output = input - x1 + 0.997f * y1;
             x1 = input;
             y1 = output;
             return output;
