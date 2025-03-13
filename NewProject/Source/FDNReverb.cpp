@@ -22,12 +22,12 @@ FDNReverb::FDNReverb() {
 
     // Early reflection for a realistic room sound
     earlyReflections = {
-        { 450,  0.55f },
-        { 850,  0.45f },
-        { 1250, 0.38f },
-        { 1800, 0.32f },
-        { 2500, 0.28f },
-        { 3200, 0.22f },
+        { 450,  0.65f },
+        { 850,  0.57f },
+        { 1250, 0.49f },
+        { 1800, 0.40f },
+        { 2500, 0.32f },
+        { 3200, 0.24f },
         { 4000, 0.18f },
         { 4800, 0.15f }
     };
@@ -226,4 +226,3 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
 
     return channelOutputs;
 }
-
