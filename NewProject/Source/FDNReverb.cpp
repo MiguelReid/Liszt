@@ -110,26 +110,28 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
     std::vector<std::vector<float>> feedbackSignals(numDelayLines, std::vector<float>(numSamples, 0.0f));
     std::vector<std::vector<float>> channelOutputs(numChannels, std::vector<float>(numSamples, 0.0f));
 
-    // Increase direct signal mix for more presence
-    for (int ch = 0; ch < numChannels; ++ch) {
-        for (int sample = 0; sample < numSamples; ++sample) {
+    // Direct signal mix (moderate level)
+    for (int ch = 0; ch < numChannels; ++ch)
+    {
+        for (int sample = 0; sample < numSamples; ++sample)
+        {
             channelOutputs[ch][sample] = buffer.getSample(ch, sample) * 0.20f;
         }
     }
 
-    // Process early reflections with simplified approach
-    for (int sample = 0; sample < numSamples; ++sample) {
+    // Process early reflections
+    for (int sample = 0; sample < numSamples; ++sample)
+    {
         float monoInput = 0.0f;
         for (int ch = 0; ch < numChannels; ++ch)
             monoInput += buffer.getSample(ch, sample);
         monoInput /= numChannels;
 
-        // Write to circular buffer
         erBuffer[erWriteIndex] = monoInput;
 
-        // Sum a few key early reflection contributions
         float erOutput = 0.0f;
-        for (int i = 0; i < 4; i++) { // Using only the first 4 reflections
+        for (int i = 0; i < 4; i++)  // Using first 4 reflections
+        {
             const auto& er = earlyReflections[i];
             int readPos = erWriteIndex - er.delaySamples;
             if (readPos < 0)
@@ -137,36 +139,36 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
             erOutput += erBuffer[readPos] * er.gain;
         }
 
-        // Apply diffusion on early reflections
         erOutput = erDiffusion1.process(erOutput, 0.2f);
 
-        // Advance ER write position
         erWriteIndex = (erWriteIndex + 1) % erBufferSize;
 
-        // Increase early reflections mix
+        // Increase early reflection contribution
         for (int ch = 0; ch < numChannels; ++ch)
             channelOutputs[ch][sample] += erOutput * 0.80f;
     }
 
-    // Maintain consistent filter cutoff for a cleaner sound
+    // Consistent low-pass cutoff adjustment
     float inputCutoff = 2900.0f + (1.0f - decayGain) * 2000.0f;
     for (int i = 0; i < numDelayLines; ++i)
         lpfFilters[i].setLowpass(inputCutoff, 0.6f, static_cast<float>(sampleRate));
 
-    // Process each sample in the buffer through the feedback network
     for (int sample = 0; sample < numSamples; ++sample)
     {
         std::array<float, numDelayLines> inputSignals = { 0.0f };
-        for (int ch = 0; ch < std::min(numChannels, numDelayLines); ++ch) {
+        for (int ch = 0; ch < std::min(numChannels, numDelayLines); ++ch)
+        {
             float inputSample = buffer.getSample(ch, sample);
             inputSample = dcBlockers[ch].process(inputSample);
-            // Apply denormal prevention on the input
+            // Apply denormal prevention and then predelay
             inputSignals[ch] = predelayBuffer.process(denormalPrevention(inputSample), predelaySamples);
         }
 
         std::array<float, numDelayLines> mixedInputs = { 0.0f };
-        for (int i = 0; i < numDelayLines; ++i) {
-            for (int j = 0; j < numDelayLines; ++j) {
+        for (int i = 0; i < numDelayLines; ++i)
+        {
+            for (int j = 0; j < numDelayLines; ++j)
+            {
                 mixedInputs[i] += hadamardMatrix[i][j] * inputSignals[j];
             }
         }
@@ -181,31 +183,37 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
         }
 
         std::array<float, numDelayLines> householderMixed = { 0.0f };
-        for (int i = 0; i < numDelayLines; ++i) {
+        for (int i = 0; i < numDelayLines; ++i)
+        {
             for (int j = 0; j < numDelayLines; ++j)
                 householderMixed[i] += householderMatrix[i][j] * outputs[j][sample];
         }
 
-        // Process feedback
-        for (int i = 0; i < numDelayLines; ++i) {
-            // Process through the DCBlocker and diffusion filter
+        // Noise Gating
+        for (int i = 0; i < numDelayLines; ++i)
+        {
             float signal = dcBlockers[i].process(householderMixed[i]);
-            // Increase diffusion slightly to enhance tail density
             signal = diffusionFilters[i].process(signal, 0.4f + (diffusionCoeff * 0.1f));
-            // Apply decay and denormal prevention
             float lineDecay = decayGain * decayVariations[i];
+
+            // Apply denormal prevention and soft limit
             signal = denormalPrevention(signal);
-            // Use soft limiter to control excessive peaks
             if (std::abs(signal) > 0.9f)
                 signal *= 0.9f / std::abs(signal);
+
+            // Noise gating: zero out any values below threshold
+            if (std::abs(signal) < 5e-5f)
+                signal = 0.0f;
+
             feedbackSignals[i][sample] = signal * lineDecay;
         }
 
-        // Sum delayed outputs for each channel
-        for (int ch = 0; ch < numChannels; ++ch) {
+        // Mix late reverb outputs for each channel
+        for (int ch = 0; ch < numChannels; ++ch)
+        {
             float lateSum = 0.0f;
-            // Using half the lines for a cleaner blend
-            for (int i = 0; i < numDelayLines; i += 2) {
+            for (int i = 0; i < numDelayLines; i += 2)
+            {
                 float outputGain = 1.2f / (numDelayLines / 2);
                 lateSum += feedbackSignals[(i + ch) % numDelayLines][sample] * outputGain;
             }
@@ -215,4 +223,5 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
 
     return channelOutputs;
 }
+
 
