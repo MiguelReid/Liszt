@@ -99,8 +99,11 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
     const int numChannels = buffer.getNumChannels();
     const int numSamples = buffer.getNumSamples();
 
+    // Simplify parameter handling
     float decayGain = juce::jlimit(0.0f, 0.98f, static_cast<float>(decay));
-    float decayVariations[numDelayLines] = { 1.0f, 0.995f, 0.998f, 0.992f, 0.997f, 0.994f, 0.999f, 0.991f };    float diffusionCoeff = juce::jlimit(0.0f, 0.7f, static_cast<float>(diffusion));
+    // Use fewer variations with less extreme differences
+    float decayVariations[numDelayLines] = { 1.0f, 0.998f, 0.997f, 0.999f, 0.996f, 0.998f, 0.997f, 0.999f };
+    float diffusionCoeff = juce::jlimit(0.0f, 0.7f, static_cast<float>(diffusion));
 
     int predelaySamples = static_cast<int>(predelay * sampleRate / 1000.0);
 
@@ -108,7 +111,15 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
     std::vector<std::vector<float>> feedbackSignals(numDelayLines, std::vector<float>(numSamples, 0.0f));
     std::vector<std::vector<float>> channelOutputs(numChannels, std::vector<float>(numSamples, 0.0f));
 
-    // Process early reflections first
+    // Add some direct signal for immediate presence
+    for (int ch = 0; ch < numChannels; ++ch) {
+        for (int sample = 0; sample < numSamples; ++sample) {
+            // Add 15% direct signal
+            channelOutputs[ch][sample] = buffer.getSample(ch, sample) * 0.15f;
+        }
+    }
+
+    // Process early reflections with simplified approach
     for (int sample = 0; sample < numSamples; ++sample) {
         float monoInput = 0.0f;
         for (int ch = 0; ch < numChannels; ++ch) {
@@ -119,31 +130,31 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
         // Write to circular buffer
         erBuffer[erWriteIndex] = monoInput;
 
-        // Sum early reflection contributions without diffusing each one individually
+        // Sum early reflection contributions - simplify to just a few key reflections
         float erOutput = 0.0f;
-        for (const auto& er : earlyReflections) {
+        for (int i = 0; i < 4; i++) { // Use only the first 4 reflections for clarity
+            const auto& er = earlyReflections[i];
             int readPos = erWriteIndex - er.delaySamples;
             if (readPos < 0)
                 readPos += erBufferSize;
             erOutput += erBuffer[readPos] * er.gain;
         }
-        // Apply diffusion to the summed early reflections only once
-        erOutput = erDiffusion1.process(erOutput, 0.25f);
-        erOutput = erDiffusion2.process(erOutput, 0.15f);
+
+        // Apply minimal diffusion - just one stage with moderate setting
+        erOutput = erDiffusion1.process(erOutput, 0.2f);
 
         // Advance write position
         erWriteIndex = (erWriteIndex + 1) % erBufferSize;
 
         for (int ch = 0; ch < numChannels; ++ch) {
-            // * 0.8 for more prominent late reverb
-            channelOutputs[ch][sample] += softLimit(erOutput * 0.8f);
+            channelOutputs[ch][sample] += erOutput * 0.6f;
         }
     }
 
-    // Optimize Biquad coefficient updates: precompute cutoff outside the sample loop
-    float inputCutoff = 2000.0f + (1.0f - decayGain) * 2500.0f;
+    // Set consistent filter cutoff for cleaner sound
+    float inputCutoff = 3000.0f + (1.0f - decayGain) * 2000.0f;
     for (int i = 0; i < numDelayLines; ++i) {
-        lpfFilters[i].setLowpass(inputCutoff, 0.5f, static_cast<float>(sampleRate));
+        lpfFilters[i].setLowpass(inputCutoff, 0.6f, static_cast<float>(sampleRate));
     }
 
     for (int sample = 0; sample < numSamples; ++sample)
@@ -151,7 +162,7 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
         std::array<float, numDelayLines> inputSignals = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
 
         for (int ch = 0; ch < std::min(numChannels, numDelayLines); ++ch) {
-            float inputSample = juce::jlimit(-0.85f, 0.85f, buffer.getSample(ch, sample));
+            float inputSample = buffer.getSample(ch, sample);
             inputSample = dcBlockers[ch].process(inputSample);
             inputSignals[ch] = predelayBuffer.process(inputSample, predelaySamples);
         }
@@ -165,13 +176,18 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
 
         for (int i = 0; i < numDelayLines; ++i)
         {
-            float prevFeedback = (sample > 0) ? feedbackSignals[i][sample - 1] * 0.98f : 0.0f;
-            bool invertInput = (i & 0x5) != 0;   // Binary 101 pattern (bits 0 and 2)
-            bool invertFeedback = (i & 0x3) != 0;  // Binary 011 pattern (bits 0 and 1)
-            float delayInput = (invertInput ? -1.0f : 1.0f) * mixedInputs[i] +
-                (invertFeedback ? -1.0f : 1.0f) * prevFeedback;
+            // Simplify feedback mixing
+            float prevFeedback = (sample > 0) ? feedbackSignals[i][sample - 1] * 0.95f : 0.0f;
+
+            // Simpler polarity pattern
+            bool invertInput = (i & 0x1) != 0;   // Alternate polarity
+
+            // Simplified mixing
+            float delayInput = (invertInput ? -1.0f : 1.0f) * mixedInputs[i] + prevFeedback;
+
+            // Apply filter and delay
             delayInput = lpfFilters[i].processBiquad(delayInput);
-            outputs[i][sample] = delayLines[i]->processSample(softLimit(delayInput));
+            outputs[i][sample] = delayLines[i]->processSample(delayInput);
         }
 
         std::array<float, numDelayLines> householderMixed = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
@@ -182,27 +198,32 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
         }
 
         for (int i = 0; i < numDelayLines; ++i) {
-            float signal = dcBlockers[i].process(denormalPrevention(householderMixed[i]));
-            int stages = 1 + static_cast<int>(diffusionCoeff * 2.0f); // 2 stages max
-            for (int s = 0; s < stages; s++) {
-                signal = diffusionFilters[i].process(signal, 0.35f + (diffusionCoeff * 0.2f));
-            }
+            float signal = dcBlockers[i].process(householderMixed[i]);
+
+            // Simplified diffusion - use only one stage with consistent settings
+            signal = diffusionFilters[i].process(signal, 0.3f + (diffusionCoeff * 0.1f));
+
+            // Apply decay
             float lineDecay = decayGain * decayVariations[i];
-            float absLevel = std::abs(signal);
-            if (absLevel > 0.3f) {
-                signal *= (0.3f + (absLevel - 0.3f) * 0.7f) / absLevel;
-            }
-            feedbackSignals[i][sample] = softLimit(signal * lineDecay);
+
+            // Simple limiter to avoid excessive peaks
+            if (std::abs(signal) > 0.9f)
+                signal *= 0.9f / std::abs(signal);
+
+            feedbackSignals[i][sample] = signal * lineDecay;
         }
 
         for (int ch = 0; ch < numChannels; ++ch) {
-            for (int i = 0; i < numDelayLines; ++i) {
-                float outputGain = 1.5f / numDelayLines;
-                channelOutputs[ch][sample] += softLimit(
-                    feedbackSignals[(i + ch) % numDelayLines][sample] * outputGain);
+            float lateSum = 0.0f;
+            // Use fewer lines for cleaner sound
+            for (int i = 0; i < numDelayLines; i += 2) {
+                float outputGain = 1.2f / (numDelayLines / 2);
+                lateSum += feedbackSignals[(i + ch) % numDelayLines][sample] * outputGain;
             }
+            channelOutputs[ch][sample] += lateSum;
         }
     }
 
     return channelOutputs;
 }
+
