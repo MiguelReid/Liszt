@@ -76,6 +76,11 @@ void FDNReverb::prepare(double newSampleRate) {
         filter.writeIndex = 0;
     }
 
+	// Reset DC Blockers
+    for (auto& blocker : dcBlockers) {
+        blocker.reset();
+    }
+
     // Scale early reflection times for sample rate
     for (auto& er : earlyReflections) {
         er.delaySamples = static_cast<int>(er.delaySamples * sampleRateRatio);

@@ -205,15 +205,34 @@ private:
 
 	// Avoid static noise buildup with DC blocking
     struct DCBlocker {
-        float x1 = 0.0f, y1 = 0.0f;
+        float x1 = 0.0f, x2 = 0.0f;
+        float y1 = 0.0f, y2 = 0.0f;
+
+        void reset() {
+            x1 = x2 = 0.0f;
+            y1 = y2 = 0.0f;
+        }
 
         float process(float input) {
-            float output = input - x1 + 0.997f * y1;
-            x1 = input;
+            // Second-order DC blocking filter (pole at 0.995, zero at 1.0)
+            const float R = 0.995f; // Pole radius - closer to 1 gives narrower notch
+
+            // Store current input
+            float x0 = input;
+
+            // Calculate output: y[n] = x[n] - x[n-2] + R^2 * y[n-2]
+            float output = x0 - x2 + R * R * y2;
+
+            // Update state variables
+            x2 = x1;
+            x1 = x0;
+            y2 = y1;
             y1 = output;
+
             return output;
         }
     };
+
 
     std::vector<DCBlocker> dcBlockers;
 
