@@ -100,8 +100,6 @@ private:
         { -0.25f, -0.25f, -0.25f, -0.25f, -0.25f, -0.25f, -0.25f,  0.75f }
     } };
 
-    // First, define the AllPassFilter properly in your header file
-// In FDNReverb.h (within the AllPassFilter struct)
     struct AllPassFilter {
         std::vector<float> buffer;
         int bufferSize = 0;
@@ -175,7 +173,6 @@ private:
         }
     };
 
-
     std::vector<BiquadFilter> lpfFilters;
 
     double sampleRate = 44100.0;
@@ -238,7 +235,6 @@ private:
             return output;
         }
     };
-
 
     std::vector<DCBlocker> dcBlockers;
 
