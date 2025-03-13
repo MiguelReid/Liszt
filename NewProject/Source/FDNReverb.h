@@ -72,9 +72,7 @@ private:
     // DelayLines
     std::vector<std::unique_ptr<CustomDelayLine>> delayLines;
     static constexpr int numDelayLines = 8;
-    const int primeDelays[numDelayLines] = { 1031, 1327, 1523, 1871, 2053, 2311, 2539, 2803 };
-
-    // Predelay Lines
+    const int primeDelays[numDelayLines] = { 1087, 1283, 1511, 1747, 1997, 2269, 2539, 2797 };
     PredelayLine predelayBuffer{ 96000 }; // Maximum 2 seconds at 48kHz
 
     // Normalised hadamard matrix
