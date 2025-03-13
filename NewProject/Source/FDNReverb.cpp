@@ -103,7 +103,7 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
     float decayGain = juce::jlimit(0.0f, 0.98f, static_cast<float>(decay));
     // Use fewer variations with less extreme differences
     float decayVariations[numDelayLines] = { 1.0f, 0.998f, 0.997f, 0.999f, 0.996f, 0.998f, 0.997f, 0.999f };
-    float diffusionCoeff = juce::jlimit(0.0f, 0.7f, static_cast<float>(diffusion));
+    float diffusionCoeff = juce::jlimit(0.0f, 0.9f, static_cast<float>(diffusion));
 
     int predelaySamples = static_cast<int>(predelay * sampleRate / 1000.0);
 
@@ -152,7 +152,7 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
     }
 
     // Set consistent filter cutoff for cleaner sound
-    float inputCutoff = 3000.0f + (1.0f - decayGain) * 2000.0f;
+    float inputCutoff = 2900.0f + (1.0f - decayGain) * 2000.0f;
     for (int i = 0; i < numDelayLines; ++i) {
         lpfFilters[i].setLowpass(inputCutoff, 0.6f, static_cast<float>(sampleRate));
     }
