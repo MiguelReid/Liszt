@@ -172,14 +172,20 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
             }
         }   
 
-        // 1c) Delay lines with feedback
+        // 1c) Delay lines with feedback - elegant polarity pattern
         for (int i = 0; i < numDelayLines; ++i)
         {
             // Increase feedback to 98% for more sustain
             float prevFeedback = (sample > 0) ? feedbackSignals[i][sample - 1] * 0.98f : 0.0f;
 
-            // Sum mixed input + feedback
-            float delayInput = mixedInputs[i] + prevFeedback;
+            // Apply polarity inversion in an elegant alternating pattern
+            // Create a binary pattern based on prime numbers to avoid regular patterns
+            bool invertInput = (i & 0x5) != 0;  // Binary 101 pattern (bits 0 and 2)
+            bool invertFeedback = (i & 0x3) != 0;  // Binary 011 pattern (bits 0 and 1)
+
+            // Apply polarity based on pattern
+            float delayInput = (invertInput ? -1.0f : 1.0f) * mixedInputs[i] +
+                (invertFeedback ? -1.0f : 1.0f) * prevFeedback;
 
             // Use slightly higher cutoff for more reverb presence
             float inputCutoff = 2000.0f + (1.0f - decayGain) * 2500.0f;
@@ -189,6 +195,7 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
             // Store delayed output with limiting
             outputs[i][sample] = delayLines[i]->processSample(softLimit(delayInput));
         }
+
 
         // 2) Feedback Matrix -> Householder
         std::array<float, numDelayLines> householderMixed = { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
