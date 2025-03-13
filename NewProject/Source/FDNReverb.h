@@ -101,6 +101,7 @@ private:
     } };
 
     // First, define the AllPassFilter properly in your header file
+// In FDNReverb.h (within the AllPassFilter struct)
     struct AllPassFilter {
         std::vector<float> buffer;
         int bufferSize = 0;
@@ -114,7 +115,7 @@ private:
         float process(float input, float coeff) {
             coeff = juce::jlimit(-0.9f, 0.9f, coeff);
 
-            int readIndex = (writeIndex - bufferSize + buffer.size()) % buffer.size();
+            int readIndex = (writeIndex - bufferSize + static_cast<int>(buffer.size())) % static_cast<int>(buffer.size());
             float delayedSample = buffer[readIndex];
 
             float temp = input + (coeff * delayedSample);
@@ -123,7 +124,14 @@ private:
 
             return delayedSample - (coeff * temp);
         }
+
+        // New clear method to reset the filter state
+        void clear() noexcept {
+            std::fill(buffer.begin(), buffer.end(), 0.0f);
+            writeIndex = 0;
+        }
     };
+
 
     const int allPassValues[8] = { 277, 379, 419, 479, 547, 607, 661, 739 };
 
