@@ -22,16 +22,18 @@ FDNReverb::FDNReverb() {
 
     // Early reflection for a realistic room sound
     earlyReflections = {
-        { 450,  0.50f },
-        { 850,  0.40f },
-        { 1250, 0.30f },
-        { 1800, 0.25f },
-        { 2500, 0.20f },
-        { 3200, 0.15f }
+        { 450,  0.55f },
+        { 850,  0.45f },
+        { 1250, 0.38f },
+        { 1800, 0.32f },
+        { 2500, 0.28f },
+        { 3200, 0.22f },
+        { 4000, 0.18f },
+        { 4800, 0.15f }
     };
 
     // Initialize ER buffer (enough for longest reflection)
-    erBufferSize = 4000;  // ~90ms at 44.1kHz
+    erBufferSize = 5000;  // ~90ms at 44.1kHz
     erBuffer.resize(erBufferSize, 0.0f);
 
     // Additional diffusers for the early reflections
@@ -98,8 +100,7 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
     const int numSamples = buffer.getNumSamples();
 
     float decayGain = juce::jlimit(0.0f, 0.98f, static_cast<float>(decay));
-    float decayVariations[numDelayLines] = { 1.0f, 0.99f, 0.995f, 0.985f, 0.992f, 0.988f, 0.997f, 0.982f };
-    float diffusionCoeff = juce::jlimit(0.0f, 0.7f, static_cast<float>(diffusion));
+    float decayVariations[numDelayLines] = { 1.0f, 0.995f, 0.998f, 0.992f, 0.997f, 0.994f, 0.999f, 0.991f };    float diffusionCoeff = juce::jlimit(0.0f, 0.7f, static_cast<float>(diffusion));
 
     int predelaySamples = static_cast<int>(predelay * sampleRate / 1000.0);
 
