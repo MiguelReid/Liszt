@@ -95,8 +95,7 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
     const int numChannels = buffer.getNumChannels();
     const int numSamples = buffer.getNumSamples();
 
-    // Increase the decay gain scaling slightly
-    float decayGain = juce::jlimit(0.0f, 0.997f, static_cast<float>(decay));
+    float decayGain = juce::jlimit(0.0f, 0.98f, static_cast<float>(decay));
     float decayVariations[numDelayLines] = { 1.0f, 0.99f, 0.995f, 0.985f, 0.992f, 0.988f, 0.997f, 0.982f };
     float diffusionCoeff = juce::jlimit(0.0f, 0.7f, static_cast<float>(diffusion));
 
@@ -172,13 +171,13 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
         for (int i = 0; i < numDelayLines; ++i)
         {
             // Increase feedback to 98% for more sustain
-            float prevFeedback = (sample > 0) ? feedbackSignals[i][sample - 1] * 0.99f : 0.0f;
+            float prevFeedback = (sample > 0) ? feedbackSignals[i][sample - 1] * 0.98f : 0.0f;
 
             // Sum mixed input + feedback
             float delayInput = mixedInputs[i] + prevFeedback;
 
             // Use slightly higher cutoff for more reverb presence
-            float inputCutoff = 2200.0f + (1.0f - decayGain) * 2500.0f;
+            float inputCutoff = 2000.0f + (1.0f - decayGain) * 2500.0f;
             lpfFilters[i].setLowpass(inputCutoff, 0.5f, static_cast<float>(sampleRate));
             delayInput = lpfFilters[i].processBiquad(delayInput);
 
