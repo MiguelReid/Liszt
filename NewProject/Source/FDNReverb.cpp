@@ -99,6 +99,8 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
     const int numChannels = buffer.getNumChannels();
     const int numSamples = buffer.getNumSamples();
 
+    static float hpStates[16] = { 0.0f }; // 2 states per delay line (we need 2 for a steeper filter)
+
     // Simplify parameter handling
     float decayGain = juce::jlimit(0.0f, 0.98f, static_cast<float>(decay));
     float decayVariations[numDelayLines] = { 1.0f, 0.998f, 0.997f, 0.999f, 0.996f, 0.998f, 0.997f, 0.999f };
@@ -176,6 +178,8 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
         for (int i = 0; i < numDelayLines; ++i)
         {
             float prevFeedback = (sample > 0) ? feedbackSignals[i][sample - 1] * 0.95f : 0.0f;
+
+
             bool invertInput = ((i & 0x1) != 0);
             float delayInput = (invertInput ? -1.0f : 1.0f) * mixedInputs[i] + prevFeedback;
             delayInput = lpfFilters[i].processBiquad(delayInput);
@@ -189,24 +193,80 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
                 householderMixed[i] += householderMatrix[i][j] * outputs[j][sample];
         }
 
-        // Noise Gating
-        for (int i = 0; i < numDelayLines; ++i)
-        {
-            float signal = dcBlockers[i].process(householderMixed[i]);
-            signal = diffusionFilters[i].process(signal, 0.4f + (diffusionCoeff * 0.1f));
-            float lineDecay = decayGain * decayVariations[i];
+// Enhanced noise gating with high-pass filtering
+for (int i = 0; i < numDelayLines; ++i)
+{
+    float signal = dcBlockers[i].process(householderMixed[i]);
+    
+    // Add an additional high-pass filter to specifically target low swooshing sounds
+    // Second-order high-pass (12dB/octave) for more aggressive low-frequency removal
+    float hpCutoff = 120.0f; // Target those low swooshing frequencies
+    float hpQ = 0.8f;
+    float omega = 2.0f * juce::MathConstants<float>::pi * hpCutoff / sampleRate;
+    float alpha = std::sin(omega) / (2.0f * hpQ);
+    float cosw = std::cos(omega);
+    
+    // Second-order high-pass filter (direct form II)
+    float b0 = (1.0f + cosw) / 2.0f;
+    float b1 = -(1.0f + cosw);
+    float b2 = (1.0f + cosw) / 2.0f;
+    float a0 = 1.0f + alpha;
+    float a1 = -2.0f * cosw;
+    float a2 = 1.0f - alpha;
+    
+    // Apply normalization
+    b0 /= a0;
+    b1 /= a0;
+    b2 /= a0;
+    a1 /= a0;
+    a2 /= a0;
+    
+    // Apply the high-pass filter (direct form II)
+    const int stateIdx = i * 2;
+    float w = signal - a1 * hpStates[stateIdx] - a2 * hpStates[stateIdx + 1];
+    signal = b0 * w + b1 * hpStates[stateIdx] + b2 * hpStates[stateIdx + 1];
+    hpStates[stateIdx + 1] = hpStates[stateIdx];
+    hpStates[stateIdx] = w;
+    
+    // Continue with standard diffusion
+    signal = diffusionFilters[i].process(signal, 0.4f + (diffusionCoeff * 0.1f));
+    float lineDecay = decayGain * decayVariations[i];
+    
+    // Apply denormal prevention and soft limit
+    signal = denormalPrevention(signal);
+    // More aggressive limiting
+    if (std::abs(signal) > 0.9f)
+        signal *= 0.9f / std::abs(signal);
 
-            // Apply denormal prevention and soft limit
-            signal = denormalPrevention(signal);
-            if (std::abs(signal) > 0.9f)
-                signal *= 0.9f / std::abs(signal);
+    // Higher noise gate threshold
+    if (std::abs(signal) < 1e-4f)  // Higher threshold
+        signal = 0.0f;
 
-            // Noise gating: zero out any values below threshold
-            if (std::abs(signal) < 5e-5f)
-                signal = 0.0f;
+    // More progressive noise reduction with additional soft threshold
+    if (std::abs(signal) < 5e-4f) {
+        signal *= std::pow(std::abs(signal) / 5e-4f, 1.5f);  // Progressive reduction
+    }
 
-            feedbackSignals[i][sample] = signal * lineDecay;
-        }
+    // Extra smooth between consecutive samples
+    if (sample > 0) {
+        float prevSample = feedbackSignals[i][sample - 1] / lineDecay;
+        signal = prevSample * 0.4f + signal * 0.6f;
+    }
+
+    // Apply both a subtle modulation and soft saturation
+    float modFactor = 0.98f + 0.04f * std::sin(sample * 0.001f + i * 0.5f);
+    signal *= modFactor;
+
+    // Apply more aggressive soft saturation curve
+    signal = std::tanh(signal * 0.9f) / 0.9f;
+
+    // Reduce decay for low frequencies
+    if (i < 2) {  // First two delay lines tend to carry more low frequencies
+        lineDecay *= 0.94f;  // Extra decay reduction
+    }
+
+    feedbackSignals[i][sample] = signal * lineDecay;
+}
 
         // Mix late reverb outputs for each channel
         for (int ch = 0; ch < numChannels; ++ch)
