@@ -154,10 +154,16 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
 			channelOutputs[ch][sample] += erOutput * 0.80f;
 	}
 
-	// Consistent low-pass cutoff adjustment
+	// Dynamic low-pass cutoff adjustment with Butterworth response
 	float inputCutoff = 2900.0f + (1.0f - decayGain) * 2000.0f;
-	for (int i = 0; i < numDelayLines; ++i)
-		lpfFilters[i].setLowpass(inputCutoff, 0.6f, static_cast<float>(sampleRate));
+	constexpr float butterworthQ = 0.7071f; // For maximally flat frequency response
+
+	for (int i = 0; i < numDelayLines; ++i) {
+		// Add slight variation to cutoff per delay line for more natural sound
+		float lineCutoff = inputCutoff * (0.97f + 0.06f * (static_cast<float>(i) / numDelayLines));
+		lpfFilters[i].setLowpass(lineCutoff, butterworthQ, static_cast<float>(sampleRate));
+	}
+
 
 	for (int sample = 0; sample < numSamples; ++sample)
 	{
@@ -204,7 +210,7 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
 			float signal = dcBlockers[i].process(householderMixed[i]);
 
 			// Use the BiquadFilter for high-pass filtering
-			hpfFilters[i].processBiquad(signal);
+			signal = hpfFilters[i].processBiquad(signal);
 
 			// Continue with standard diffusion
 			signal = diffusionFilters[i].process(signal, 0.4f + (diffusionCoeff * 0.1f));

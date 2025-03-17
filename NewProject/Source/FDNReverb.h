@@ -137,18 +137,32 @@ private:
 
 	// Biquad filter: 2 poles and 2 zeros
     struct BiquadFilter {
-        float b0 = 1.0f, b1 = 0.0f, b2 = 0.0f;
-        float a1 = 0.0f, a2 = 0.0f;
-        float z1 = 0.0f, z2 = 0.0f;
         float lastInput = 0.0f;
         float cutoffFreq = 5000.0f;  // Store current cutoff frequency
         float q = 0.7071f;          // Default Q factor (Butterworth)
 
-        // Process using proper biquad implementation
+        // First stage
+        float b0 = 1.0f, b1 = 0.0f, b2 = 0.0f;
+        float a1 = 0.0f, a2 = 0.0f;
+        float z1 = 0.0f, z2 = 0.0f;
+
+        // Second stage 
+        float b0_2 = 1.0f, b1_2 = 0.0f, b2_2 = 0.0f;
+        float a1_2 = 0.0f, a2_2 = 0.0f;
+        float z1_2 = 0.0f, z2_2 = 0.0f;
+
+        // Process using cascaded biquads (24dB/octave)
         float processBiquad(float in) {
-            float out = in * b0 + z1;
-            z1 = in * b1 + z2 - a1 * out;
-            z2 = in * b2 - a2 * out;
+            // First stage
+            float mid = in * b0 + z1;
+            z1 = in * b1 + z2 - a1 * mid;
+            z2 = in * b2 - a2 * mid;
+
+            // Second stage
+            float out = mid * b0_2 + z1_2;
+            z1_2 = mid * b1_2 + z2_2 - a1_2 * out;
+            z2_2 = mid * b2_2 - a2_2 * out;
+
             return out;
         }
 
