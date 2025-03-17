@@ -105,8 +105,6 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
 	const int numChannels = buffer.getNumChannels();
 	const int numSamples = buffer.getNumSamples();
 
-	static float hpStates[16] = { 0.0f }; // 2 states per delay line (we need 2 for a steeper filter)
-
 	// Simplify parameter handling
 	float decayGain = juce::jlimit(0.0f, 0.98f, static_cast<float>(decay));
 	float decayVariations[numDelayLines] = { 1.0f, 0.998f, 0.997f, 0.999f, 0.996f, 0.998f, 0.997f, 0.999f };
