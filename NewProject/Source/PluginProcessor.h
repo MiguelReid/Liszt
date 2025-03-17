@@ -13,6 +13,7 @@
 #include <juce_audio_basics/juce_audio_basics.h>
 #include "ReverbControls.h"
 #include "FDNReverb.h"
+#include "LFO.h"
 
 //==============================================================================
 /**
@@ -78,6 +79,7 @@ private:
     //==============================================================================
     Synth synth;
     FDNReverb fdnReverb;
+    LFO lfo;
 
     juce::AbstractFifo midiFifo{ 1024 }; // Size the FIFO as needed
     std::vector<juce::MidiMessage> midiBuffer;

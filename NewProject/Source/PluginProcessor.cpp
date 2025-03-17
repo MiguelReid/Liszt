@@ -109,6 +109,8 @@ void NewProjectAudioProcessor::changeProgramName(int index, const juce::String& 
 void NewProjectAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
 	synth.setCurrentPlaybackSampleRate(sampleRate);
+	lfo.setSampleRate(sampleRate); // Add this line
+	fdnReverb.prepare(sampleRate); // Make sure this is called too
 }
 
 void NewProjectAudioProcessor::releaseResources()
@@ -198,6 +200,20 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 	midiMessages.clear();
 
 	// ================================================================
+
+	// LFO
+	// Apply LFO processing if oscillators are enabled
+	if (auto* lfoEnabled = apvts.getRawParameterValue("OSC1_ENABLED"))
+	{
+		if (lfoEnabled->load()) {
+			// Get LFO parameters
+			float lfoRange = apvts.getRawParameterValue("OSC1_RANGE")->load();
+			int lfoShape = static_cast<int>(apvts.getRawParameterValue("OSC1_SHAPE")->load());
+
+			// Process buffer with LFO
+			auto lfoOutput = lfo.processLFO(buffer, lfoRange, lfoShape);
+		}
+	}
 
 	// Gain Control
 	auto localGain = apvts.getRawParameterValue("GAIN")->load();

@@ -114,6 +114,8 @@
       <GROUP id="{4892159E-314E-9763-9FC0-6423C7B6C34B}" name="DSP">
         <FILE id="pZLWx2" name="FDNReverb.cpp" compile="1" resource="0" file="Source/FDNReverb.cpp"/>
         <FILE id="n3CSLg" name="FDNReverb.h" compile="0" resource="0" file="Source/FDNReverb.h"/>
+        <FILE id="RvZ7Fc" name="LFO.cpp" compile="1" resource="0" file="Source/LFO.cpp"/>
+        <FILE id="NgLeXj" name="LFO.h" compile="0" resource="0" file="Source/LFO.h"/>
       </GROUP>
       <FILE id="uSltEe" name="CustomSamplerVoice.cpp" compile="1" resource="0"
             file="Source/CustomSamplerVoice.cpp"/>
