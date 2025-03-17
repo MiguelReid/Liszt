@@ -171,9 +171,34 @@ private:
             a1 = (-2.0f * cosw) * norm;
             a2 = (1.0f - alpha) * norm;
         }
+
+        // Set coefficients for high-pass filter
+        void setHighpass(float frequency, float q, float sampleRate) {
+            // Store current settings
+            cutoffFreq = frequency;
+            this->q = q;
+
+            float omega = 2.0f * juce::MathConstants<float>::pi * frequency / sampleRate;
+            float alpha = std::sin(omega) / (2.0f * q);
+            float cosw = std::cos(omega);
+
+            float norm = 1.0f / (1.0f + alpha);
+
+            b0 = ((1.0f + cosw) * 0.5f) * norm;
+            b1 = -(1.0f + cosw) * norm;
+            b2 = ((1.0f + cosw) * 0.5f) * norm;
+            a1 = (-2.0f * cosw) * norm;
+            a2 = (1.0f - alpha) * norm;
+        }
+
+        // Reset filter state
+        void reset() {
+            z1 = z2 = 0.0f;
+        }
     };
 
     std::vector<BiquadFilter> lpfFilters;
+    std::vector<BiquadFilter> hpfFilters;
 
     double sampleRate = 44100.0;
 
