@@ -203,17 +203,18 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 
 	// LFO
 	// Apply LFO processing if oscillators are enabled
-	if (auto* lfoEnabled = apvts.getRawParameterValue("OSC1_ENABLED"))
-	{
-		if (lfoEnabled->load()) {
-			// Get LFO parameters
-			float lfoRange = apvts.getRawParameterValue("OSC1_RANGE")->load();
-			int lfoShape = static_cast<int>(apvts.getRawParameterValue("OSC1_SHAPE")->load());
+	auto* lfoState = apvts.getRawParameterValue("OSC1_ENABLED");
+	auto lfoEnabled = lfoState->load();
 
-			// Process buffer with LFO
-			auto lfoOutput = lfo.processLFO(buffer, lfoRange, lfoShape);
-		}
+	if (lfoEnabled){
+		// Get LFO parameters
+		float lfoRange = apvts.getRawParameterValue("OSC1_RANGE")->load();
+		int lfoShape = static_cast<int>(apvts.getRawParameterValue("OSC1_SHAPE")->load());
+
+		// Process buffer with LFO
+		auto lfoOutput = lfo.processLFO(buffer, lfoRange, lfoShape);
 	}
+	
 
 	// Gain Control
 	auto localGain = apvts.getRawParameterValue("GAIN")->load();
@@ -273,6 +274,7 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 
 	if (buffer.getNumChannels() > 0)
 	{
+		//float visualizationGain = lfoEnabled ? 3.0f : 2.0f;
 		float visualizationGain = 2.0f;
 		const float* readPtr = buffer.getReadPointer(0);
 
@@ -343,13 +345,13 @@ juce::AudioProcessorValueTreeState::ParameterLayout NewProjectAudioProcessor::cr
 
 	// Oscillator 1 Parameters
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
-		"OSC1_RANGE", "Osc 1 Range", juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.5f));
+		"OSC1_RANGE", "Osc 1 Range", juce::NormalisableRange<float>(0.0f, 30.0f, 0.01f), 15.0f));
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
 		"OSC1_SHAPE", "Osc 1 Shape", juce::NormalisableRange<float>(0.0f, 2.0f, 0.01f), 0.0f));
 
 	// Oscillator 2 Parameters
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
-		"OSC2_RANGE", "Osc 2 Range", juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.5f));
+		"OSC2_RANGE", "Osc 2 Range", juce::NormalisableRange<float>(0.0f, 30.0f, 0.01f), 15.0f));
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
 		"OSC2_SHAPE", "Osc 2 Shape", juce::NormalisableRange<float>(0.0f, 2.0f, 0.01f), 0.0f));
 
