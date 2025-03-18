@@ -238,8 +238,8 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
 			}
 
 			// Apply both a subtle modulation and soft saturation
-			float modFactor = 0.98f + 0.04f * std::sin(sample * 0.001f + i * 0.5f);
-			signal *= modFactor;
+			float randomFactor = 0.98f + 0.04f * ((static_cast<float>((i * sample + i * 17) % 100)) / 100.0f);
+			signal *= randomFactor;
 
 			// Apply more aggressive soft saturation curve
 			signal = std::tanh(signal * 0.9f) / 0.9f;
