@@ -258,6 +258,7 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
 				lateSum += feedbackSignals[(i + ch) % numDelayLines][sample] * outputGain;
 			}
 			channelOutputs[ch][sample] += lateSum;
+			channelOutputs[ch][sample] = softLimit(channelOutputs[ch][sample]);
 		}
 	}
 
