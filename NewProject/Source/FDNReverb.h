@@ -278,8 +278,13 @@ private:
     std::vector<DCBlocker> dcBlockers;
 
     // Denormal Prevention
-    inline float denormalPrevention(float sample) const {
-        static constexpr float antiDenormal = 1.0e-9f;
-        return sample + antiDenormal;
+    inline float denormalPrevention(float sample) {
+        static const float minLevel = 1.0e-8f;
+        static const float antiDenormal = 1.0e-8f;
+
+        if (std::abs(sample) < minLevel)
+            return antiDenormal * (2.0f * static_cast<float>(rand()) / RAND_MAX - 1.0f);
+        return sample;
     }
+
 };

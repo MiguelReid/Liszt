@@ -30,7 +30,6 @@ std::vector<std::vector<float>> LFO::processLFO(juce::AudioBuffer<float>& buffer
 
     const float depth = juce::jlimit(0.0f, 1.0f, static_cast<float>(lfoDepth));
 
-    // Make depth a parameter you can adjust based on desired intensity
     const float frequency = 5.0f;
 
     // Calculate phase increment per sample with higher precision
