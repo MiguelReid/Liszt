@@ -20,15 +20,15 @@ OscillatorControls::OscillatorControls(juce::AudioProcessorValueTreeState& apvts
     oscillatorLabel.setColour(juce::Label::textColourId, juce::Colours::white);
     addAndMakeVisible(oscillatorLabel);
 
-    // Initialize and configure rangeKnob1
-    rangeKnob1.setSliderStyle(juce::Slider::Rotary);
-    rangeKnob1.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
-    addAndMakeVisible(rangeKnob1);
-    rangeLabel1.setText("Range", juce::dontSendNotification);
-    rangeLabel1.setJustificationType(juce::Justification::centredTop);
-    rangeLabel1.setFont(12.0f);
-    rangeLabel1.setColour(juce::Label::textColourId, juce::Colours::white);
-    addAndMakeVisible(rangeLabel1);
+    // Initialize and configure depthKnob1
+    depthKnob1.setSliderStyle(juce::Slider::Rotary);
+    depthKnob1.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+    addAndMakeVisible(depthKnob1);
+    depthLabel1.setText("Depth", juce::dontSendNotification);
+    depthLabel1.setJustificationType(juce::Justification::centredTop);
+    depthLabel1.setFont(12.0f);
+    depthLabel1.setColour(juce::Label::textColourId, juce::Colours::white);
+    addAndMakeVisible(depthLabel1);
 
     // Label for Oscillator 1
     oscLabel1.setText("Osc 1", juce::dontSendNotification);
@@ -53,15 +53,15 @@ OscillatorControls::OscillatorControls(juce::AudioProcessorValueTreeState& apvts
     shapeLabel1.setColour(juce::Label::textColourId, juce::Colours::white);
     addAndMakeVisible(shapeLabel1);
 
-    // Initialize and configure rangeKnob2
-    rangeKnob2.setSliderStyle(juce::Slider::Rotary);
-    rangeKnob2.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
-    addAndMakeVisible(rangeKnob2);
-    rangeLabel2.setText("Range", juce::dontSendNotification);
-    rangeLabel2.setJustificationType(juce::Justification::centredTop);
-    rangeLabel2.setFont(12.0f);
-    rangeLabel2.setColour(juce::Label::textColourId, juce::Colours::white);
-    addAndMakeVisible(rangeLabel2);
+    // Initialize and configure depthKnob2
+    depthKnob2.setSliderStyle(juce::Slider::Rotary);
+    depthKnob2.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+    addAndMakeVisible(depthKnob2);
+    depthLabel2.setText("Depth", juce::dontSendNotification);
+    depthLabel2.setJustificationType(juce::Justification::centredTop);
+    depthLabel2.setFont(12.0f);
+    depthLabel2.setColour(juce::Label::textColourId, juce::Colours::white);
+    addAndMakeVisible(depthLabel2);
 
     // Label for Oscillator 2
     oscLabel2.setText("Osc 2", juce::dontSendNotification);
@@ -96,20 +96,20 @@ OscillatorControls::OscillatorControls(juce::AudioProcessorValueTreeState& apvts
 
 	shapeKnob1.setName("ShapeKnob");
 	shapeKnob2.setName("ShapeKnob");
-    rangeKnob1.setLookAndFeel(knobLookAndFeel.get());
-    rangeKnob2.setLookAndFeel(knobLookAndFeel.get());
+    depthKnob1.setLookAndFeel(knobLookAndFeel.get());
+    depthKnob2.setLookAndFeel(knobLookAndFeel.get());
     shapeKnob1.setLookAndFeel(knobLookAndFeel.get());
     shapeKnob2.setLookAndFeel(knobLookAndFeel.get());
     osc1Button.setLookAndFeel(toggleButtonLookAndFeel.get());
     osc2Button.setLookAndFeel(toggleButtonLookAndFeel.get());
 
 	// AudioProcessorValueTreeState ===============================
-	rangeAttachment1 = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
-		apvts, "OSC1_RANGE", rangeKnob1);
+	depthAttachment1 = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+		apvts, "OSC1_DEPTH", depthKnob1);
 	shapeAttachment1 = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
 		apvts, "OSC1_SHAPE", shapeKnob1);
-	rangeAttachment2 = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
-		apvts, "OSC2_RANGE", rangeKnob2);
+	depthAttachment2 = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+		apvts, "OSC2_DEPTH", depthKnob2);
 	shapeAttachment2 = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
 		apvts, "OSC2_SHAPE", shapeKnob2);
 	oscAttachment1 = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(
@@ -121,8 +121,8 @@ OscillatorControls::OscillatorControls(juce::AudioProcessorValueTreeState& apvts
 
 OscillatorControls::~OscillatorControls()
 {
-    rangeKnob1.setLookAndFeel(nullptr);
-    rangeKnob2.setLookAndFeel(nullptr);
+    depthKnob1.setLookAndFeel(nullptr);
+    depthKnob2.setLookAndFeel(nullptr);
     shapeKnob1.setLookAndFeel(nullptr);
     shapeKnob2.setLookAndFeel(nullptr);
     osc1Button.setLookAndFeel(nullptr);
@@ -156,12 +156,12 @@ void OscillatorControls::resized()
     int startX = (getWidth() - totalWidth) / 2;
     int startY = bounds.getY() + marginY;
 
-    // rangeKnob1
-    rangeKnob1.setBounds(startX, startY, knobWidth, knobHeight);
-    rangeLabel1.setBounds(rangeKnob1.getX(), rangeKnob1.getBottom(), knobWidth, 15);
+    // depthKnob1
+    depthKnob1.setBounds(startX, startY, knobWidth, knobHeight);
+    depthLabel1.setBounds(depthKnob1.getX(), depthKnob1.getBottom(), knobWidth, 15);
 
     // oscLabel1
-    oscLabel1.setBounds(rangeKnob1.getRight() + marginX, startY + (knobWidth / 2) - 10, knobWidth, 20);
+    oscLabel1.setBounds(depthKnob1.getRight() + marginX, startY + (knobWidth / 2) - 10, knobWidth, 20);
 
     // osc1Button
     osc1Button.setBounds(oscLabel1.getRight() - 5, startY + (knobWidth / 2) - 10, buttonWidth, buttonHeight);
@@ -173,12 +173,12 @@ void OscillatorControls::resized()
     // Second Row
     startY = shapeLabel1.getBottom() + marginY;  // Adjust startY based on shapeKnob1's bottom
 
-    // rangeKnob2
-    rangeKnob2.setBounds(startX, startY, knobWidth, knobHeight);
-    rangeLabel2.setBounds(rangeKnob2.getX(), rangeKnob2.getBottom(), knobWidth, 15);
+    // depthKnob2
+    depthKnob2.setBounds(startX, startY, knobWidth, knobHeight);
+    depthLabel2.setBounds(depthKnob2.getX(), depthKnob2.getBottom(), knobWidth, 15);
 
     // oscLabel2
-    oscLabel2.setBounds(rangeKnob2.getRight() + marginX, startY + (knobWidth / 2) - 10, knobWidth, 20);
+    oscLabel2.setBounds(depthKnob2.getRight() + marginX, startY + (knobWidth / 2) - 10, knobWidth, 20);
 
     // osc2Button
     osc2Button.setBounds(oscLabel2.getRight() - 5, startY + (knobWidth / 2) - 10, buttonWidth, buttonHeight);

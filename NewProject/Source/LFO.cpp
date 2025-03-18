@@ -19,7 +19,7 @@ LFO::~LFO()
 }
 
 std::vector<std::vector<float>> LFO::processLFO(juce::AudioBuffer<float>& buffer,
-    double lfoRange,
+    double lfoDepth,
     int lfoShape)
 {
     const int numChannels = buffer.getNumChannels();
@@ -28,11 +28,10 @@ std::vector<std::vector<float>> LFO::processLFO(juce::AudioBuffer<float>& buffer
     // Create output buffers matching the input
     std::vector<std::vector<float>> outputs(numChannels, std::vector<float>(numSamples, 0.0f));
 
-    // Use lfoRange directly as frequency in Hz (0-30Hz range from plugin parameters)
-    const float frequency = juce::jlimit(0.01f, 30.0f, static_cast<float>(lfoRange));
+    const float depth = juce::jlimit(0.0f, 1.0f, static_cast<float>(lfoDepth));
 
     // Make depth a parameter you can adjust based on desired intensity
-    const float depth = 0.05f;
+    const float frequency = 5.0f;
 
     // Calculate phase increment per sample with higher precision
     const double phaseIncrement = frequency / sampleRate;

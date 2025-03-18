@@ -28,8 +28,8 @@ public:
 
 private:
 	// APVTS Attachments
-	std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> rangeAttachment1;
-	std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> rangeAttachment2;
+	std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> depthAttachment1;
+	std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> depthAttachment2;
 	std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> shapeAttachment1;
 	std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> shapeAttachment2;
 	std::unique_ptr <juce::AudioProcessorValueTreeState::ButtonAttachment> oscAttachment1;
@@ -37,15 +37,15 @@ private:
 
 	// Elements
     juce::Label oscillatorLabel;
-    juce::Slider rangeKnob1;
-	juce::Slider rangeKnob2;
+    juce::Slider depthKnob1;
+	juce::Slider depthKnob2;
 	juce::Slider shapeKnob1;
 	juce::Slider shapeKnob2;
 
 	juce::Label oscLabel1;
     juce::Label oscLabel2;
-	juce::Label rangeLabel1;
-	juce::Label rangeLabel2;
+	juce::Label depthLabel1;
+	juce::Label depthLabel2;
 	juce::Label shapeLabel1;
 	juce::Label shapeLabel2;
 
