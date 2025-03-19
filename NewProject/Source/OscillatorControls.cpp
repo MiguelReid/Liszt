@@ -89,6 +89,21 @@ OscillatorControls::OscillatorControls(juce::AudioProcessorValueTreeState& apvts
     addAndMakeVisible(osc1Button);
     addAndMakeVisible(osc2Button);
 
+    // ComboBoxes
+    osc1ComboBox.addItem("Diffusion", 1);
+    osc1ComboBox.addItem("Decay", 2);
+    osc1ComboBox.addItem("Predelay", 3);
+    osc1ComboBox.addItem("Pitch", 4);
+    osc1ComboBox.setSelectedId(1);
+    addAndMakeVisible(osc1ComboBox);
+
+    osc2ComboBox.addItem("Diffusion", 1);
+    osc2ComboBox.addItem("Decay", 2);
+    osc2ComboBox.addItem("Predelay", 3);
+    osc2ComboBox.addItem("Pitch", 4);
+    osc2ComboBox.setSelectedId(2); // Default to decay (different from osc1)
+    addAndMakeVisible(osc2ComboBox);
+
     // =================== Look and feel ========================
 
     toggleButtonLookAndFeel = std::make_unique<ToggleButton>();
@@ -116,7 +131,22 @@ OscillatorControls::OscillatorControls(juce::AudioProcessorValueTreeState& apvts
 		apvts, "OSC1_ENABLED", osc1Button);
 	oscAttachment2 = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(
 		apvts, "OSC2_ENABLED", osc2Button);
+    comboBoxAttachment1 = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(
+        apvts, "OSC1_TARGET", osc1ComboBox);
+    comboBoxAttachment2 = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(
+        apvts, "OSC2_TARGET", osc2ComboBox);
 
+    // Add this to your constructor, after initializing the comboboxes and their attachments:
+    osc1ComboBox.onChange = [this] {
+        comboBoxChanged();
+        };
+
+    osc2ComboBox.onChange = [this] {
+        comboBoxChanged();
+        };
+
+    // Call it once initially to set up the initial state
+    comboBoxChanged();
 }
 
 OscillatorControls::~OscillatorControls()
@@ -166,9 +196,12 @@ void OscillatorControls::resized()
     // osc1Button
     osc1Button.setBounds(oscLabel1.getRight() - 5, startY + (knobWidth / 2) - 10, buttonWidth, buttonHeight);
 
-    // shapeKnob1 with increased height
+    // shapeKnob1
     shapeKnob1.setBounds(osc1Button.getRight() + marginX, startY, knobWidth, knobHeight);
     shapeLabel1.setBounds(shapeKnob1.getX(), shapeKnob1.getBottom(), knobWidth, 15);
+
+    // Positioning for OSC1 ComboBox
+    osc1ComboBox.setBounds(oscLabel1.getX() + 10,osc1Button.getBottom() + 5,labelWidth+5,buttonHeight);
 
     // Second Row
     startY = shapeLabel1.getBottom() + marginY;  // Adjust startY based on shapeKnob1's bottom
@@ -186,6 +219,26 @@ void OscillatorControls::resized()
     // shapeKnob2 with increased height
     shapeKnob2.setBounds(osc2Button.getRight() + marginX, startY, knobWidth, knobHeight);
     shapeLabel2.setBounds(shapeKnob2.getX(), shapeKnob2.getBottom(), knobWidth, 15);
+
+    // Positioning for OSC2 ComboBox
+    osc2ComboBox.setBounds(oscLabel2.getX() + 10,osc2Button.getBottom() + 5, labelWidth+5, buttonHeight);
+}
+
+void OscillatorControls::comboBoxChanged()
+{
+    // Get currently selected items for each combobox
+    int osc1Selection = osc1ComboBox.getSelectedId();
+    int osc2Selection = osc2ComboBox.getSelectedId();
+
+    // First, enable all options in both comboboxes
+    for (int i = 1; i <= 4; ++i) {
+        osc1ComboBox.setItemEnabled(i, true);
+        osc2ComboBox.setItemEnabled(i, true);
+    }
+
+    // Then disable the selected option in the other combobox
+    osc1ComboBox.setItemEnabled(osc2Selection, false);
+    osc2ComboBox.setItemEnabled(osc1Selection, false);
 }
 
 

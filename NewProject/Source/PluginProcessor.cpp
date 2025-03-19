@@ -210,9 +210,10 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 		// Get LFO parameters
 		float lfoDepth = apvts.getRawParameterValue("OSC1_DEPTH")->load();
 		int lfoShape = static_cast<int>(apvts.getRawParameterValue("OSC1_SHAPE")->load());
+		auto boxIndex = apvts.getRawParameterValue("OSC1_TARGET")->load();
 
 		// Process buffer with LFO
-		auto lfoOutput = lfo.processLFO(buffer, lfoDepth, lfoShape);
+		auto lfoOutput = lfo.processLFO(buffer, lfoDepth, lfoShape, boxIndex);
 	}
 	
 
@@ -348,12 +349,16 @@ juce::AudioProcessorValueTreeState::ParameterLayout NewProjectAudioProcessor::cr
 		"OSC1_DEPTH", "Osc 1 DEPTH", juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.5f));
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
 		"OSC1_SHAPE", "Osc 1 Shape", juce::NormalisableRange<float>(0.0f, 2.0f, 0.01f), 0.0f));
+	params.push_back(std::make_unique<juce::AudioParameterChoice>("OSC1_TARGET", "Osc 1 Target",
+		juce::StringArray("Diffusion", "Decay", "Predelay", "Pitch"), 0));
 
 	// Oscillator 2 Parameters
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
 		"OSC2_DEPTH", "Osc 2 DEPTH", juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.5f));
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
 		"OSC2_SHAPE", "Osc 2 Shape", juce::NormalisableRange<float>(0.0f, 2.0f, 0.01f), 0.0f));
+	params.push_back(std::make_unique<juce::AudioParameterChoice>("OSC2_TARGET", "Osc 2 Target",
+		juce::StringArray("Diffusion", "Decay", "Predelay", "Pitch"), 1));
 
 	// Oscillator Enable Parameters
 	params.push_back(std::make_unique<juce::AudioParameterBool>(

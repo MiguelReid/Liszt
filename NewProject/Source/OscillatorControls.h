@@ -34,6 +34,8 @@ private:
 	std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> shapeAttachment2;
 	std::unique_ptr <juce::AudioProcessorValueTreeState::ButtonAttachment> oscAttachment1;
 	std::unique_ptr <juce::AudioProcessorValueTreeState::ButtonAttachment> oscAttachment2;
+	std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> comboBoxAttachment1;
+	std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> comboBoxAttachment2;
 
 	// Elements
     juce::Label oscillatorLabel;
@@ -52,12 +54,17 @@ private:
     juce::ToggleButton osc1Button;
     juce::ToggleButton osc2Button;
 
+	juce::ComboBox osc1ComboBox;
+	juce::ComboBox osc2ComboBox;
+
 	// Custom LookAndFeel
     std::unique_ptr<Knob> knobLookAndFeel;
 	std::unique_ptr<ToggleButton> toggleButtonLookAndFeel;
 
 	// APVTS
     juce::AudioProcessorValueTreeState& apvts;
+
+	void comboBoxChanged();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(OscillatorControls)
 };

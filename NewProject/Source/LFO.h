@@ -18,8 +18,7 @@ public:
     ~LFO();
 
     std::vector<std::vector<float>> processLFO(juce::AudioBuffer<float>& buffer,
-        double lfoRange,
-        int lfoShape);
+        double lfoRange, int lfoShape, int boxIndex);
 
 
     void setSampleRate(double newSampleRate) { sampleRate = newSampleRate; }
