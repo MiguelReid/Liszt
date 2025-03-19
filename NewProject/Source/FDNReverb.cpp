@@ -216,7 +216,7 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
 			signal = diffusionFilters[i].process(signal, 0.4f + (diffusionCoeff * 0.1f));
 			float lineDecay = decayGain * decayVariations[i];
 
-			// Apply denormal prevention and soft limit
+			// Apply denormal prevention
 			signal = denormalPrevention(signal);
 			// More aggressive limiting
 			if (std::abs(signal) > 0.9f)
