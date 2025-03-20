@@ -18,78 +18,60 @@ LFO::~LFO()
 {
 }
 
-/*
-LFO Could vary diffusion, decay, predelay and pitch?
-*/
-
-std::vector<std::vector<float>> LFO::processLFO(juce::AudioBuffer<float>& buffer,
-    double lfoDepth, int lfoShape, int boxIndex)
+// Returns a modulation value for the specified target parameter
+float LFO::processLFO(double lfoDepth, int lfoShape, int boxIndex)
 {
-    const int numChannels = buffer.getNumChannels();
-    const int numSamples = buffer.getNumSamples();
+    // Faster frequency for more rapid oscillation
+    auto frequency = 5.0f;
 
-    // Create output buffers matching the input
-    std::vector<std::vector<float>> outputs(numChannels, std::vector<float>(numSamples, 0.0f));
+    // More aggressive depth scaling based on target parameter
+    // These values determine the maximum possible range of modulation when depth = 1.0
+    const std::array<float, 4> depthScales = { 1.0f, 4.2f, 100.0f, 2.0f };
+    float depthScale = depthScales[std::clamp(boxIndex, 0, 3)];
 
-    // Lower default depth for subtler effect
-    const float depth = juce::jlimit(0.0f, 0.7f, static_cast<float>(lfoDepth));
+    // Apply depth control directly - linear scaling works better for predictable ranges
+    const float depth = static_cast<float>(lfoDepth) * depthScale;
 
-    // Slower frequency for less pronounced swooshing
-    const float frequency = 1.5f;
+    // Phase with precise floating point
+    phase += frequency / sampleRate;
+    if (phase >= 1.0f)
+        phase -= 1.0f;
 
-    // Calculate phase increment per sample with higher precision
-    const double phaseIncrement = frequency / sampleRate;
-
-    for (int sample = 0; sample < numSamples; ++sample)
+    // Calculate LFO value based on selected waveform
+    float lfoValue = 0.0f;
+    switch (lfoShape)
     {
-        // Advance LFO phase with precise floating point
-        phase += phaseIncrement;
-        if (phase >= 1.0f)
-            phase -= 1.0f;
-
-        // Calculate LFO value based on selected waveform
-        float lfoValue = 0.0f;
-        switch (lfoShape)
-        {
-        case 0: // Sine
-            lfoValue = 0.5f * (std::sin(phase * juce::MathConstants<double>::twoPi) + 1.0f);
-            break;
-
-        case 1: // Triangle
-            lfoValue = phase < 0.5f ? 2.0f * phase : 2.0f * (1.0f - phase);
-            break;
-
-        case 2: // Square - with improved anti-aliasing & softer transitions
-        {
-            constexpr float smoothFactor = 0.02f; // Larger for softer transitions
-            const float threshold = 0.5f;
-
-            if (std::abs(phase - threshold) < smoothFactor) {
-                // Smooth transition using sigmoid-like function
-                float normalized = (phase - (threshold - smoothFactor)) / (2.0f * smoothFactor);
-                lfoValue = normalized > 0.5f ? 1.0f - (1.0f - normalized) * (1.0f - normalized) : normalized * normalized;
-            }
-            else {
-                lfoValue = phase < threshold ? 0.0f : 1.0f;
-            }
-        }
+    case 0: // Sine - pure bipolar sine wave (-1 to +1)
+        lfoValue = std::sin(phase * juce::MathConstants<double>::twoPi);
         break;
+
+    case 1: // Triangle - bipolar triangle wave (-1 to +1)
+        lfoValue = phase < 0.5f
+            ? (4.0f * phase - 1.0f)       // -1 to +1 for first half
+            : (3.0f - 4.0f * phase);      // +1 to -1 for second half
+        break;
+
+    case 2: // Square - bipolar with anti-aliasing (-1 to +1)
+    {
+        constexpr float smoothFactor = 0.01f; // Sharper transitions
+        const float threshold = 0.5f;
+
+        if (std::abs(phase - threshold) < smoothFactor) {
+            // Smooth transition using sigmoid-like function
+            float normalized = (phase - (threshold - smoothFactor)) / (2.0f * smoothFactor);
+            lfoValue = normalized > 0.5f ? 1.0f : -1.0f;
+            lfoValue *= (std::abs(normalized - 0.5f) * 2.0f); // Smooth the transition
         }
-
-        // More centered modulation - less extreme variation, closer to 1.0
-        lfoValue = 1.0f + (lfoValue * 2.0f - 1.0f) * depth * 0.5f;
-
-        // Apply LFO to all channels
-        for (int channel = 0; channel < numChannels; ++channel)
-        {
-            float* channelData = buffer.getWritePointer(channel);
-
-            // Blend original and modulated signals for subtler effect
-            float modulated = channelData[sample] * lfoValue;
-            channelData[sample] = channelData[sample] * 0.3f + modulated * 0.7f; // Blend original and modulated
-            outputs[channel][sample] = channelData[sample];
+        else {
+            lfoValue = phase < threshold ? -1.0f : 1.0f;
         }
     }
+    break;
+    }
 
-    return outputs;
+    // All outputs are now directly bipolar (-1 to +1) and scaled by depth
+    // This makes the depth directly control the maximum deviation from center
+    return lfoValue * depth;
 }
+
+

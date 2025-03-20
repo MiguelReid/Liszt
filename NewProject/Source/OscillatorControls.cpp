@@ -136,7 +136,6 @@ OscillatorControls::OscillatorControls(juce::AudioProcessorValueTreeState& apvts
     comboBoxAttachment2 = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(
         apvts, "OSC2_TARGET", osc2ComboBox);
 
-    // Add this to your constructor, after initializing the comboboxes and their attachments:
     osc1ComboBox.onChange = [this] {
         comboBoxChanged();
         };
@@ -145,7 +144,6 @@ OscillatorControls::OscillatorControls(juce::AudioProcessorValueTreeState& apvts
         comboBoxChanged();
         };
 
-    // Call it once initially to set up the initial state
     comboBoxChanged();
 }
 

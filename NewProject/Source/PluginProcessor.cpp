@@ -109,8 +109,9 @@ void NewProjectAudioProcessor::changeProgramName(int index, const juce::String& 
 void NewProjectAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
 	synth.setCurrentPlaybackSampleRate(sampleRate);
-	lfo.setSampleRate(sampleRate); // Add this line
-	fdnReverb.prepare(sampleRate); // Make sure this is called too
+	lfo1.setSampleRate(sampleRate);
+	lfo2.setSampleRate(sampleRate);
+	fdnReverb.prepare(sampleRate);
 }
 
 void NewProjectAudioProcessor::releaseResources()
@@ -201,21 +202,64 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 
 	// ================================================================
 
-	// LFO
-	// Apply LFO processing if oscillators are enabled
-	auto* lfoState = apvts.getRawParameterValue("OSC1_ENABLED");
-	auto lfoEnabled = lfoState->load();
+	// Reverb parameters to modulate
+	double baseDecay = apvts.getRawParameterValue("DECAY")->load();
+	double baseDiffusion = apvts.getRawParameterValue("DIFFUSION")->load();
+	double basePredelay = apvts.getRawParameterValue("PREDELAY")->load();
 
-	if (lfoEnabled){
-		// Get LFO parameters
-		float lfoDepth = apvts.getRawParameterValue("OSC1_DEPTH")->load();
-		int lfoShape = static_cast<int>(apvts.getRawParameterValue("OSC1_SHAPE")->load());
-		auto boxIndex = apvts.getRawParameterValue("OSC1_TARGET")->load();
+	// Process LFO modulation if enabled
+	double osc1Depth = apvts.getRawParameterValue("OSC1_DEPTH")->load();
+	int osc1Shape = static_cast<int>(apvts.getRawParameterValue("OSC1_SHAPE")->load());
+	int osc1Target = static_cast<int>(apvts.getRawParameterValue("OSC1_TARGET")->load());
+	bool osc1Enabled = apvts.getRawParameterValue("OSC1_ENABLED")->load() > 0.5f;
 
-		// Process buffer with LFO
-		auto lfoOutput = lfo.processLFO(buffer, lfoDepth, lfoShape, boxIndex);
+	double osc2Depth = apvts.getRawParameterValue("OSC2_DEPTH")->load();
+	int osc2Shape = static_cast<int>(apvts.getRawParameterValue("OSC2_SHAPE")->load());
+	int osc2Target = static_cast<int>(apvts.getRawParameterValue("OSC2_TARGET")->load());
+	bool osc2Enabled = apvts.getRawParameterValue("OSC2_ENABLED")->load() > 0.5f;
+
+	// Modulate parameters with LFOs if enabled
+	double modulatedDiffusion = baseDiffusion;
+	double modulatedDecay = baseDecay;
+	double modulatedPredelay = basePredelay;
+
+	if (osc1Enabled) {
+		float modValue = lfo1.processLFO(osc1Depth, osc1Shape, osc1Target);
+
+		switch (osc1Target) {
+		case 0: // Diffusion (0.0 - 1.0 range)
+			// Apply bipolar modulation centered around current value
+			modulatedDiffusion = juce::jlimit(0.0, 1.0, baseDiffusion + modValue);
+			break;
+		case 1: // Decay (0.8 - 5.0 range)
+			// Apply bipolar modulation centered around current value
+			modulatedDecay = juce::jlimit(0.8, 5.0, baseDecay + modValue);
+			break;
+		case 2: // Predelay (0.0 - 100.0 range)
+			// Apply bipolar modulation centered around current value
+			modulatedPredelay = juce::jlimit(0.0, 100.0, basePredelay + modValue);
+			break;
+		}
 	}
-	
+
+	if (osc2Enabled) {
+		float modValue = lfo2.processLFO(osc2Depth, osc2Shape, osc2Target);
+
+		switch (osc2Target) {
+		case 0: // Diffusion (0.0 - 1.0 range)
+			// Apply bipolar modulation to already modulated value
+			modulatedDiffusion = juce::jlimit(0.0, 1.0, modulatedDiffusion + modValue);
+			break;
+		case 1: // Decay (0.8 - 5.0 range)
+			// Apply bipolar modulation to already modulated value
+			modulatedDecay = juce::jlimit(0.8, 5.0, modulatedDecay + modValue);
+			break;
+		case 2: // Predelay (0.0 - 100.0 range)
+			// Apply bipolar modulation to already modulated value
+			modulatedPredelay = juce::jlimit(0.0, 100.0, modulatedPredelay + modValue);
+			break;
+		}
+	}
 
 	// Gain Control
 	auto localGain = apvts.getRawParameterValue("GAIN")->load();
@@ -232,10 +276,7 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 		if (reverbEnabled->load())
 		{
 			// Get all reverb parameters
-			auto predelay = apvts.getRawParameterValue("PREDELAY")->load();
-			auto decay = apvts.getRawParameterValue("DECAY")->load();
 			auto dryWet = apvts.getRawParameterValue("DRYWET")->load();
-			auto diffusion = apvts.getRawParameterValue("DIFFUSION")->load();
 
 			// Save original dry signal if you need to mix it later
 			juce::AudioBuffer<float> dryBuffer;
@@ -244,7 +285,7 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 			}
 
 			// Process audio with reverb
-			auto outputs = fdnReverb.process(buffer, predelay, decay, diffusion);
+			auto outputs = fdnReverb.process(buffer, modulatedPredelay, modulatedDecay, modulatedDiffusion);
 
 			// Clear the buffer as we'll fill it with the processed signal
 			buffer.clear();
@@ -271,11 +312,11 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 				}
 			}
 		}
+		DBG("Modulated Diffusion: " << modulatedDiffusion);
 	}
 
 	if (buffer.getNumChannels() > 0)
 	{
-		//float visualizationGain = lfoEnabled ? 3.0f : 2.0f;
 		float visualizationGain = 2.0f;
 		const float* readPtr = buffer.getReadPointer(0);
 
@@ -308,13 +349,6 @@ void NewProjectAudioProcessor::addMidiMessage(const juce::MidiMessage& message)
 		midiBuffer[start2] = message;
 		midiFifo.finishedWrite(1);
 		written = true;
-	}
-
-	// Optionally handle the case where the FIFO is full
-	if (!written)
-	{
-		// Handle buffer overflow if necessary
-		// For example, you might log a warning or discard the message
 	}
 }
 

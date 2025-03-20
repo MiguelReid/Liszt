@@ -10,6 +10,7 @@
 
 #pragma once
 #include <JuceHeader.h>
+#include <algorithm>
 
 class LFO
 {
@@ -17,8 +18,7 @@ public:
     LFO();
     ~LFO();
 
-    std::vector<std::vector<float>> processLFO(juce::AudioBuffer<float>& buffer,
-        double lfoRange, int lfoShape, int boxIndex);
+    float processLFO(double lfoRange, int lfoShape, int boxIndex);
 
 
     void setSampleRate(double newSampleRate) { sampleRate = newSampleRate; }
@@ -27,4 +27,3 @@ private:
     float phase = 0.0f;
     double sampleRate = 44100.0;
 };
-
