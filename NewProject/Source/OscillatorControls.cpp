@@ -93,14 +93,12 @@ OscillatorControls::OscillatorControls(juce::AudioProcessorValueTreeState& apvts
     osc1ComboBox.addItem("Diffusion", 1);
     osc1ComboBox.addItem("Decay", 2);
     osc1ComboBox.addItem("Predelay", 3);
-    osc1ComboBox.addItem("Pitch", 4);
     osc1ComboBox.setSelectedId(1);
     addAndMakeVisible(osc1ComboBox);
 
     osc2ComboBox.addItem("Diffusion", 1);
     osc2ComboBox.addItem("Decay", 2);
     osc2ComboBox.addItem("Predelay", 3);
-    osc2ComboBox.addItem("Pitch", 4);
     osc2ComboBox.setSelectedId(2); // Default to decay (different from osc1)
     addAndMakeVisible(osc2ComboBox);
 

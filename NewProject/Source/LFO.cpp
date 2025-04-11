@@ -71,6 +71,7 @@ float LFO::processLFO(double lfoDepth, int lfoShape, int boxIndex)
 
     // All outputs are now directly bipolar (-1 to +1) and scaled by depth
     // This makes the depth directly control the maximum deviation from center
+	DBG("LFO Value: " << lfoValue);
     return lfoValue * depth;
 }
 
