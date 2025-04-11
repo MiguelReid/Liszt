@@ -384,7 +384,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout NewProjectAudioProcessor::cr
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
 		"OSC1_SHAPE", "Osc 1 Shape", juce::NormalisableRange<float>(0.0f, 2.0f, 0.01f), 0.0f));
 	params.push_back(std::make_unique<juce::AudioParameterChoice>("OSC1_TARGET", "Osc 1 Target",
-		juce::StringArray("Diffusion", "Decay", "Predelay", "Pitch"), 0));
+		juce::StringArray("Diffusion", "Decay", "Predelay"), 0));
 
 	// Oscillator 2 Parameters
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
@@ -392,7 +392,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout NewProjectAudioProcessor::cr
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
 		"OSC2_SHAPE", "Osc 2 Shape", juce::NormalisableRange<float>(0.0f, 2.0f, 0.01f), 0.0f));
 	params.push_back(std::make_unique<juce::AudioParameterChoice>("OSC2_TARGET", "Osc 2 Target",
-		juce::StringArray("Diffusion", "Decay", "Predelay", "Pitch"), 1));
+		juce::StringArray("Diffusion", "Decay", "Predelay"), 1));
 
 	// Oscillator Enable Parameters
 	params.push_back(std::make_unique<juce::AudioParameterBool>(
