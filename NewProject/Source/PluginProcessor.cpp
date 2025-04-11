@@ -228,15 +228,12 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 
 		switch (osc1Target) {
 		case 0: // Diffusion (0.0 - 1.0 range)
-			// Apply bipolar modulation centered around current value
 			modulatedDiffusion = juce::jlimit(0.0, 1.0, baseDiffusion + modValue);
 			break;
 		case 1: // Decay (0.8 - 5.0 range)
-			// Apply bipolar modulation centered around current value
 			modulatedDecay = juce::jlimit(0.8, 5.0, baseDecay + modValue);
 			break;
 		case 2: // Predelay (0.0 - 100.0 range)
-			// Apply bipolar modulation centered around current value
 			modulatedPredelay = juce::jlimit(0.0, 100.0, basePredelay + modValue);
 			break;
 		}
@@ -247,15 +244,12 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 
 		switch (osc2Target) {
 		case 0: // Diffusion (0.0 - 1.0 range)
-			// Apply bipolar modulation to already modulated value
 			modulatedDiffusion = juce::jlimit(0.0, 1.0, modulatedDiffusion + modValue);
 			break;
 		case 1: // Decay (0.8 - 5.0 range)
-			// Apply bipolar modulation to already modulated value
 			modulatedDecay = juce::jlimit(0.8, 5.0, modulatedDecay + modValue);
 			break;
 		case 2: // Predelay (0.0 - 100.0 range)
-			// Apply bipolar modulation to already modulated value
 			modulatedPredelay = juce::jlimit(0.0, 100.0, modulatedPredelay + modValue);
 			break;
 		}

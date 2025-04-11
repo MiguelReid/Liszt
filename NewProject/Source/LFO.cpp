@@ -24,7 +24,7 @@ float LFO::processLFO(double lfoDepth, int lfoShape, int boxIndex)
     auto frequency = 5.0f;
 
     // More aggressive depth scaling based on target parameter
-    const std::array<float, 3> depthScales = { 1.0f, 5.0f, 100.0f};
+    const std::array<float, 3> depthScales = { 1.0f, 5.0f, 100.0f };
     float depthScale = depthScales[std::clamp(boxIndex, 0, 2)];
 
     // Apply depth control directly
@@ -51,20 +51,14 @@ float LFO::processLFO(double lfoDepth, int lfoShape, int boxIndex)
         break;
 
     case 2: // Square
-    {
-        // Simplest square wave implementation
         lfoValue = (phase < 0.5f) ? -1.0f : 1.0f;
-    }
-    break;
+        break;
+    default:
+        break;
     }
 
     // Final output
     float result = lfoValue * depth;
     DBG("value=" << result);
-
     return result;
 }
-
-
-
-
