@@ -40,19 +40,19 @@ public:
     PredelayLine(int maxDelay) {
         buffer.resize(maxDelay, 0.0f);
     }
-    
+
     float process(float input, int delaySamples) {
         delaySamples = juce::jlimit(0, static_cast<int>(buffer.size() - 1), delaySamples);
-        
+
         float output = buffer[readIndex];
         buffer[writeIndex] = input;
-        
+
         writeIndex = (writeIndex + 1) % buffer.size();
         readIndex = (writeIndex - delaySamples + buffer.size()) % buffer.size();
-        
+
         return output;
     }
-    
+
 private:
     std::vector<float> buffer;
     int writeIndex = 0, readIndex = 0;
@@ -71,70 +71,173 @@ public:
 private:
     // DelayLines
     std::vector<std::unique_ptr<CustomDelayLine>> delayLines;
-    static constexpr int numDelayLines = 8;
-    const int primeDelays[numDelayLines] = { 1087, 1283, 1511, 1747, 1997, 2269, 2539, 2903 };    PredelayLine predelayBuffer{ 96000 }; // Maximum 2 seconds at 48kHz
+    static constexpr int numDelayLines = 16;
+    const int primeDelays[numDelayLines] = {
+        101, 103, 107, 109, 113, 127, 131, 137,
+        139, 149, 151, 157, 163, 167, 173, 179
+    };
+
+    PredelayLine predelayBuffer{ 96000 }; // Maximum 2 seconds at 48kHz 
 
     // Normalised hadamard matrix
     std::vector<std::vector<float>> FDNReverb::hadamard(const std::vector<std::vector<float>>& delayOutputs);
     const std::array<std::array<float, numDelayLines>, numDelayLines> hadamardMatrix = { {
-        {  0.354f,  0.354f,  0.354f,  0.354f,  0.354f,  0.354f,  0.354f,  0.354f },
-        {  0.354f, -0.354f,  0.354f, -0.354f,  0.354f, -0.354f,  0.354f, -0.354f },
-        {  0.354f,  0.354f, -0.354f, -0.354f,  0.354f,  0.354f, -0.354f, -0.354f },
-        {  0.354f, -0.354f, -0.354f,  0.354f,  0.354f, -0.354f, -0.354f,  0.354f },
-        {  0.354f,  0.354f,  0.354f,  0.354f, -0.354f, -0.354f, -0.354f, -0.354f },
-        {  0.354f, -0.354f,  0.354f, -0.354f, -0.354f,  0.354f, -0.354f,  0.354f },
-        {  0.354f,  0.354f, -0.354f, -0.354f, -0.354f, -0.354f,  0.354f,  0.354f },
-        {  0.354f, -0.354f, -0.354f,  0.354f, -0.354f,  0.354f,  0.354f, -0.354f }
+        {  0.25f,  0.25f,  0.25f,  0.25f,  0.25f,  0.25f,  0.25f,  0.25f,  0.25f,  0.25f,  0.25f,  0.25f,  0.25f,  0.25f,  0.25f,  0.25f },
+        {  0.25f, -0.25f,  0.25f, -0.25f,  0.25f, -0.25f,  0.25f, -0.25f,  0.25f, -0.25f,  0.25f, -0.25f,  0.25f, -0.25f,  0.25f, -0.25f },
+        {  0.25f,  0.25f, -0.25f, -0.25f,  0.25f,  0.25f, -0.25f, -0.25f,  0.25f,  0.25f, -0.25f, -0.25f,  0.25f,  0.25f, -0.25f, -0.25f },
+        {  0.25f, -0.25f, -0.25f,  0.25f,  0.25f, -0.25f, -0.25f,  0.25f,  0.25f, -0.25f, -0.25f,  0.25f,  0.25f, -0.25f, -0.25f,  0.25f },
+        {  0.25f,  0.25f,  0.25f,  0.25f, -0.25f, -0.25f, -0.25f, -0.25f,  0.25f,  0.25f,  0.25f,  0.25f, -0.25f, -0.25f, -0.25f, -0.25f },
+        {  0.25f, -0.25f,  0.25f, -0.25f, -0.25f,  0.25f, -0.25f,  0.25f,  0.25f, -0.25f,  0.25f, -0.25f, -0.25f,  0.25f, -0.25f,  0.25f },
+        {  0.25f,  0.25f, -0.25f, -0.25f, -0.25f, -0.25f,  0.25f,  0.25f,  0.25f,  0.25f, -0.25f, -0.25f, -0.25f, -0.25f,  0.25f,  0.25f },
+        {  0.25f, -0.25f, -0.25f,  0.25f, -0.25f,  0.25f,  0.25f, -0.25f,  0.25f, -0.25f, -0.25f,  0.25f, -0.25f,  0.25f,  0.25f, -0.25f },
+        {  0.25f,  0.25f,  0.25f,  0.25f,  0.25f,  0.25f,  0.25f,  0.25f, -0.25f, -0.25f, -0.25f, -0.25f, -0.25f, -0.25f, -0.25f, -0.25f },
+        {  0.25f, -0.25f,  0.25f, -0.25f,  0.25f, -0.25f,  0.25f, -0.25f, -0.25f,  0.25f, -0.25f,  0.25f, -0.25f,  0.25f, -0.25f,  0.25f },
+        {  0.25f,  0.25f, -0.25f, -0.25f,  0.25f,  0.25f, -0.25f, -0.25f, -0.25f, -0.25f,  0.25f,  0.25f, -0.25f, -0.25f,  0.25f,  0.25f },
+        {  0.25f, -0.25f, -0.25f,  0.25f,  0.25f, -0.25f, -0.25f,  0.25f, -0.25f,  0.25f,  0.25f, -0.25f, -0.25f,  0.25f,  0.25f, -0.25f },
+        {  0.25f,  0.25f,  0.25f,  0.25f, -0.25f, -0.25f, -0.25f, -0.25f, -0.25f, -0.25f, -0.25f, -0.25f,  0.25f,  0.25f,  0.25f,  0.25f },
+        {  0.25f, -0.25f,  0.25f, -0.25f, -0.25f,  0.25f, -0.25f,  0.25f, -0.25f,  0.25f, -0.25f,  0.25f,  0.25f, -0.25f,  0.25f, -0.25f },
+        {  0.25f,  0.25f, -0.25f, -0.25f, -0.25f, -0.25f,  0.25f,  0.25f, -0.25f, -0.25f,  0.25f,  0.25f,  0.25f,  0.25f, -0.25f, -0.25f },
+        {  0.25f, -0.25f, -0.25f,  0.25f, -0.25f,  0.25f,  0.25f, -0.25f, -0.25f,  0.25f,  0.25f, -0.25f,  0.25f, -0.25f, -0.25f,  0.25f }
     } };
 
-    // 8x8 Householder matrix (normalized)
+    // 16x16 Householder matrix (normalized)
     const std::array<std::array<float, numDelayLines>, numDelayLines> householderMatrix = { {
-        {  0.75f, -0.25f, -0.25f, -0.25f, -0.25f, -0.25f, -0.25f, -0.25f },
-        { -0.25f,  0.75f, -0.25f, -0.25f, -0.25f, -0.25f, -0.25f, -0.25f },
-        { -0.25f, -0.25f,  0.75f, -0.25f, -0.25f, -0.25f, -0.25f, -0.25f },
-        { -0.25f, -0.25f, -0.25f,  0.75f, -0.25f, -0.25f, -0.25f, -0.25f },
-        { -0.25f, -0.25f, -0.25f, -0.25f,  0.75f, -0.25f, -0.25f, -0.25f },
-        { -0.25f, -0.25f, -0.25f, -0.25f, -0.25f,  0.75f, -0.25f, -0.25f },
-        { -0.25f, -0.25f, -0.25f, -0.25f, -0.25f, -0.25f,  0.75f, -0.25f },
-        { -0.25f, -0.25f, -0.25f, -0.25f, -0.25f, -0.25f, -0.25f,  0.75f }
+        {  0.875f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f },
+        { -0.125f,  0.875f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f },
+        { -0.125f, -0.125f,  0.875f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f },
+        { -0.125f, -0.125f, -0.125f,  0.875f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f },
+        { -0.125f, -0.125f, -0.125f, -0.125f,  0.875f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f },
+        { -0.125f, -0.125f, -0.125f, -0.125f, -0.125f,  0.875f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f },
+        { -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f,  0.875f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f },
+        { -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f,  0.875f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f },
+        { -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f,  0.875f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f },
+        { -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f,  0.875f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f },
+        { -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f,  0.875f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f },
+        { -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f,  0.875f, -0.125f, -0.125f, -0.125f, -0.125f },
+        { -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f,  0.875f, -0.125f, -0.125f, -0.125f },
+        { -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f,  0.875f, -0.125f, -0.125f },
+        { -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f,  0.875f, -0.125f },
+        { -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f, -0.125f,  0.875f }
     } };
 
     struct AllPassFilter {
         std::vector<float> buffer;
         int bufferSize = 0;
         int writeIndex = 0;
+        float lastOutput = 0.0f; // For smoother transitions
 
         AllPassFilter(int size = 277) { // Use a prime number for buffer size
             buffer.resize(size, 0.0f);
             bufferSize = size;
         }
 
+        // Nested all-pass for cascaded diffusion
         float process(float input, float coeff) {
             coeff = juce::jlimit(-0.9f, 0.9f, coeff);
 
             int readIndex = (writeIndex - bufferSize + static_cast<int>(buffer.size())) % static_cast<int>(buffer.size());
             float delayedSample = buffer[readIndex];
 
+            // Apply cascade of two first-order all-pass sections
             float temp = input + (coeff * delayedSample);
             buffer[writeIndex] = temp;
             writeIndex = (writeIndex + 1) % buffer.size();
 
-            return delayedSample - (coeff * temp);
+            float output = delayedSample - (coeff * temp);
+
+            // Smooth transitions to reduce THD
+            output = 0.85f * output + 0.15f * lastOutput;
+            lastOutput = output;
+
+            // Apply soft saturation to reduce peaks that cause distortion
+            if (std::abs(output) > 0.9f)
+                output = std::tanh(output);
+
+            return output;
+        }
+
+        // Higher-order process with multiple stages for better diffusion
+        float processMultiStage(float input, float coeff) {
+            // Two-stage diffusion with slightly different coefficients for richer sound
+            float stage1 = process(input, coeff);
+            float stage2 = process(stage1, coeff * 0.85f);
+            return stage2;
         }
 
         // New clear method to reset the filter state
         void clear() noexcept {
             std::fill(buffer.begin(), buffer.end(), 0.0f);
             writeIndex = 0;
+            lastOutput = 0.0f;
         }
     };
 
+    struct ModulatedAllPassFilter {
+        std::vector<float> buffer;
+        int baseSize;
+        int currentSize;
+        int writeIndex = 0;
+        float phase = 0.0f;
+        float modDepth = 0.0f;
+        float modRate = 0.0f;
+        float lastOutput = 0.0f;
 
-    const int allPassValues[8] = { 277, 379, 419, 479, 547, 607, 661, 739 };
+        ModulatedAllPassFilter(int size = 433) { // Use a prime number for better results
+            baseSize = size;
+            currentSize = size;
+            // Allocate extra buffer space for modulation
+            buffer.resize(size + 100, 0.0f);
+        }
 
+        float process(float input, float coeff, float sampleRate) {
+            coeff = juce::jlimit(-0.9f, 0.9f, coeff);
+
+            // Update modulation
+            phase += modRate / sampleRate;
+            if (phase >= 1.0f) phase -= 1.0f;
+
+            // Calculate modulated buffer size
+            float modFactor = 1.0f + modDepth * std::sin(phase * 2.0f * juce::MathConstants<float>::pi);
+            currentSize = static_cast<int>(baseSize * modFactor);
+            if (currentSize >= (int)buffer.size()) currentSize = buffer.size() - 1;
+            if (currentSize < 1) currentSize = 1;
+
+            // Standard allpass processing with modulated delay
+            int readIndex = (writeIndex - currentSize + static_cast<int>(buffer.size())) % static_cast<int>(buffer.size());
+            float delayedSample = buffer[readIndex];
+
+            float temp = input + (coeff * delayedSample);
+            buffer[writeIndex] = temp;
+            writeIndex = (writeIndex + 1) % buffer.size();
+
+            float output = delayedSample - (coeff * temp);
+
+            // Smooth transitions
+            output = 0.92f * output + 0.08f * lastOutput;
+            lastOutput = output;
+
+            return output;
+        }
+
+        void setModulation(float depth, float rate) {
+            modDepth = juce::jlimit(0.0f, 0.3f, depth); // Limit modulation depth
+            modRate = juce::jlimit(0.01f, 8.0f, rate);  // Modulation rate in Hz
+        }
+
+        void clear() noexcept {
+            std::fill(buffer.begin(), buffer.end(), 0.0f);
+            writeIndex = 0;
+            lastOutput = 0.0f;
+            phase = 0.0f;
+        }
+    };
+
+    const int allPassValues[16] = { 277, 379, 419, 479, 547, 607, 661, 739, 811, 877, 947, 1019, 1087, 1153, 1229, 1297 };
     std::vector<AllPassFilter> diffusionFilters;
+    std::vector<ModulatedAllPassFilter> modulatedDiffusers;
+    std::vector<AllPassFilter> postDiffusers;  // Additional stage of diffusion
 
-	// Biquad filter: 2 poles and 2 zeros
+    // Biquad filter: 2 poles and 2 zeros
     struct BiquadFilter {
         float lastInput = 0.0f;
         float cutoffFreq = 5000.0f;  // Store current cutoff frequency
@@ -244,7 +347,7 @@ private:
             return input; // Pass through unaffected
     }
 
-	// Avoid static noise buildup with DC blocking
+    // Avoid static noise buildup with DC blocking
     struct DCBlocker {
         float x1 = 0.0f, x2 = 0.0f;
         float y1 = 0.0f, y2 = 0.0f;

@@ -19,8 +19,6 @@ public:
     ~LFO();
 
     float processLFO(double lfoRange, int lfoShape, int boxIndex);
-
-
     void setSampleRate(double newSampleRate) { sampleRate = newSampleRate; }
 
 private:
