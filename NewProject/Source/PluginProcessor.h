@@ -79,8 +79,7 @@ private:
     //==============================================================================
     Synth synth;
     FDNReverb fdnReverb;
-    LFO lfo1;
-    LFO lfo2;
+    LFO lfo1, lfo2;
 
     juce::AbstractFifo midiFifo{ 1024 }; // Size the FIFO as needed
     std::vector<juce::MidiMessage> midiBuffer;

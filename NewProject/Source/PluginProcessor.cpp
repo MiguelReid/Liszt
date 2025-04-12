@@ -148,7 +148,6 @@ bool NewProjectAudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts
 
 void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
-	// NO CONSOLE OUT IN PROCESS BLOCK
 	auto totalNumInputChannels = getTotalNumInputChannels();
 	auto totalNumOutputChannels = getTotalNumOutputChannels();
 
@@ -228,14 +227,14 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 
 		switch (osc1Target) {
 		case 0: // Diffusion (0.0 - 1.0 range)
-			modulatedDiffusion = juce::jlimit(0.0, 1.0, baseDiffusion + modValue);
-			break;
+			modulatedDiffusion = juce::jlimit(0.0, 1.0,
+				baseDiffusion + (modValue * 0.5)); // 50% of diffusion range
 		case 1: // Decay (0.8 - 5.0 range)
-			modulatedDecay = juce::jlimit(0.8, 5.0, baseDecay + modValue);
-			break;
+			modulatedDecay = juce::jlimit(0.8, 5.0,
+				baseDecay + (modValue * 2.1)); // 50% of decay range
 		case 2: // Predelay (0.0 - 100.0 range)
-			modulatedPredelay = juce::jlimit(0.0, 100.0, basePredelay + modValue);
-			break;
+			modulatedPredelay = juce::jlimit(0.0, 100.0,
+				basePredelay + (modValue * 50.0)); // 50% of predelay range
 		}
 	}
 
@@ -244,14 +243,14 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 
 		switch (osc2Target) {
 		case 0: // Diffusion (0.0 - 1.0 range)
-			modulatedDiffusion = juce::jlimit(0.0, 1.0, modulatedDiffusion + modValue);
-			break;
+			modulatedDiffusion = juce::jlimit(0.0, 1.0,
+				baseDiffusion + (modValue * 0.5)); // 50% of diffusion range
 		case 1: // Decay (0.8 - 5.0 range)
-			modulatedDecay = juce::jlimit(0.8, 5.0, modulatedDecay + modValue);
-			break;
+			modulatedDecay = juce::jlimit(0.8, 5.0,
+				baseDecay + (modValue * 2.1)); // 50% of decay range
 		case 2: // Predelay (0.0 - 100.0 range)
-			modulatedPredelay = juce::jlimit(0.0, 100.0, modulatedPredelay + modValue);
-			break;
+			modulatedPredelay = juce::jlimit(0.0, 100.0,
+				basePredelay + (modValue * 50.0)); // 50% of predelay range
 		}
 	}
 
@@ -306,7 +305,6 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 				}
 			}
 		}
-		DBG("Modulated Diffusion: " << modulatedDiffusion);
 	}
 
 	if (buffer.getNumChannels() > 0)

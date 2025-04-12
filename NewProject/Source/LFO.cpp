@@ -59,6 +59,9 @@ float LFO::processLFO(double lfoDepth, int lfoShape, int boxIndex)
 
     // Final output
     float result = lfoValue * depth;
-    DBG("value=" << result);
+	
+    // Debug all of the variables for debugging
+	DBG("LFO Result: " << result);
+
     return result;
 }
