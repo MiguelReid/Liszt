@@ -13,7 +13,7 @@
 NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioProcessor& p)
 	: AudioProcessorEditor(&p), audioProcessor(p), keyboardComponent(keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard), leftControls(p.apvts), reverbControls(p.apvts), oscillatorControls(p.apvts), filterControls(p.apvts), waveScreen()
 {
-    setSize (880, 385);
+    setSize (815, 375);
     startTimerHz(30); // Adjust refresh rate as needed
     addAndMakeVisible(keyboardComponent);
 	addAndMakeVisible(waveScreen);
@@ -54,13 +54,13 @@ void NewProjectAudioProcessorEditor::resized()
     // Position FilterControls to the right of ReverbControls (aligned Y)
     filterControls.setBounds(reverbControls.getRight() + 30,
         reverbControls.getY(), // Align Y with reverbControls
-        180,
+        80,
         oscillatorControlsHeight);
 
     // Position OscillatorControls to the right of FilterControls with bottom aligned to section1
-    oscillatorControls.setBounds(filterControls.getRight() + 50,
+    oscillatorControls.setBounds(filterControls.getRight() + 60,
         reverbControls.getY(), // Align bottom with reverbControls
-        180,
+        200,
         oscillatorControlsHeight);
 
     // Position LeftControls at the bottom left
@@ -72,7 +72,7 @@ void NewProjectAudioProcessorEditor::resized()
     // WaveScreen Position (adjusted to align with oscillatorControls)
     auto screenHeight = 70;
     auto screenWidth = 170;
-    waveScreen.setBounds(oscillatorControls.getRight() + 50,
+    waveScreen.setBounds(oscillatorControls.getRight() + 60,
         oscillatorControls.getY(), // Same Y as oscillatorControls
         screenWidth,
         screenHeight);
@@ -93,15 +93,15 @@ void NewProjectAudioProcessorEditor::paint(juce::Graphics& g)
     juce::Rectangle<float> section1;
     section1.setX(reverbControls.getX() - 15);
     section1.setTop(filterControls.getY() - 15);
-    section1.setRight(filterControls.getRight() + 15);
-    section1.setBottom(reverbControls.getBottom() + 15);
+    section1.setRight(filterControls.getRight() + 25);
+    section1.setBottom(reverbControls.getBottom() + 5);
     g.drawRoundedRectangle(section1, 15.0f, 3.0f);
 
     // Section 2: oscillatorControls - ensure bottom is aligned with section1
     juce::Rectangle<float> section2;
     section2.setX(oscillatorControls.getX() - 15);
     section2.setY(oscillatorControls.getY() - 15);
-    section2.setRight(oscillatorControls.getRight() + 15);
+    section2.setRight(oscillatorControls.getRight() + 25);
     section2.setBottom(section1.getBottom()); // Set same bottom as section1
     g.drawRoundedRectangle(section2, 15.0f, 3.0f);
 

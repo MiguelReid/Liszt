@@ -13,7 +13,7 @@
 
 //==============================================================================
 FilterControls::FilterControls(juce::AudioProcessorValueTreeState& apvts) : apvts(apvts) {
-	// Custom LookAndFeel
+    // Custom LookAndFeel
     knobLookAndFeel = std::make_unique<Knob>();
 
     // High-Pass Label
@@ -23,36 +23,17 @@ FilterControls::FilterControls(juce::AudioProcessorValueTreeState& apvts) : apvt
     highPassLabel.setColour(juce::Label::textColourId, juce::Colours::white);
     addAndMakeVisible(highPassLabel);
 
-    // High-Pass Knobs + Labels
+    // High-Pass Knob + Label
     highCutoffKnob.setSliderStyle(juce::Slider::Rotary);
     highCutoffKnob.setLookAndFeel(knobLookAndFeel.get());
     highCutoffKnob.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
     addAndMakeVisible(highCutoffKnob);
+
     highCutoffLabel.setText("Cutoff", juce::dontSendNotification);
     highCutoffLabel.setJustificationType(juce::Justification::centredTop);
     highCutoffLabel.setFont(12.0f);
     highCutoffLabel.setColour(juce::Label::textColourId, juce::Colours::white);
     addAndMakeVisible(highCutoffLabel);
-
-    highSlopeKnob.setSliderStyle(juce::Slider::Rotary);
-    highSlopeKnob.setLookAndFeel(knobLookAndFeel.get());
-	highSlopeKnob.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
-    addAndMakeVisible(highSlopeKnob);
-    highSlopeLabel.setText("Slope", juce::dontSendNotification);
-    highSlopeLabel.setJustificationType(juce::Justification::centredTop);
-    highSlopeLabel.setFont(12.0f);
-    highSlopeLabel.setColour(juce::Label::textColourId, juce::Colours::white);
-    addAndMakeVisible(highSlopeLabel);
-
-    highEmphasisKnob.setSliderStyle(juce::Slider::Rotary);
-    highEmphasisKnob.setLookAndFeel(knobLookAndFeel.get());
-	highEmphasisKnob.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
-    addAndMakeVisible(highEmphasisKnob);
-    highEmphasisLabel.setText("Emphasis", juce::dontSendNotification);
-    highEmphasisLabel.setJustificationType(juce::Justification::centredTop);
-    highEmphasisLabel.setFont(12.0f);
-    highEmphasisLabel.setColour(juce::Label::textColourId, juce::Colours::white);
-    addAndMakeVisible(highEmphasisLabel);
 
     // LOW PASS =================================================================
 
@@ -63,66 +44,34 @@ FilterControls::FilterControls(juce::AudioProcessorValueTreeState& apvts) : apvt
     lowPassLabel.setColour(juce::Label::textColourId, juce::Colours::white);
     addAndMakeVisible(lowPassLabel);
 
-    // Low-Pass Knobs + Labels
+    // Low-Pass Knob + Label
     lowCutoffKnob.setSliderStyle(juce::Slider::Rotary);
     lowCutoffKnob.setLookAndFeel(knobLookAndFeel.get());
-	lowCutoffKnob.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+    lowCutoffKnob.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
     addAndMakeVisible(lowCutoffKnob);
+
     lowCutoffLabel.setText("Cutoff", juce::dontSendNotification);
     lowCutoffLabel.setJustificationType(juce::Justification::centredTop);
     lowCutoffLabel.setFont(12.0f);
     lowCutoffLabel.setColour(juce::Label::textColourId, juce::Colours::white);
     addAndMakeVisible(lowCutoffLabel);
 
-    lowSlopeKnob.setSliderStyle(juce::Slider::Rotary);
-    lowSlopeKnob.setLookAndFeel(knobLookAndFeel.get());
-	lowSlopeKnob.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
-    addAndMakeVisible(lowSlopeKnob);
-    lowSlopeLabel.setText("Slope", juce::dontSendNotification);
-    lowSlopeLabel.setJustificationType(juce::Justification::centredTop);
-    lowSlopeLabel.setFont(12.0f);
-    lowSlopeLabel.setColour(juce::Label::textColourId, juce::Colours::white);
-    addAndMakeVisible(lowSlopeLabel);
-
-    lowEmphasisKnob.setSliderStyle(juce::Slider::Rotary);
-    lowEmphasisKnob.setLookAndFeel(knobLookAndFeel.get());
-	lowEmphasisKnob.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
-    addAndMakeVisible(lowEmphasisKnob);
-    lowEmphasisLabel.setText("Emphasis", juce::dontSendNotification);
-    lowEmphasisLabel.setJustificationType(juce::Justification::centredTop);
-    lowEmphasisLabel.setFont(12.0f);
-    lowEmphasisLabel.setColour(juce::Label::textColourId, juce::Colours::white);
-    addAndMakeVisible(lowEmphasisLabel);
-
-	// AudioProcessorValueTreeState ===============================
-	highCutoffAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
-		apvts, "HIGH_CUTOFF", highCutoffKnob);
-	highSlopeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
-		apvts, "HIGH_SLOPE", highSlopeKnob);
-	highEmphasisAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
-		apvts, "HIGH_EMPHASIS", highEmphasisKnob);
-	lowCutoffAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
-		apvts, "LOW_CUTOFF", lowCutoffKnob);
-	lowSlopeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
-		apvts, "LOW_SLOPE", lowSlopeKnob);
-	lowEmphasisAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
-		apvts, "LOW_EMPHASIS", lowEmphasisKnob);
+    // AudioProcessorValueTreeState ===============================
+    highCutoffAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+        apvts, "HIGH_CUTOFF", highCutoffKnob);
+    lowCutoffAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+        apvts, "LOW_CUTOFF", lowCutoffKnob);
 }
 
 FilterControls::~FilterControls()
 {
     highCutoffKnob.setLookAndFeel(nullptr);
-    highSlopeKnob.setLookAndFeel(nullptr);
-    highEmphasisKnob.setLookAndFeel(nullptr);
-
     lowCutoffKnob.setLookAndFeel(nullptr);
-    lowSlopeKnob.setLookAndFeel(nullptr);
-    lowEmphasisKnob.setLookAndFeel(nullptr);
 }
 
-void FilterControls::paint (juce::Graphics& g)
+void FilterControls::paint(juce::Graphics& g)
 {
-
+    // Empty paint method
 }
 
 void FilterControls::resized()
@@ -131,31 +80,33 @@ void FilterControls::resized()
     int labelHeight = 20;
     int toggleSize = 20;
     int knobSize = 55;
-    int knobLabelHeight = 15; // Height for the knob labels
-    int spacing = 5; // Spacing between components
-    int sectionSpacing = 5; // Additional spacing between High-Pass and Low-Pass sections
+    int knobLabelHeight = 15;
+    int sectionSpacing = 5;
 
-    // Total height allocated to each section (High-Pass and Low-Pass)
-    int sectionHeight = labelHeight + knobSize + knobLabelHeight + spacing * 2;
+    // Calculate the height needed for each section
+    int sectionHeight = labelHeight + knobSize + knobLabelHeight;
+
+    // Center everything horizontally
+    int centerX = area.getCentreX();
 
     // First Section: High-Pass
-    auto highPassArea = area.removeFromTop(sectionHeight);
-
-    // Place High-Pass Label
+    // Place High-Pass Label centered above the knob
     highPassLabel.setBounds(
-        highPassArea.getCentreX() - 40, // Center the label horizontally
-        highPassArea.getY(),
+        centerX - 40, // Center the label
+        area.getY(),
         80,
         labelHeight
     );
 
-    // Place High-Pass Knobs and their Labels
-    int totalKnobWidth = (3 * knobSize) + (2 * spacing);
-    int knobsStartX = highPassArea.getCentreX() - (totalKnobWidth / 2);
-    int knobsY = highPassLabel.getBottom() + spacing;
+    // High Cutoff Knob - centered
+    highCutoffKnob.setBounds(
+        centerX - (knobSize / 2),
+        highPassLabel.getBottom(),
+        knobSize,
+        knobSize
+    );
 
-    // High Cutoff Knob
-    highCutoffKnob.setBounds(knobsStartX, knobsY, knobSize, knobSize);
+    // High Cutoff Label - aligned with knob
     highCutoffLabel.setBounds(
         highCutoffKnob.getX(),
         highCutoffKnob.getBottom(),
@@ -163,65 +114,30 @@ void FilterControls::resized()
         knobLabelHeight
     );
 
-    // High Slope Knob
-    highSlopeKnob.setBounds(highCutoffKnob.getRight() + spacing, knobsY, knobSize, knobSize);
-    highSlopeLabel.setBounds(
-        highSlopeKnob.getX(),
-        highSlopeKnob.getBottom(),
-        knobSize,
-        knobLabelHeight
-    );
-
-    // High Emphasis Knob
-    highEmphasisKnob.setBounds(highSlopeKnob.getRight() + spacing, knobsY, knobSize, knobSize);
-    highEmphasisLabel.setBounds(
-        highEmphasisKnob.getX(),
-        highEmphasisKnob.getBottom(),
-        knobSize,
-        knobLabelHeight
-    );
-
-    // Add extra spacing between High-Pass and Low-Pass sections
-    area.removeFromTop(sectionSpacing);
+    // Add spacing between sections
+    int secondSectionY = highCutoffLabel.getBottom() + sectionSpacing;
 
     // Second Section: Low-Pass
-    auto lowPassArea = area.removeFromTop(sectionHeight);
-
-    // Place Low-Pass Label
+    // Place Low-Pass Label centered above the knob
     lowPassLabel.setBounds(
-        lowPassArea.getCentreX() - 40,
-        lowPassArea.getY(),
+        centerX - 40, // Center the label
+        secondSectionY,
         80,
         labelHeight
     );
 
-    // Place Low-Pass Knobs and their Labels
-    knobsStartX = lowPassArea.getCentreX() - (totalKnobWidth / 2);
-    knobsY = lowPassLabel.getBottom() + spacing;
+    // Low Cutoff Knob - centered
+    lowCutoffKnob.setBounds(
+        centerX - (knobSize / 2),
+        lowPassLabel.getBottom(),
+        knobSize,
+        knobSize
+    );
 
-    // Low Cutoff Knob
-    lowCutoffKnob.setBounds(knobsStartX, knobsY, knobSize, knobSize);
+    // Low Cutoff Label - aligned with knob
     lowCutoffLabel.setBounds(
         lowCutoffKnob.getX(),
         lowCutoffKnob.getBottom(),
-        knobSize,
-        knobLabelHeight
-    );
-
-    // Low Slope Knob
-    lowSlopeKnob.setBounds(lowCutoffKnob.getRight() + spacing, knobsY, knobSize, knobSize);
-    lowSlopeLabel.setBounds(
-        lowSlopeKnob.getX(),
-        lowSlopeKnob.getBottom(),
-        knobSize,
-        knobLabelHeight
-    );
-
-    // Low Emphasis Knob
-    lowEmphasisKnob.setBounds(lowSlopeKnob.getRight() + spacing, knobsY, knobSize, knobSize);
-    lowEmphasisLabel.setBounds(
-        lowEmphasisKnob.getX(),
-        lowEmphasisKnob.getBottom(),
         knobSize,
         knobLabelHeight
     );

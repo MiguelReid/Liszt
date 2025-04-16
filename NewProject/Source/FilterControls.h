@@ -29,30 +29,18 @@ public:
 private:
     // APVTS Attachments
     std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> highCutoffAttachment;
-    std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> highSlopeAttachment;
-    std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> highEmphasisAttachment;
 
     std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> lowCutoffAttachment;
-    std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> lowSlopeAttachment;
-    std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> lowEmphasisAttachment;
 
     // High-Pass Elements
     juce::Label highPassLabel;
     juce::Slider highCutoffKnob;
 	juce::Label highCutoffLabel;
-    juce::Slider highSlopeKnob;
-	juce::Label highSlopeLabel;
-    juce::Slider highEmphasisKnob;
-	juce::Label highEmphasisLabel;
 
     // Low-Pass Elements
     juce::Label lowPassLabel;
     juce::Slider lowCutoffKnob;
 	juce::Label lowCutoffLabel;
-    juce::Slider lowSlopeKnob;
-	juce::Label lowSlopeLabel;
-    juce::Slider lowEmphasisKnob;
-	juce::Label lowEmphasisLabel;
 
     // Custom LookAndFeel
     std::unique_ptr<Knob> knobLookAndFeel;

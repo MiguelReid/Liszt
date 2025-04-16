@@ -91,11 +91,13 @@ void FDNReverb::prepare(double newSampleRate) {
 	// Reset Biquad Filters
 	for (int i = 0; i < numDelayLines; ++i) {
 		lpfFilters[i].setLowpass(5000.0f, 0.7071f, static_cast<float>(sampleRate));
+		// 5kHz - 16kHz
 		lpfFilters[i].z1 = 0.0f;
 		lpfFilters[i].z2 = 0.0f;
 
 		// Initialize high-pass filters with Butterworth response
-		hpfFilters[i].setHighpass(120.0f, 0.7071f, static_cast<float>(sampleRate));
+		hpfFilters[i].setHighpass(20.0f, 0.7071f, static_cast<float>(sampleRate));
+		// 20Hz - 150Hz
 		hpfFilters[i].z1 = 0.0f;
 		hpfFilters[i].z2 = 0.0f;
 	}
