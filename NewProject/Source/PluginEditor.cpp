@@ -13,7 +13,7 @@
 NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioProcessor& p)
 	: AudioProcessorEditor(&p), audioProcessor(p), keyboardComponent(keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard), leftControls(p.apvts), reverbControls(p.apvts), oscillatorControls(p.apvts), filterControls(p.apvts), waveScreen()
 {
-    setSize (880, 380);
+    setSize (880, 385);
     startTimerHz(30); // Adjust refresh rate as needed
     addAndMakeVisible(keyboardComponent);
 	addAndMakeVisible(waveScreen);
@@ -33,21 +33,41 @@ NewProjectAudioProcessorEditor::~NewProjectAudioProcessorEditor()
 }
 
 //==============================================================================
-void NewProjectAudioProcessorEditor::paint (juce::Graphics& g)
+void NewProjectAudioProcessorEditor::paint(juce::Graphics& g)
 {
+    // Fill background with gradient
     g.fillAll(juce::Colour::fromRGB(109, 70, 44));
     juce::ColourGradient gradient(juce::Colour::fromRGB(60, 35, 20), 0, 0,
-        juce::Colour::fromRGB(150, 90, 55), getWidth(), getHeight(),false);
+        juce::Colour::fromRGB(150, 90, 55), getWidth(), getHeight(), false);
     g.setGradientFill(gradient);
     g.fillRect(getLocalBounds());
 
     g.setColour(juce::Colours::black);
-    g.drawLine(reverbControls.getRight() + 25, 0, reverbControls.getRight() + 25, getHeight(), 2.0f);
-    g.drawLine(oscillatorControls.getRight() + 25, 0, oscillatorControls.getRight() + 25, getHeight(), 2.0f);
-    g.drawLine(filterControls.getRight() + 25, 0, filterControls.getRight() + 25, getHeight(), 2.0f);
 
-    int lineY = waveScreen.getY() - 10;
-    g.drawLine(filterControls.getRight() + 25, lineY, getWidth(), lineY, 2.0f);
+    // Section 1: reverbControls and filterControls together
+    juce::Rectangle<float> section1;
+    section1.setX(reverbControls.getX() - 15);
+    section1.setTop(filterControls.getY() - 15);
+	section1.setBottom(reverbControls.getBottom() - 15);
+    section1.setRight(filterControls.getRight() + 15);
+    section1.setBottom(reverbControls.getBottom() + 15);
+    g.drawRoundedRectangle(section1, 12.0f, 3.0f); // cornerSize=12, lineThickness=4
+
+    // Section 2: oscillatorControls
+    juce::Rectangle<float> section2;
+    section2.setX(oscillatorControls.getX() - 15);
+    section2.setY(oscillatorControls.getY() - 15);
+    section2.setRight(oscillatorControls.getRight() + 15);
+    section2.setBottom(oscillatorControls.getBottom() + 15);
+    g.drawRoundedRectangle(section2, 12.0f, 3.0f); // cornerSize=12, lineThickness=4
+
+    // Section 3: waveScreen
+    juce::Rectangle<float> section3;
+    section3.setX(waveScreen.getX() - 15);
+    section3.setY(waveScreen.getY() - 15);
+    section3.setRight(waveScreen.getRight() + 15);
+    section3.setBottom(waveScreen.getBottom() + 15);
+    g.drawRoundedRectangle(section3, 12.0f, 3.0f); // cornerSize=12, lineThickness=4
 }
 
 void NewProjectAudioProcessorEditor::resized()
@@ -57,7 +77,7 @@ void NewProjectAudioProcessorEditor::resized()
     // Space on the left for extra controls
     auto controlAreaWidth = 135;
     auto keyboardHeight = 130;
-    auto reverbControlsHeight = 200;
+    auto reverbControlsHeight = 195;
     int oscillatorControlsHeight = 200;
 
     // Position ReverbControls lower down and to the right
@@ -68,11 +88,17 @@ void NewProjectAudioProcessorEditor::resized()
         .removeFromTop(reverbControlsHeight)
         .translated(reverbOffsetX, reverbOffsetY));
 
-    // Position OscillatorControls to the right of ReverbControls
-    oscillatorControls.setBounds(reverbControls.getRight() + 50, reverbControls.getY(), 200, oscillatorControlsHeight);
+    // Position FilterControls to the right of ReverbControls (aligned Y)
+    filterControls.setBounds(reverbControls.getRight() + 50,
+        reverbControls.getY(), // Align Y with reverbControls
+        180,
+        oscillatorControlsHeight);
 
-	// Position FilterControls to the right of OscillatorControls
-	filterControls.setBounds(oscillatorControls.getRight() + 50, oscillatorControls.getY(), 180, oscillatorControlsHeight);
+    // Position OscillatorControls to the right of FilterControls (same Y)
+    oscillatorControls.setBounds(filterControls.getRight() + 50,
+        filterControls.getY(), // Same Y as filterControls
+        200,
+        oscillatorControlsHeight);
 
     // Position LeftControls at the bottom left
     leftControls.setBounds(leftControlArea.withY(getHeight() - keyboardHeight).withHeight(keyboardHeight));
@@ -80,14 +106,14 @@ void NewProjectAudioProcessorEditor::resized()
     // Position the keyboard at the bottom
     keyboardComponent.setBounds(bounds.removeFromBottom(keyboardHeight));
 
-    // WaveScreen Position
+    // WaveScreen Position (adjusted to align bottom border)
     auto screenHeight = 70;
     auto screenWidth = 170;
-    auto screenX = getWidth() - screenWidth - 20;
-    auto screenY = keyboardComponent.getY() - screenHeight - 10;
-    waveScreen.setBounds(screenX, screenY, screenWidth, screenHeight);
+    waveScreen.setBounds(oscillatorControls.getRight() + 50,
+        oscillatorControls.getY(), // Same Y as filterControls
+        screenWidth,
+        screenHeight);
 }
-
 
 void NewProjectAudioProcessorEditor::handleNoteOn(juce::MidiKeyboardState*, int midiChannel, int midiNoteNumber, float velocity)
 {
