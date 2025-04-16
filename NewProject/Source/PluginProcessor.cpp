@@ -271,6 +271,10 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 			// Get all reverb parameters
 			auto dryWet = apvts.getRawParameterValue("DRYWET")->load();
 
+			// HPF and LPF
+			auto hpCutoff = apvts.getRawParameterValue("HIGH_CUTOFF")->load();
+			auto lpCutoff = apvts.getRawParameterValue("LOW_CUTOFF")->load();
+
 			// Save original dry signal if you need to mix it later
 			juce::AudioBuffer<float> dryBuffer;
 			if (dryWet < 1.0f) { // Only copy if we need to mix dry signal
@@ -278,7 +282,7 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 			}
 
 			// Process audio with reverb
-			auto outputs = fdnReverb.process(buffer, modulatedPredelay, modulatedDecay, modulatedDiffusion);
+			auto outputs = fdnReverb.process(buffer, modulatedPredelay, modulatedDecay, modulatedDiffusion, hpCutoff, lpCutoff);
 
 			// Clear the buffer as we'll fill it with the processed signal
 			buffer.clear();
@@ -351,7 +355,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout NewProjectAudioProcessor::cr
 
 	// Left Controls Parameters (Gain with SkewFactor)
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
-		"GAIN", "Gain", juce::NormalisableRange<float>(0.0f, 3.0f, 0.01f, 0.5f), 0.5f));
+		"GAIN", "Gain", juce::NormalisableRange<float>(0.0f, 3.0f, 0.01f, 0.5f), 1.5f));
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
 		"PITCH_BEND", "Pitch Bend", juce::NormalisableRange<float>(-2.0f, 2.0f), 0.0f));
 	params.push_back(std::make_unique<juce::AudioParameterBool>(
@@ -359,9 +363,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout NewProjectAudioProcessor::cr
 
 	// Reverb Parameters
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
-		"PREDELAY", "Predelay", juce::NormalisableRange<float>(0.0f, 100.0f, 0.01f), 0.0f));
+		"PREDELAY", "Predelay", juce::NormalisableRange<float>(0.0f, 100.0f, 1.0f), 50.0f));
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
-		"DECAY", "Decay", juce::NormalisableRange<float>(0.8f, 5.0f, 0.1f), 0.8f));
+		"DECAY", "Decay", juce::NormalisableRange<float>(0.8f, 5.0f, 0.1f), 2.5f));
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
 		"DRYWET", "Dry/Wet", juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.5f));
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
@@ -395,11 +399,11 @@ juce::AudioProcessorValueTreeState::ParameterLayout NewProjectAudioProcessor::cr
 
 	// High-Pass Filter Parameters
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
-		"HIGH_CUTOFF", "High Cutoff", juce::NormalisableRange<float>(20.0f, 20000.0f, 1.0f), 20000.0f));
+		"HIGH_CUTOFF", "High Cutoff", juce::NormalisableRange<float>(20.0f, 150.0f, 2.0f), 120.0f));
 
 	// Low-Pass Filter Parameters
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
-		"LOW_CUTOFF", "Low Cutoff", juce::NormalisableRange<float>(20.0f, 20000.0f, 1.0f), 20.0f));
+		"LOW_CUTOFF", "Low Cutoff", juce::NormalisableRange<float>(5000.0f, 16000.0f, 160.0f), 5000.0f));
 
 	return { params.begin(), params.end() };
 }

@@ -96,7 +96,7 @@ void FDNReverb::prepare(double newSampleRate) {
 		lpfFilters[i].z2 = 0.0f;
 
 		// Initialize high-pass filters with Butterworth response
-		hpfFilters[i].setHighpass(20.0f, 0.7071f, static_cast<float>(sampleRate));
+		hpfFilters[i].setHighpass(120.0f, 0.7071f, static_cast<float>(sampleRate));
 		// 20Hz - 150Hz
 		hpfFilters[i].z1 = 0.0f;
 		hpfFilters[i].z2 = 0.0f;
@@ -133,183 +133,195 @@ void FDNReverb::prepare(double newSampleRate) {
 }
 
 std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buffer,
-	double predelay,
-	double decay,
-	double diffusion)
+    double predelay,
+    double decay,
+    double diffusion,
+    double hpCutoff,
+    double lpCutoff)
 {
-	const int numChannels = buffer.getNumChannels();
-	const int numSamples = buffer.getNumSamples();
+    const int numChannels = buffer.getNumChannels();
+    const int numSamples = buffer.getNumSamples();
 
-	// Simplify parameter handling
-	float decayGain = juce::jlimit(0.0f, 0.98f, static_cast<float>(decay));
-	float decayVariations[numDelayLines] = {
-		1.0f, 0.998f, 0.997f, 0.999f, 0.996f, 0.998f, 0.997f, 0.999f,
-		0.995f, 0.998f, 0.996f, 0.999f, 0.997f, 0.995f, 0.998f, 0.996f
-	};
-	float diffusionCoeff = juce::jlimit(0.0f, 0.9f, static_cast<float>(diffusion));
+    // Simplify parameter handling
+    float decayGain = juce::jlimit(0.0f, 0.98f, static_cast<float>(decay));
+    float decayVariations[numDelayLines] = {
+        1.0f, 0.998f, 0.997f, 0.999f, 0.996f, 0.998f, 0.997f, 0.999f,
+        0.995f, 0.998f, 0.996f, 0.999f, 0.997f, 0.995f, 0.998f, 0.996f
+    };
+    float diffusionCoeff = juce::jlimit(0.0f, 0.9f, static_cast<float>(diffusion));
 
-	int predelaySamples = static_cast<int>(predelay * sampleRate / 1000.0);
+    int predelaySamples = static_cast<int>(predelay * sampleRate / 1000.0);
 
-	std::vector<std::vector<float>> outputs(numDelayLines, std::vector<float>(numSamples, 0.0f));
-	std::vector<std::vector<float>> feedbackSignals(numDelayLines, std::vector<float>(numSamples, 0.0f));
-	std::vector<std::vector<float>> channelOutputs(numChannels, std::vector<float>(numSamples, 0.0f));
+    // Set filter cutoffs from parameters (hpCutoff: 20-150Hz, lpCutoff: 5000-16000Hz)
+    constexpr float butterworthQ = 0.7071f; // For maximally flat frequency response
 
-	// Direct signal mix (moderate level)
-	for (int ch = 0; ch < numChannels; ++ch)
-	{
-		for (int sample = 0; sample < numSamples; ++sample)
-		{
-			channelOutputs[ch][sample] = buffer.getSample(ch, sample) * 0.20f;
-		}
-	}
+    for (int i = 0; i < numDelayLines; ++i) {
+        // Add slight variation to cutoffs per delay line for more natural sound
+        float hpVariation = 0.95f + 0.1f * (static_cast<float>(i) / numDelayLines);
+        float lpVariation = 0.97f + 0.06f * (static_cast<float>(i) / numDelayLines);
 
-	// Process early reflections
-	for (int sample = 0; sample < numSamples; ++sample)
-	{
-		float monoInput = 0.0f;
-		for (int ch = 0; ch < numChannels; ++ch)
-			monoInput += buffer.getSample(ch, sample);
-		monoInput /= numChannels;
+        // Set the high-pass filter cutoff directly from the parameter
+        hpfFilters[i].setHighpass(
+            static_cast<float>(hpCutoff) * hpVariation,
+            butterworthQ,
+            static_cast<float>(sampleRate)
+        );
 
-		erBuffer[erWriteIndex] = monoInput;
+        // Set the low-pass filter cutoff directly from the parameter
+        lpfFilters[i].setLowpass(
+            static_cast<float>(lpCutoff) * lpVariation,
+            butterworthQ,
+            static_cast<float>(sampleRate)
+        );
+    }
 
-		float erOutput = 0.0f;
-		for (int i = 0; i < 8; i++)  // Using first 8 reflections
-		{
-			const auto& er = earlyReflections[i];
-			int readPos = erWriteIndex - er.delaySamples;
-			if (readPos < 0)
-				readPos += erBufferSize;
-			erOutput += erBuffer[readPos] * er.gain;
-		}
+    std::vector<std::vector<float>> outputs(numDelayLines, std::vector<float>(numSamples, 0.0f));
+    std::vector<std::vector<float>> feedbackSignals(numDelayLines, std::vector<float>(numSamples, 0.0f));
+    std::vector<std::vector<float>> channelOutputs(numChannels, std::vector<float>(numSamples, 0.0f));
 
-		erOutput = erDiffusion1.process(erOutput, 0.2f);
+    // Direct signal mix (moderate level)
+    for (int ch = 0; ch < numChannels; ++ch)
+    {
+        for (int sample = 0; sample < numSamples; ++sample)
+        {
+            channelOutputs[ch][sample] = buffer.getSample(ch, sample) * 0.20f;
+        }
+    }
 
-		erWriteIndex = (erWriteIndex + 1) % erBufferSize;
+    // Process early reflections
+    for (int sample = 0; sample < numSamples; ++sample)
+    {
+        float monoInput = 0.0f;
+        for (int ch = 0; ch < numChannels; ++ch)
+            monoInput += buffer.getSample(ch, sample);
+        monoInput /= numChannels;
 
-		// Increase early reflection contribution
-		for (int ch = 0; ch < numChannels; ++ch)
-			channelOutputs[ch][sample] += erOutput * 0.80f;
-	}
+        erBuffer[erWriteIndex] = monoInput;
 
-	// Dynamic low-pass cutoff adjustment with Butterworth response
-	float inputCutoff = 2900.0f + (1.0f - decayGain) * 2000.0f;
-	constexpr float butterworthQ = 0.7071f; // For maximally flat frequency response
+        float erOutput = 0.0f;
+        for (int i = 0; i < 8; i++)  // Using first 8 reflections
+        {
+            const auto& er = earlyReflections[i];
+            int readPos = erWriteIndex - er.delaySamples;
+            if (readPos < 0)
+                readPos += erBufferSize;
+            erOutput += erBuffer[readPos] * er.gain;
+        }
 
-	for (int i = 0; i < numDelayLines; ++i) {
-		// Add slight variation to cutoff per delay line for more natural sound
-		float lineCutoff = inputCutoff * (0.97f + 0.06f * (static_cast<float>(i) / numDelayLines));
-		lpfFilters[i].setLowpass(lineCutoff, butterworthQ, static_cast<float>(sampleRate));
-	}
+        erOutput = erDiffusion1.process(erOutput, 0.2f);
 
+        erWriteIndex = (erWriteIndex + 1) % erBufferSize;
 
-	for (int sample = 0; sample < numSamples; ++sample)
-	{
-		std::array<float, numDelayLines> inputSignals = { 0.0f };
-		for (int ch = 0; ch < std::min(numChannels, numDelayLines); ++ch)
-		{
-			float inputSample = buffer.getSample(ch, sample);
-			inputSample = dcBlockers[ch].process(inputSample);
-			// Apply denormal prevention and then predelay
-			inputSignals[ch] = predelayBuffer.process(denormalPrevention(inputSample), predelaySamples);
-		}
+        // Increase early reflection contribution
+        for (int ch = 0; ch < numChannels; ++ch)
+            channelOutputs[ch][sample] += erOutput * 0.80f;
+    }
 
-		std::array<float, numDelayLines> mixedInputs = { 0.0f };
-		for (int i = 0; i < numDelayLines; ++i)
-		{
-			for (int j = 0; j < numDelayLines; ++j)
-			{
-				mixedInputs[i] += hadamardMatrix[i][j] * inputSignals[j];
-			}
-		}
+    for (int sample = 0; sample < numSamples; ++sample)
+    {
+        std::array<float, numDelayLines> inputSignals = { 0.0f };
+        for (int ch = 0; ch < std::min(numChannels, numDelayLines); ++ch)
+        {
+            float inputSample = buffer.getSample(ch, sample);
+            inputSample = dcBlockers[ch].process(inputSample);
+            // Apply denormal prevention and then predelay
+            inputSignals[ch] = predelayBuffer.process(denormalPrevention(inputSample), predelaySamples);
+        }
 
-		// FEEDBACK LOOP
-		for (int i = 0; i < numDelayLines; ++i)
-		{
-			float prevFeedback = (sample > 0) ? feedbackSignals[i][sample - 1] * 0.95f : 0.0f;
+        std::array<float, numDelayLines> mixedInputs = { 0.0f };
+        for (int i = 0; i < numDelayLines; ++i)
+        {
+            for (int j = 0; j < numDelayLines; ++j)
+            {
+                mixedInputs[i] += hadamardMatrix[i][j] * inputSignals[j];
+            }
+        }
 
+        // FEEDBACK LOOP
+        for (int i = 0; i < numDelayLines; ++i)
+        {
+            float prevFeedback = (sample > 0) ? feedbackSignals[i][sample - 1] * 0.95f : 0.0f;
 
-			bool invertInput = ((i & 0x1) != 0);
-			float delayInput = (invertInput ? -1.0f : 1.0f) * mixedInputs[i] + prevFeedback;
-			delayInput = lpfFilters[i].processBiquad(delayInput);
-			outputs[i][sample] = delayLines[i]->processSample(delayInput);
-		}
+            bool invertInput = ((i & 0x1) != 0);
+            float delayInput = (invertInput ? -1.0f : 1.0f) * mixedInputs[i] + prevFeedback;
+            delayInput = lpfFilters[i].processBiquad(delayInput);
+            outputs[i][sample] = delayLines[i]->processSample(delayInput);
+        }
 
-		std::array<float, numDelayLines> householderMixed = { 0.0f };
-		for (int i = 0; i < numDelayLines; ++i)
-		{
-			for (int j = 0; j < numDelayLines; ++j)
-				householderMixed[i] += householderMatrix[i][j] * outputs[j][sample];
-		}
+        std::array<float, numDelayLines> householderMixed = { 0.0f };
+        for (int i = 0; i < numDelayLines; ++i)
+        {
+            for (int j = 0; j < numDelayLines; ++j)
+                householderMixed[i] += householderMatrix[i][j] * outputs[j][sample];
+        }
 
-		// Enhanced noise gating with high-pass filtering and improved diffusion
-		for (int i = 0; i < numDelayLines; ++i)
-		{
-			float signal = dcBlockers[i].process(householderMixed[i]);
+        // Enhanced noise gating with high-pass filtering and improved diffusion
+        for (int i = 0; i < numDelayLines; ++i)
+        {
+            float signal = dcBlockers[i].process(householderMixed[i]);
 
-			// Use the BiquadFilter for high-pass filtering
-			signal = hpfFilters[i].processBiquad(signal);
+            // Use the BiquadFilter for high-pass filtering
+            signal = hpfFilters[i].processBiquad(signal);
 
-			// Use standard diffusion to maintain the original reverb character
-			signal = diffusionFilters[i].process(signal, 0.4f + (diffusionCoeff * 0.1f));
+            // Use standard diffusion to maintain the original reverb character
+            signal = diffusionFilters[i].process(signal, 0.4f + (diffusionCoeff * 0.1f));
 
-			// Add modulation only with small depth to avoid altering the reverb character too much
-			if (diffusionCoeff > 0.5f) {
-				// Apply modulated diffusion with conservative settings
-				signal = modulatedDiffusers[i].process(signal, 0.15f + (diffusionCoeff * 0.05f), static_cast<float>(sampleRate));
-			}
+            // Add modulation only with small depth to avoid altering the reverb character too much
+            if (diffusionCoeff > 0.5f) {
+                // Apply modulated diffusion with conservative settings
+                signal = modulatedDiffusers[i].process(signal, 0.15f + (diffusionCoeff * 0.05f), static_cast<float>(sampleRate));
+            }
 
-			float lineDecay = decayGain * decayVariations[i];
+            float lineDecay = decayGain * decayVariations[i];
 
-			// Apply denormal prevention
-			signal = denormalPrevention(signal);
+            // Apply denormal prevention
+            signal = denormalPrevention(signal);
 
-			// Aggressive limiting
-			if (std::abs(signal) > 0.9f)
-				signal *= 0.9f / std::abs(signal);
+            // Aggressive limiting
+            if (std::abs(signal) > 0.9f)
+                signal *= 0.9f / std::abs(signal);
 
-			// Higher noise gate threshold
-			if (std::abs(signal) < 1e-4f)
-				signal = 0.0f;
+            // Higher noise gate threshold
+            if (std::abs(signal) < 1e-4f)
+                signal = 0.0f;
 
-			// More progressive noise reduction with additional soft threshold
-			if (std::abs(signal) < 5e-4f) {
-				signal *= std::pow(std::abs(signal) / 5e-4f, 1.5f);  // Progressive reduction
-			}
+            // More progressive noise reduction with additional soft threshold
+            if (std::abs(signal) < 5e-4f) {
+                signal *= std::pow(std::abs(signal) / 5e-4f, 1.5f);  // Progressive reduction
+            }
 
-			// Extra smooth between consecutive samples - keeping original amount
-			if (sample > 0) {
-				float prevSample = feedbackSignals[i][sample - 1] / lineDecay;
-				signal = prevSample * 0.4f + signal * 0.6f;
-			}
+            // Extra smooth between consecutive samples - keeping original amount
+            if (sample > 0) {
+                float prevSample = feedbackSignals[i][sample - 1] / lineDecay;
+                signal = prevSample * 0.4f + signal * 0.6f;
+            }
 
-			// Apply more aggressive soft saturation curve - keeping original
-			signal = std::tanh(signal * 0.9f) / 0.9f;
+            // Apply more aggressive soft saturation curve - keeping original
+            signal = std::tanh(signal * 0.9f) / 0.9f;
 
-			// Reduce decay for low frequencies
-			if (i < 4) {  // First few delay lines tend to carry more low frequencies
-				lineDecay *= 0.94f;  // Extra decay reduction
-			}
+            // Reduce decay for low frequencies
+            if (i < 4) {  // First few delay lines tend to carry more low frequencies
+                lineDecay *= 0.94f;  // Extra decay reduction
+            }
 
-			feedbackSignals[i][sample] = signal * lineDecay;
-		}
+            feedbackSignals[i][sample] = signal * lineDecay;
+        }
 
+        // Mix late reverb outputs for each channel with adjusted output routing
+        for (int ch = 0; ch < numChannels; ++ch)
+        {
+            float lateSum = 0.0f;
+            // Distribute the 16 delay lines across channels more evenly
+            for (int i = 0; i < numDelayLines; i += 2)
+            {
+                float outputGain = 1.0f / (numDelayLines / 2);
+                lateSum += feedbackSignals[(i + ch) % numDelayLines][sample] * outputGain;
+            }
+            channelOutputs[ch][sample] += lateSum;
+            channelOutputs[ch][sample] = softLimit(channelOutputs[ch][sample]);
+        }
+    }
 
-
-		// Mix late reverb outputs for each channel with adjusted output routing
-		for (int ch = 0; ch < numChannels; ++ch)
-		{
-			float lateSum = 0.0f;
-			// Distribute the 16 delay lines across channels more evenly
-			for (int i = 0; i < numDelayLines; i += 2)
-			{
-				float outputGain = 1.0f / (numDelayLines / 2);
-				lateSum += feedbackSignals[(i + ch) % numDelayLines][sample] * outputGain;
-			}
-			channelOutputs[ch][sample] += lateSum;
-			channelOutputs[ch][sample] = softLimit(channelOutputs[ch][sample]);
-		}
-	}
-
-	return channelOutputs;
+    return channelOutputs;
 }
+

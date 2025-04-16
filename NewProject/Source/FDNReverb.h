@@ -65,7 +65,7 @@ public:
     FDNReverb();
     ~FDNReverb();
 
-    std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buffer, double predelay, double decay, double diffusion);
+    std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buffer, double predelay, double decay, double diffusion, double hpCutoff, double lpCutoff);
     void prepare(double newSampleRate);
 
 private:
