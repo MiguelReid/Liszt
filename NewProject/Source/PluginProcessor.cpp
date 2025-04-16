@@ -400,8 +400,6 @@ juce::AudioProcessorValueTreeState::ParameterLayout NewProjectAudioProcessor::cr
 		"HIGH_SLOPE", "High Slope", juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.5f));
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
 		"HIGH_EMPHASIS", "High Emphasis", juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.0f));
-	params.push_back(std::make_unique<juce::AudioParameterBool>(
-		"HIGH_ENABLED", "High Pass Enabled", false));
 
 	// Low-Pass Filter Parameters
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
@@ -410,8 +408,6 @@ juce::AudioProcessorValueTreeState::ParameterLayout NewProjectAudioProcessor::cr
 		"LOW_SLOPE", "Low Slope", juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.5f));
 	params.push_back(std::make_unique<juce::AudioParameterFloat>(
 		"LOW_EMPHASIS", "Low Emphasis", juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f), 0.0f));
-	params.push_back(std::make_unique<juce::AudioParameterBool>(
-		"LOW_ENABLED", "Low Pass Enabled", false));
 
 	return { params.begin(), params.end() };
 }

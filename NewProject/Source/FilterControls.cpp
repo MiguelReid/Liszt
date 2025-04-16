@@ -14,7 +14,6 @@
 //==============================================================================
 FilterControls::FilterControls(juce::AudioProcessorValueTreeState& apvts) : apvts(apvts) {
 	// Custom LookAndFeel
-    toggleButtonLookAndFeel = std::make_unique<ToggleButton>();
     knobLookAndFeel = std::make_unique<Knob>();
 
     // High-Pass Label
@@ -23,10 +22,6 @@ FilterControls::FilterControls(juce::AudioProcessorValueTreeState& apvts) : apvt
     highPassLabel.setFont(juce::Font(18.0f, juce::Font::bold));
     highPassLabel.setColour(juce::Label::textColourId, juce::Colours::white);
     addAndMakeVisible(highPassLabel);
-
-    // High-Pass ToggleButton
-    highToggle.setLookAndFeel(toggleButtonLookAndFeel.get());
-    addAndMakeVisible(highToggle);
 
     // High-Pass Knobs + Labels
     highCutoffKnob.setSliderStyle(juce::Slider::Rotary);
@@ -67,10 +62,6 @@ FilterControls::FilterControls(juce::AudioProcessorValueTreeState& apvts) : apvt
     lowPassLabel.setFont(juce::Font(18.0f, juce::Font::bold));
     lowPassLabel.setColour(juce::Label::textColourId, juce::Colours::white);
     addAndMakeVisible(lowPassLabel);
-
-    // Low-Pass ToggleButton
-    lowToggle.setLookAndFeel(toggleButtonLookAndFeel.get());
-    addAndMakeVisible(lowToggle);
 
     // Low-Pass Knobs + Labels
     lowCutoffKnob.setSliderStyle(juce::Slider::Rotary);
@@ -116,18 +107,10 @@ FilterControls::FilterControls(juce::AudioProcessorValueTreeState& apvts) : apvt
 		apvts, "LOW_SLOPE", lowSlopeKnob);
 	lowEmphasisAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
 		apvts, "LOW_EMPHASIS", lowEmphasisKnob);
-	highToggleAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(
-		apvts, "HIGH_ENABLED", highToggle);
-	lowToggleAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ButtonAttachment>(
-		apvts, "LOW_ENABLED", lowToggle);
 }
 
 FilterControls::~FilterControls()
 {
-    // Reset LookAndFeel
-    highToggle.setLookAndFeel(nullptr);
-    lowToggle.setLookAndFeel(nullptr);
-
     highCutoffKnob.setLookAndFeel(nullptr);
     highSlopeKnob.setLookAndFeel(nullptr);
     highEmphasisKnob.setLookAndFeel(nullptr);
@@ -160,18 +143,10 @@ void FilterControls::resized()
 
     // Place High-Pass Label
     highPassLabel.setBounds(
-        highPassArea.getCentreX() - 53, // Center the label horizontally
+        highPassArea.getCentreX() - 40, // Center the label horizontally
         highPassArea.getY(),
         80,
         labelHeight
-    );
-
-    // Place High-Pass ToggleButton
-    highToggle.setBounds(
-        highPassLabel.getRight() + spacing,
-        highPassArea.getY(),
-        toggleSize,
-        toggleSize
     );
 
     // Place High-Pass Knobs and their Labels
@@ -214,18 +189,10 @@ void FilterControls::resized()
 
     // Place Low-Pass Label
     lowPassLabel.setBounds(
-        lowPassArea.getCentreX() - 53,
+        lowPassArea.getCentreX() - 40,
         lowPassArea.getY(),
         80,
         labelHeight
-    );
-
-    // Place Low-Pass ToggleButton
-    lowToggle.setBounds(
-        lowPassLabel.getRight() + spacing,
-        lowPassArea.getY(),
-        toggleSize,
-        toggleSize
     );
 
     // Place Low-Pass Knobs and their Labels
