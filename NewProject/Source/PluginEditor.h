@@ -14,7 +14,6 @@
 #include "LeftControls.h"
 #include "ReverbControls.h"
 #include "OscillatorControls.h"
-#include "FilterControls.h"
 
 //==============================================================================
 /**
@@ -46,7 +45,6 @@ private:
     LeftControls leftControls;
     ReverbControls reverbControls;
     OscillatorControls oscillatorControls;
-	FilterControls filterControls;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NewProjectAudioProcessorEditor)
 };

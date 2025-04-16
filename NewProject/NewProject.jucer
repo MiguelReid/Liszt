@@ -87,10 +87,6 @@
     <GROUP id="{0DE48964-0C34-297E-506C-5D9552E4C577}" name="Source">
       <GROUP id="{C5E3E42E-845E-92E2-8096-5396AAE29B3C}" name="Frontend">
         <GROUP id="{5BB37783-4C61-8178-D376-DF60AAB92159}" name="Controls">
-          <FILE id="imz0Km" name="FilterControls.cpp" compile="1" resource="0"
-                file="Source/FilterControls.cpp"/>
-          <FILE id="uFkwhk" name="FilterControls.h" compile="0" resource="0"
-                file="Source/FilterControls.h"/>
           <FILE id="hOKQMs" name="OscillatorControls.cpp" compile="1" resource="0"
                 file="Source/OscillatorControls.cpp"/>
           <FILE id="pkdE2C" name="WaveScreen.cpp" compile="1" resource="0" file="Source/WaveScreen.cpp"/>

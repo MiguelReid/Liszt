@@ -34,17 +34,23 @@ private:
     std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> dryWetAttachment;
     std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> diffusionAttachment;
     std::unique_ptr <juce::AudioProcessorValueTreeState::ButtonAttachment> reverbEnabledAttachment;
+    std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> highCutoffAttachment;
+    std::unique_ptr <juce::AudioProcessorValueTreeState::SliderAttachment> lowCutoffAttachment;
 
     juce::Label reverbLabel;
     juce::Slider predelayKnob;
     juce::Slider decayKnob;
     juce::Slider dryWetKnob;
     juce::Slider diffusionKnob;
+    juce::Slider highCutoffKnob;
+    juce::Slider lowCutoffKnob;
 
     juce::Label decayLabel;
     juce::Label predelayLabel;
     juce::Label dryWetLabel;
     juce::Label diffusionLabel;
+    juce::Label highCutoffLabel;
+    juce::Label lowCutoffLabel;
 
     juce::ToggleButton reverbButton;
 
