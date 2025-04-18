@@ -334,17 +334,28 @@ private:
 
     // Soft Limiter
     float softLimit(float input) {
-        // Cubic soft clipper for smooth limiting
-        if (input > 1.0f)
-            return 1.0f - (1.0f / (input + 1.0f)); // Asymptotic approach to 1.0
-        else if (input < -1.0f)
-            return -1.0f + (1.0f / (-input + 1.0f)); // Asymptotic approach to -1.0
-        else if (input > 0.4f)
-            return 0.4f + (0.6f * (input - 0.4f) / (0.6f + (input - 0.4f)));
-        else if (input < -0.4f)
-            return -0.4f + (0.6f * (input + 0.4f) / (0.6f - (input + 0.4f)));
-        else
-            return input; // Pass through unaffected
+        // Symmetric soft limiter with continuous 1st/2nd derivatives
+        const float threshold = 0.4f;    // Start of soft knee
+        const float limit = 1.0f;        // Hard limit
+        const float curve = 1.5f;        // Adjusts knee shape
+
+        float abs_x = std::abs(input);
+        float sign = input > 0.0f ? 1.0f : -1.0f;
+
+        if (abs_x <= threshold) {
+            return input;  // Linear region
+        }
+        else if (abs_x <= limit) {
+            // Cubic soft knee (C2 continuous)
+            float t = (abs_x - threshold) / (limit - threshold);
+            float eased = threshold + (limit - threshold) * (t - t * t * t / 3.0f);
+            return sign * eased;
+        }
+        else {
+            // Asymptotic approach to ±limit (continuous 1st derivative)
+            float overshoot = abs_x - limit;
+            return sign * (limit - (1.0f / (overshoot + 1.0f)));
+        }
     }
 
     // Avoid static noise buildup with DC blocking

@@ -277,9 +277,8 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
             // Apply denormal prevention
             signal = denormalPrevention(signal);
 
-            // Aggressive limiting
-            if (std::abs(signal) > 0.9f)
-                signal *= 0.9f / std::abs(signal);
+            // Soft Limiting
+            signal = softLimit(signal);
 
             // Higher noise gate threshold
             if (std::abs(signal) < 1e-4f)
