@@ -242,6 +242,7 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
         {
             float prevFeedback = (sample > 0) ? feedbackSignals[i][sample - 1] * 0.95f : 0.0f;
 
+            // Invert Polarity
             bool invertInput = ((i & 0x1) != 0);
             float delayInput = (invertInput ? -1.0f : 1.0f) * mixedInputs[i] + prevFeedback;
             delayInput = lpfFilters[i].processBiquad(delayInput);
@@ -255,7 +256,7 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
                 householderMixed[i] += householderMatrix[i][j] * outputs[j][sample];
         }
 
-        // Enhanced noise gating with high-pass filtering and improved diffusion
+        // Noise gating with high-pass filtering and improved diffusion
         for (int i = 0; i < numDelayLines; ++i)
         {
             float signal = dcBlockers[i].process(householderMixed[i]);

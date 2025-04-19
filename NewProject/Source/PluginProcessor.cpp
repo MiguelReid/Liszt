@@ -222,6 +222,8 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 	double modulatedDecay = baseDecay;
 	double modulatedPredelay = basePredelay;
 
+	// In PluginProcessor.cpp, replace the switch statements with these fixed versions:
+
 	if (osc1Enabled) {
 		float modValue = lfo1.processLFO(osc1Depth, osc1Shape, osc1Target);
 
@@ -229,12 +231,15 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 		case 0: // Diffusion (0.0 - 1.0 range)
 			modulatedDiffusion = juce::jlimit(0.0, 1.0,
 				baseDiffusion + (modValue * 0.5)); // 50% of diffusion range
+			break;
 		case 1: // Decay (0.8 - 5.0 range)
 			modulatedDecay = juce::jlimit(0.8, 5.0,
 				baseDecay + (modValue * 2.1)); // 50% of decay range
+			break;
 		case 2: // Predelay (0.0 - 100.0 range)
 			modulatedPredelay = juce::jlimit(0.0, 100.0,
 				basePredelay + (modValue * 50.0)); // 50% of predelay range
+			break;
 		}
 	}
 
@@ -245,14 +250,18 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 		case 0: // Diffusion (0.0 - 1.0 range)
 			modulatedDiffusion = juce::jlimit(0.0, 1.0,
 				baseDiffusion + (modValue * 0.5)); // 50% of diffusion range
+			break;
 		case 1: // Decay (0.8 - 5.0 range)
 			modulatedDecay = juce::jlimit(0.8, 5.0,
 				baseDecay + (modValue * 2.1)); // 50% of decay range
+			break;
 		case 2: // Predelay (0.0 - 100.0 range)
 			modulatedPredelay = juce::jlimit(0.0, 100.0,
 				basePredelay + (modValue * 50.0)); // 50% of predelay range
+			break;
 		}
 	}
+
 
 	// Gain Control
 	auto localGain = apvts.getRawParameterValue("GAIN")->load();

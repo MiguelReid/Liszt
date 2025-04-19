@@ -69,7 +69,9 @@ void CustomSamplerVoice::renderNextBlock(juce::AudioBuffer<float>& outputBuffer,
 
             if (nextPos >= totalLength)
             {
-                stopNote(0.0f, false);
+                adsr.noteOff();
+                adsr.reset();
+                clearCurrentNote();
                 break;
             }
 
