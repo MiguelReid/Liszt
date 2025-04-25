@@ -269,8 +269,11 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
 
             // Add modulation only with small depth to avoid altering the reverb character too much
             if (diffusionCoeff > 0.5f) {
-                // Apply modulated diffusion with conservative settings
-                signal = modulatedDiffusers[i].process(signal, 0.15f + (diffusionCoeff * 0.05f), static_cast<float>(sampleRate));
+                // Calculate adaptive modulation depth based on signal amplitude
+                float adaptiveDepth = (0.01f + (diffusionCoeff * 0.05f)) * std::min(1.0f, std::abs(signal) * 1.1f);
+
+                // Apply modulated diffusion with amplitude-sensitive depth
+                signal = modulatedDiffusers[i].process(signal, adaptiveDepth, static_cast<float>(sampleRate));
             }
 
             float lineDecay = decayGain * decayVariations[i];

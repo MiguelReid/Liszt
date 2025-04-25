@@ -192,18 +192,26 @@ private:
         float process(float input, float coeff, float sampleRate) {
             coeff = juce::jlimit(-0.9f, 0.9f, coeff);
 
-            // Update modulation
+            // Update modulation with smoother transitions
+            float prevPhase = phase;
             phase += modRate / sampleRate;
             if (phase >= 1.0f) phase -= 1.0f;
 
-            // Calculate modulated buffer size
-            float modFactor = 1.0f + modDepth * std::sin(phase * 2.0f * juce::MathConstants<float>::pi);
-            currentSize = static_cast<int>(baseSize * modFactor);
-            if (currentSize >= (int)buffer.size()) currentSize = buffer.size() - 1;
-            if (currentSize < 1) currentSize = 1;
+            // Use cosine interpolation for smoother modulation transitions
+            float t = (phase < prevPhase) ? 0.0f : phase; // Handle wraparound
+            float modFactor = 1.0f + modDepth * std::sin(t * 2.0f * juce::MathConstants<float>::pi);
+
+            // Limit maximum modulation change per sample
+            int targetSize = static_cast<int>(baseSize * modFactor);
+            if (targetSize >= (int)buffer.size()) targetSize = buffer.size() - 1;
+            if (targetSize < 1) targetSize = 1;
+
+            // Smooth the buffer size transitions
+            currentSize = currentSize * 0.99f + targetSize * 0.01f;
+            int usedSize = static_cast<int>(currentSize);
 
             // Standard allpass processing with modulated delay
-            int readIndex = (writeIndex - currentSize + static_cast<int>(buffer.size())) % static_cast<int>(buffer.size());
+            int readIndex = (writeIndex - usedSize + static_cast<int>(buffer.size())) % static_cast<int>(buffer.size());
             float delayedSample = buffer[readIndex];
 
             float temp = input + (coeff * delayedSample);
