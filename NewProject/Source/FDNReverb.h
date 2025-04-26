@@ -241,7 +241,7 @@ private:
         }
     };
 
-    const int allPassValues[16] = { 277, 379, 419, 479, 547, 607, 661, 739, 811, 877, 947, 1019, 1087, 1153, 1229, 1297 };
+    const int allPassValues[16] = { 97, 109, 127, 139, 193, 251, 311, 373, 433, 491, 659, 619, 683, 757, 827, 887 };
     std::vector<AllPassFilter> diffusionFilters;
     std::vector<ModulatedAllPassFilter> modulatedDiffusers;
     std::vector<AllPassFilter> postDiffusers;  // Additional stage of diffusion
