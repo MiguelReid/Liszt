@@ -23,7 +23,9 @@ FDNReverb::FDNReverb() {
 		modulatedDiffusers.push_back(ModulatedAllPassFilter(modSize));
 
 		// Additional post-diffusion stage
-		postDiffusers.push_back(AllPassFilter(allPassValues[i] * 1.5f));
+        modSize = allPassValues[i] * 1.5f;
+        if (modSize % 2 == 0) modSize++; // Ensure odd number
+		postDiffusers.push_back(AllPassFilter(modSize));
 
 		lpfFilters.push_back(BiquadFilter());
 		hpfFilters.push_back(BiquadFilter());

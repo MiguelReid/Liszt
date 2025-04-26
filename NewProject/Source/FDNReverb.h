@@ -73,9 +73,10 @@ private:
     std::vector<std::unique_ptr<CustomDelayLine>> delayLines;
     static constexpr int numDelayLines = 16;
     const int primeDelays[numDelayLines] = {
-        101, 103, 107, 109, 113, 127, 131, 137,
-        139, 149, 151, 157, 163, 167, 173, 179
+        83, 89, 97, 101, 103, 109, 113, 121,
+        127, 131, 137, 139, 149, 151, 157, 163
     };
+
 
     PredelayLine predelayBuffer{ 96000 }; // Maximum 2 seconds at 48kHz 
 
@@ -333,6 +334,7 @@ private:
     };
 
     std::vector<EarlyReflection> earlyReflections;
+
     std::vector<float> erBuffer;
     int erBufferSize = 0;
     int erWriteIndex = 0;
