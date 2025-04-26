@@ -278,6 +278,9 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
                 signal = modulatedDiffusers[i].process(signal, adaptiveDepth, static_cast<float>(sampleRate));
             }
 
+            float postDiffCoeff = 0.05f + (diffusionCoeff * 0.1f);
+            signal = postDiffusers[i].process(signal, postDiffCoeff);
+
             float lineDecay = decayGain * decayVariations[i];
 
             // Apply denormal prevention
