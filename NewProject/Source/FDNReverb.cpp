@@ -17,14 +17,14 @@ FDNReverb::FDNReverb() {
 		delayLines.push_back(std::make_unique<CustomDelayLine>(primeDelays[i]));
 		diffusionFilters.push_back(AllPassFilter(allPassValues[i]));
 
-		// Add modulated diffusers with different prime sizes
-		int modSize = allPassValues[i] * 1.23f; // Slightly different sizes
-		if (modSize % 2 == 0) modSize++; // Ensure odd number
+		// Modulated diffusers with different prime sizes
+		int modSize = allPassValues[i] * 1.23f;
+		if (modSize % 2 == 0) modSize++;
 		modulatedDiffusers.push_back(ModulatedAllPassFilter(modSize));
 
-		// Additional post-diffusion stage
+		// Post-diffusion stage
         modSize = allPassValues[i] * 1.5f;
-        if (modSize % 2 == 0) modSize++; // Ensure odd number
+        if (modSize % 2 == 0) modSize++;
 		postDiffusers.push_back(AllPassFilter(modSize));
 
 		lpfFilters.push_back(BiquadFilter());
@@ -32,14 +32,14 @@ FDNReverb::FDNReverb() {
 		dcBlockers.push_back(DCBlocker());
 	}
 
-	// Set different modulation rates for each diffuser
+	// Different modulation rates for each diffuser
 	for (int i = 0; i < numDelayLines; ++i) {
-		float modRate = 0.1f + (0.3f * i / numDelayLines); // 0.1 to 0.4 Hz
-		float modDepth = 0.05f + (0.15f * i / numDelayLines); // 5% to 20%
+		float modRate = 0.1f + (0.3f * i / numDelayLines);
+        float modDepth = 0.05f + (0.15f * i / numDelayLines);
 		modulatedDiffusers[i].setModulation(modDepth, modRate);
 	}
 
-	// Early reflection for a realistic room sound
+	// Early reflections
 	earlyReflections = {
 		{ 450,  0.65f },
 		{ 850,  0.57f },
@@ -59,15 +59,15 @@ FDNReverb::FDNReverb() {
 		{ 9000, 0.03f }
 	};
 
-	// Initialize ER buffer (enough for longest reflection)
-	erBufferSize = 10000;  // ~220ms at 44.1kHz (increased for longer reflections)
+	// Initialize ER buffer
+	erBufferSize = 10000;
 	erBuffer.resize(erBufferSize, 0.0f);
 
 	// Additional diffusers for the early reflections
 	erDiffusion1 = AllPassFilter();
 	erDiffusion2 = AllPassFilter();
 
-	predelayBuffer = PredelayLine(96000);  // Maximum 2 seconds at 48kHz
+	predelayBuffer = PredelayLine(96000);
 }
 
 FDNReverb::~FDNReverb() {
@@ -76,16 +76,14 @@ FDNReverb::~FDNReverb() {
 void FDNReverb::prepare(double newSampleRate) {
 	sampleRate = newSampleRate;
 
-	// Maintain consistent reverb time across different sample rates
+	// Consistent reverb time across different sample rates
 	double sampleRateRatio = sampleRate / 44100.0;
 
-	// Only recreate delay lines if sample rate has changed significantly
 	if (std::abs(sampleRateRatio - 1.0) > 0.01) {
-		// Recreate delay lines with scaled lengths
 		delayLines.clear();
 		for (int i = 0; i < numDelayLines; ++i) {
 			int scaledDelay = static_cast<int>(primeDelays[i] * sampleRateRatio);
-			if (scaledDelay < 1) scaledDelay = 1; // Ensure minimum delay
+			if (scaledDelay < 1) scaledDelay = 1;
 			delayLines.push_back(std::make_unique<CustomDelayLine>(scaledDelay));
 		}
 	}
@@ -93,18 +91,15 @@ void FDNReverb::prepare(double newSampleRate) {
 	// Reset Biquad Filters
 	for (int i = 0; i < numDelayLines; ++i) {
 		lpfFilters[i].setLowpass(5000.0f, 0.7071f, static_cast<float>(sampleRate));
-		// 5kHz - 16kHz
 		lpfFilters[i].z1 = 0.0f;
 		lpfFilters[i].z2 = 0.0f;
 
-		// Initialize high-pass filters with Butterworth response
 		hpfFilters[i].setHighpass(120.0f, 0.7071f, static_cast<float>(sampleRate));
-		// 20Hz - 150Hz
 		hpfFilters[i].z1 = 0.0f;
 		hpfFilters[i].z2 = 0.0f;
 	}
 
-	// Reset diffusion filters using the clear method
+	// Reset diffusion filters
 	for (auto& filter : diffusionFilters) {
 		filter.clear();
 	}
@@ -119,7 +114,7 @@ void FDNReverb::prepare(double newSampleRate) {
 		er.delaySamples = static_cast<int>(er.delaySamples * sampleRateRatio);
 	}
 
-	// Reset new diffusion filters
+	// Reset modulated filters
 	for (auto& filter : modulatedDiffusers) {
 		filter.clear();
 	}
@@ -144,7 +139,6 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
     const int numChannels = buffer.getNumChannels();
     const int numSamples = buffer.getNumSamples();
 
-    // Simplify parameter handling
     float decayGain = juce::jlimit(0.0f, 0.98f, static_cast<float>(decay));
     float decayVariations[numDelayLines] = {
         1.0f, 0.998f, 0.997f, 0.999f, 0.996f, 0.998f, 0.997f, 0.999f,
@@ -154,22 +148,19 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
 
     int predelaySamples = static_cast<int>(predelay * sampleRate / 1000.0);
 
-    // Set filter cutoffs from parameters (hpCutoff: 20-150Hz, lpCutoff: 5000-16000Hz)
-    constexpr float butterworthQ = 0.7071f; // For maximally flat frequency response
+    constexpr float butterworthQ = 0.7071f;
 
     for (int i = 0; i < numDelayLines; ++i) {
         // Add slight variation to cutoffs per delay line for more natural sound
         float hpVariation = 0.95f + 0.1f * (static_cast<float>(i) / numDelayLines);
         float lpVariation = 0.97f + 0.06f * (static_cast<float>(i) / numDelayLines);
 
-        // Set the high-pass filter cutoff directly from the parameter
         hpfFilters[i].setHighpass(
             static_cast<float>(hpCutoff) * hpVariation,
             butterworthQ,
             static_cast<float>(sampleRate)
         );
 
-        // Set the low-pass filter cutoff directly from the parameter
         lpfFilters[i].setLowpass(
             static_cast<float>(lpCutoff) * lpVariation,
             butterworthQ,
@@ -181,7 +172,7 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
     std::vector<std::vector<float>> feedbackSignals(numDelayLines, std::vector<float>(numSamples, 0.0f));
     std::vector<std::vector<float>> channelOutputs(numChannels, std::vector<float>(numSamples, 0.0f));
 
-    // Direct signal mix (moderate level)
+    // Direct signal mix
     for (int ch = 0; ch < numChannels; ++ch)
     {
         for (int sample = 0; sample < numSamples; ++sample)
@@ -190,7 +181,7 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
         }
     }
 
-    // Process early reflections
+    // Early reflections
     for (int sample = 0; sample < numSamples; ++sample)
     {
         float monoInput = 0.0f;
@@ -201,7 +192,7 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
         erBuffer[erWriteIndex] = monoInput;
 
         float erOutput = 0.0f;
-        for (int i = 0; i < 8; i++)  // Using first 8 reflections
+        for (int i = 0; i < 8; i++)
         {
             const auto& er = earlyReflections[i];
             int readPos = erWriteIndex - er.delaySamples;
@@ -214,7 +205,6 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
 
         erWriteIndex = (erWriteIndex + 1) % erBufferSize;
 
-        // Increase early reflection contribution
         for (int ch = 0; ch < numChannels; ++ch)
             channelOutputs[ch][sample] += erOutput * 0.80f;
     }
@@ -239,12 +229,12 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
             }
         }
 
-        // FEEDBACK LOOP
+        // Start of feedback loop
         for (int i = 0; i < numDelayLines; ++i)
         {
             float prevFeedback = (sample > 0) ? feedbackSignals[i][sample - 1] * 0.95f : 0.0f;
 
-            // Invert Polarity
+            // Invert polarity to increase complexity
             bool invertInput = ((i & 0x1) != 0);
             float delayInput = (invertInput ? -1.0f : 1.0f) * mixedInputs[i] + prevFeedback;
             delayInput = lpfFilters[i].processBiquad(delayInput);
@@ -258,20 +248,18 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
                 householderMixed[i] += householderMatrix[i][j] * outputs[j][sample];
         }
 
-        // Noise gating with high-pass filtering and improved diffusion
+        // Noise gating with high-pass filtering and post diffusion
         for (int i = 0; i < numDelayLines; ++i)
         {
             float signal = dcBlockers[i].process(householderMixed[i]);
 
-            // Use the BiquadFilter for high-pass filtering
+            // HPF
             signal = hpfFilters[i].processBiquad(signal);
 
-            // Use standard diffusion to maintain the original reverb character
             signal = diffusionFilters[i].process(signal, 0.4f + (diffusionCoeff * 0.1f));
 
-            // Add modulation only with small depth to avoid altering the reverb character too much
+			// Modulated diffusion with amplitude-sensitive depth
             if (diffusionCoeff > 0.5f) {
-                // Calculate adaptive modulation depth based on signal amplitude
                 float adaptiveDepth = (0.01f + (diffusionCoeff * 0.05f)) * std::min(1.0f, std::abs(signal) * 1.1f);
 
                 // Apply modulated diffusion with amplitude-sensitive depth
@@ -283,7 +271,7 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
 
             float lineDecay = decayGain * decayVariations[i];
 
-            // Apply denormal prevention
+            // Denormal prevention
             signal = denormalPrevention(signal);
 
             // Soft Limiting
@@ -295,31 +283,28 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
 
             // More progressive noise reduction with additional soft threshold
             if (std::abs(signal) < 5e-4f) {
-                signal *= std::pow(std::abs(signal) / 5e-4f, 1.5f);  // Progressive reduction
+                signal *= std::pow(std::abs(signal) / 5e-4f, 1.5f);
             }
 
-            // Extra smooth between consecutive samples - keeping original amount
             if (sample > 0) {
                 float prevSample = feedbackSignals[i][sample - 1] / lineDecay;
                 signal = prevSample * 0.4f + signal * 0.6f;
             }
 
-            // Apply more aggressive soft saturation curve - keeping original
             signal = std::tanh(signal * 0.9f) / 0.9f;
 
             // Reduce decay for low frequencies
-            if (i < 4) {  // First few delay lines tend to carry more low frequencies
-                lineDecay *= 0.94f;  // Extra decay reduction
+            if (i < 4) {
+                lineDecay *= 0.94f;
             }
 
             feedbackSignals[i][sample] = signal * lineDecay;
         }
 
-        // Mix late reverb outputs for each channel with adjusted output routing
+        // Mix late reverb outputs for each channel
         for (int ch = 0; ch < numChannels; ++ch)
         {
             float lateSum = 0.0f;
-            // Distribute the 16 delay lines across channels more evenly
             for (int i = 0; i < numDelayLines; i += 2)
             {
                 float outputGain = 1.0f / (numDelayLines / 2);

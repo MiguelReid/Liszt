@@ -10,7 +10,7 @@
 
 #include "LFO.h"
 
-LFO::LFO() : phase(0.0f), sampleRate(44100.0)
+LFO::LFO() : phase(0.0), sampleRate(44100.0)
 {
 }
 
@@ -20,48 +20,47 @@ LFO::~LFO()
 
 float LFO::processLFO(double lfoDepth, int lfoShape, int boxIndex)
 {
-    // Fixed frequency for consistent oscillation
-    auto frequency = 5.0f;
+    // Frequency to control LFO's oscillation
+    auto frequency = 5.0;
 
-    // More aggressive depth scaling based on target parameter
+    // Depth scaling parameter dependant
     const std::array<float, 3> depthScales = { 1.0f, 5.0f, 100.0f };
     float depthScale = depthScales[std::clamp(boxIndex, 0, 2)];
-
-    // Apply depth control directly
     const float depth = static_cast<float>(lfoDepth) * depthScale;
 
     // Phase update
     phase += frequency / sampleRate;
-    if (phase >= 1.0f)
-        phase -= 1.0f;
+    if (phase >= 1.0)
+        phase -= 1.0;
 
-    // Calculate LFO value based on selected waveform
     float lfoValue = 0.0f;
 
     switch (lfoShape)
     {
     case 0: // Sine
-        lfoValue = std::sin(phase * juce::MathConstants<float>::twoPi);
+        lfoValue = std::sin(static_cast<float>(phase) * juce::MathConstants<float>::twoPi);
         break;
 
     case 1: // Triangle
-        lfoValue = phase < 0.5f
-            ? (4.0f * phase - 1.0f)
-            : (3.0f - 4.0f * phase);
+        if (phase < 0.25)
+            lfoValue = static_cast<float>(4.0 * phase);
+        else if (phase < 0.75)
+            lfoValue = static_cast<float>(2.0 - 4.0 * phase);
+        else
+            lfoValue = static_cast<float>(4.0 * phase - 4.0);
+        lfoValue = lfoValue * 2.0f - 1.0f;
         break;
 
     case 2: // Square
-        lfoValue = (phase < 0.5f) ? -1.0f : 1.0f;
+        lfoValue = (phase < 0.5) ? -1.0f : 1.0f;
         break;
+
     default:
         break;
     }
 
-    // Final output
+    // Output
     float result = lfoValue * depth;
-	
-    // Debug all of the variables for debugging
-	DBG("LFO Result: " << result);
 
     return result;
 }
