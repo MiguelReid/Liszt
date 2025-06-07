@@ -1,33 +1,78 @@
-Overview
-Liszt is a piano VST3 plugin built with the JUCE framework. The piano samples recorded by myself are enhanced with an advanced feedback delay network (FDN) reverb system and modulation capabilities to create rich, expressive piano sounds for music production.
-Features
-•	High-Quality Piano Sampling: Multi-velocity sampled piano across the full keyboard range (C0 to F6)
-•	Advanced Reverb Engine: 16-channel Feedback Delay Network (FDN) reverb with diffusion control
-•	Dynamic ADSR Controls: Velocity-sensitive envelope shaping for realistic piano expression
-•	Dual LFO Modulation: Shape your sound with customizable LFO modulators
-•	Real-Time Waveform Visualization: Monitor your audio signal with the integrated oscilloscope
-Controls
-Main Controls
-•	Gain: Adjust the overall volume of the instrument
-•	Reverb Enable: Toggle the reverb effect on/off
+# Liszt — Piano VST3 Plugin
 
-Reverb Controls
-•	Predelay: Set the time before reverb begins (0-100ms)
-•	Decay: Control the reverb tail length (0.8-5.0s)
-•	Diffusion: Adjust the density of the reverb reflections
-•	Dry/Wet: Balance between the dry piano and reverb effect
-Filtering
-•	High-Pass: Remove unwanted low frequencies (20-150Hz)
-•	Low-Pass: Control the brightness of the reverb (5-16kHz)
-Modulation
-•	Oscillator 1 & 2: Independent LFOs with:
-•	Depth control
-•	Shape selection
-•	Target parameter selection (Diffusion, Decay, Predelay)
+**Liszt** is a piano VST3 plugin built using the JUCE framework. Featuring high-quality, self-recorded piano samples, it is enhanced by a 16-channel Feedback Delay Network (FDN) reverb and versatile modulation capabilities. The result is a rich, expressive instrument tailored for modern music production.
 
-Installation
-1.	Download the Liszt.VST3 file in the builds folder
-2.	Copy the VST3 file to your VST3 plugins folder:
-•	Windows: C:\Program Files\Common Files\VST3
-•	macOS: /Library/Audio/Plug-ins/VST3/
-3.	Restart your DAW and scan for new plugins
+---
+
+## 🎹 Overview
+
+Liszt delivers expressive piano sounds through:
+
+- **Advanced reverb processing** using a 16-channel FDN with diffusion control
+- **Dynamic velocity-sensitive ADSR envelope** Which produces multi-velocity notes even if there is only one .wav file per note
+- **Dual LFO modulation** with user-defined routing
+- **Real-time waveform visualization** via an integrated oscilloscope
+
+---
+
+## ✨ Features
+
+### 🎼 Sampling & Expression
+- **High-Quality Sampling:** Multi-velocity piano recordings for natural tone
+- **Velocity-Sensitive ADSR:** Realistic dynamic shaping based on playing intensity
+
+### 🎧 Reverb Engine
+- **FDN Reverb:** 16-channel architecture for lush, spatial sound
+- **Diffusion Control:** Shape the density and texture of the reverb
+
+### 🎛️ Modulation
+- **Dual LFOs:** Independent low-frequency oscillators for modulation
+  - Depth control
+  - Waveform shape selection
+  - Target assignment (Diffusion, Decay, Predelay)
+
+### 📊 Visualization
+- **Oscilloscope:** Real-time signal monitoring directly in the plugin UI
+
+---
+
+## 🎚️ Controls
+
+### 🔊 Main
+- `Gain` – Master volume control  
+- `Reverb Enable` – Toggle reverb on/off  
+
+### 🌊 Reverb
+- `Predelay` – Time before reverb starts (0–100 ms)  
+- `Decay` – Tail length of the reverb (0.8–5.0 s)  
+- `Diffusion` – Reverb reflection density  
+- `Dry/Wet` – Blend between dry signal and reverb  
+
+### 🎚️ Filtering
+- `High-Pass Filter` – Remove low-end rumble (20–150 Hz)  
+- `Low-Pass Filter` – Control brightness (5–16 kHz)  
+
+### 🔁 Modulation
+- `Oscillator 1` & `Oscillator 2`  
+  - Depth  
+  - Shape (Sine, Triangle, Square, etc.)  
+  - Modulation Target (e.g., Decay, Diffusion)
+
+---
+
+## ⚙️ Installation
+
+1. **Download** `Liszt.vst3` from the `builds/` folder.
+2. **Copy** the file to your system’s VST3 plugin directory:
+   - **Windows:** `C:\Program Files\Common Files\VST3`
+   - **macOS:** `/Library/Audio/Plug-Ins/VST3/`
+3. **Restart your DAW** and rescan your plugin list.
+
+---
+
+## 📩 Feedback
+
+For issues or feature requests, feel free to open an issue or submit a pull request.
+
+---
+
