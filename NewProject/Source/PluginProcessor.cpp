@@ -285,9 +285,9 @@ void NewProjectAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
 			auto lpCutoff = apvts.getRawParameterValue("LOW_CUTOFF")->load();
 
 			// Save original dry signal if you need to mix it later
-			juce::AudioBuffer<float> dryBuffer;
 			if (dryWet < 1.0f) { // Only copy if we need to mix dry signal
-				dryBuffer.makeCopyOf(buffer);
+				dryBuffer.setSize(buffer.getNumChannels(), buffer.getNumSamples(), false, false, true);
+				dryBuffer.makeCopyOf(buffer, true);
 			}
 
 			// Process audio with reverb

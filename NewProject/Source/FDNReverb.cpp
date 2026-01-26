@@ -40,7 +40,7 @@ FDNReverb::FDNReverb() {
 	}
 
 	// Early reflections
-	earlyReflections = {
+	baseEarlyReflections = {
 		{ 450,  0.65f },
 		{ 850,  0.57f },
 		{ 1250, 0.49f },
@@ -58,6 +58,7 @@ FDNReverb::FDNReverb() {
 		{ 8500, 0.04f },
 		{ 9000, 0.03f }
 	};
+	earlyReflections = baseEarlyReflections;
 
 	// Initialize ER buffer
 	erBufferSize = 10000;
@@ -91,12 +92,10 @@ void FDNReverb::prepare(double newSampleRate) {
 	// Reset Biquad Filters
 	for (int i = 0; i < numDelayLines; ++i) {
 		lpfFilters[i].setLowpass(5000.0f, 0.7071f, static_cast<float>(sampleRate));
-		lpfFilters[i].z1 = 0.0f;
-		lpfFilters[i].z2 = 0.0f;
+		lpfFilters[i].reset();
 
 		hpfFilters[i].setHighpass(120.0f, 0.7071f, static_cast<float>(sampleRate));
-		hpfFilters[i].z1 = 0.0f;
-		hpfFilters[i].z2 = 0.0f;
+		hpfFilters[i].reset();
 	}
 
 	// Reset diffusion filters
@@ -110,6 +109,7 @@ void FDNReverb::prepare(double newSampleRate) {
 	}
 
 	// Scale early reflection times for sample rate
+	earlyReflections = baseEarlyReflections;
 	for (auto& er : earlyReflections) {
 		er.delaySamples = static_cast<int>(er.delaySamples * sampleRateRatio);
 	}
@@ -139,7 +139,8 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
     const int numChannels = buffer.getNumChannels();
     const int numSamples = buffer.getNumSamples();
 
-    float decayGain = juce::jlimit(0.0f, 0.98f, static_cast<float>(decay));
+    float decayNormalized = static_cast<float>((decay - 0.8) / (5.0 - 0.8));
+    float decayGain = juce::jlimit(0.0f, 0.98f, decayNormalized * 0.98f);
     float decayVariations[numDelayLines] = {
         1.0f, 0.998f, 0.997f, 0.999f, 0.996f, 0.998f, 0.997f, 0.999f,
         0.995f, 0.998f, 0.996f, 0.999f, 0.997f, 0.995f, 0.998f, 0.996f
@@ -168,9 +169,19 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
         );
     }
 
-    std::vector<std::vector<float>> outputs(numDelayLines, std::vector<float>(numSamples, 0.0f));
-    std::vector<std::vector<float>> feedbackSignals(numDelayLines, std::vector<float>(numSamples, 0.0f));
-    std::vector<std::vector<float>> channelOutputs(numChannels, std::vector<float>(numSamples, 0.0f));
+    auto resetLines = [numSamples](std::vector<std::vector<float>>& lines, int targetLines) {
+        lines.resize(targetLines);
+        for (auto& line : lines) {
+            if (static_cast<int>(line.size()) != numSamples) {
+                line.resize(numSamples);
+            }
+            std::fill(line.begin(), line.end(), 0.0f);
+        }
+    };
+
+    resetLines(outputs, numDelayLines);
+    resetLines(feedbackSignals, numDelayLines);
+    resetLines(channelOutputs, numChannels);
 
     // Direct signal mix
     for (int ch = 0; ch < numChannels; ++ch)
@@ -192,7 +203,7 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
         erBuffer[erWriteIndex] = monoInput;
 
         float erOutput = 0.0f;
-        for (int i = 0; i < 8; i++)
+        for (size_t i = 0; i < earlyReflections.size(); ++i)
         {
             const auto& er = earlyReflections[i];
             int readPos = erWriteIndex - er.delaySamples;
@@ -317,4 +328,3 @@ std::vector<std::vector<float>> FDNReverb::process(juce::AudioBuffer<float>& buf
 
     return channelOutputs;
 }
-
