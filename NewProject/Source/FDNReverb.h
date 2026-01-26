@@ -15,6 +15,7 @@
 #include <random>
 #include <iostream>
 #include <array>
+#include <algorithm>
 
 class CustomDelayLine {
 public:
@@ -317,6 +318,7 @@ private:
         // Reset filter state
         void reset() {
             z1 = z2 = 0.0f;
+            z1_2 = z2_2 = 0.0f;
         }
     };
 
@@ -331,6 +333,7 @@ private:
         float gain;
     };
 
+    std::vector<EarlyReflection> baseEarlyReflections;
     std::vector<EarlyReflection> earlyReflections;
 
     std::vector<float> erBuffer;
@@ -394,13 +397,16 @@ private:
 
     std::vector<DCBlocker> dcBlockers;
 
+    std::vector<std::vector<float>> outputs;
+    std::vector<std::vector<float>> feedbackSignals;
+    std::vector<std::vector<float>> channelOutputs;
+
     // Denormal Prevention
     inline float denormalPrevention(float sample) {
         static const float minLevel = 1.0e-8f;
-        static const float antiDenormal = 1.0e-8f;
 
         if (std::abs(sample) < minLevel)
-            return antiDenormal * (2.0f * static_cast<float>(rand()) / RAND_MAX - 1.0f);
+            return 0.0f;
         return sample;
     }
 

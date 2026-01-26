@@ -87,6 +87,7 @@ private:
     float gain = 1.0f;
 
 	juce::AudioProcessorValueTreeState::ParameterLayout createParameters();
+    juce::AudioBuffer<float> dryBuffer;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NewProjectAudioProcessor)
 };
